@@ -398,6 +398,45 @@ document.getElementById('run-batch-btn').addEventListener('click', async () => {
   updateStatus("Batch processing complete! 💛");
 });
 
+// --- GIF Maker Tool ---
+document.getElementById('run-gif-btn').addEventListener('click', () => {
+  const width = document.getElementById('gif-width').value || "480";
+  const fps = document.getElementById('gif-fps').value || "15";
+  const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
+  const output = `${globalOutputPath}/${filename}_elite.gif`;
+  
+  // High Quality GIF filter chain
+  const filter = `fps=${fps},scale=${width}:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`;
+  
+  const args = ["-i", globalInputPath, "-vf", filter, "-y", output];
+  executeFFmpegTask("GIF Creation", args);
+});
+
+// --- Video Merger Tool ---
+document.getElementById('run-merge-btn').addEventListener('click', async () => {
+  const batchList = document.querySelectorAll('#batch-list li:not(.empty-msg)');
+  if (batchList.length < 2) { alert("Please add at least 2 videos in the Batch Processor tab."); return; }
+  if (!globalOutputPath) { alert("Please select an output folder."); return; }
+  
+  const outName = document.getElementById('merge-filename').value || "merged_video.mp4";
+  const output = `${globalOutputPath}/${outName}`;
+  
+  let inputArgs = [];
+  let filterStr = "";
+  
+  batchList.forEach((li, index) => {
+    inputArgs.push("-i", li.dataset.path);
+    filterStr += `[${index}:v][${index}:a]`;
+  });
+  
+  filterStr += `concat=n=${batchList.length}:v=1:a=1[v][a]`;
+  
+  const args = [...inputArgs, "-filter_complex", filterStr, "-map", "[v]", "-map", "[a]", "-y", output];
+  
+  // Note: Duration estimation for merge is tricky, we'll just set it to 0 to show indefinite progress
+  executeFFmpegTask("Video Merging", args);
+});
+
 // --- Theme Switcher Logic ---
 const themeCircles = document.querySelectorAll('.theme-circle');
 const body = document.body;

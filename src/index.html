@@ -15,7 +15,18 @@
     <div class="brand">
       <div class="logo">🎃</div>
       <h2>Sadness Splitter</h2>
-      <span class="version">3000</span>
+      <span class="version">Video Utility</span>
+    </div>
+    
+    <div class="theme-selector-container" style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--panel-border);">
+      <span class="subtext" style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Aura Color</span>
+      <div class="theme-picker">
+        <div class="theme-circle bg-blue active" data-theme="theme-blue"></div>
+        <div class="theme-circle bg-red" data-theme="theme-red"></div>
+        <div class="theme-circle bg-green" data-theme="theme-green"></div>
+        <div class="theme-circle bg-purple" data-theme="theme-purple"></div>
+        <div class="theme-circle bg-gold" data-theme="theme-gold"></div>
+      </div>
     </div>
     <nav>
       <button class="nav-btn active" data-target="compress">Compress</button>
@@ -26,6 +37,8 @@
       <button class="nav-btn" data-target="convert">Format Converter</button>
       <button class="nav-btn" data-target="subtitle">Subtitle Burner</button>
       <button class="nav-btn" data-target="speed">Speed Warp</button>
+      <button class="nav-btn" data-target="gif">GIF Maker</button>
+      <button class="nav-btn" data-target="merger">Video Merger</button>
       <button class="nav-btn" data-target="batch">Batch Processor</button>
     </nav>
     <div class="demo-toggle-container">
@@ -35,16 +48,7 @@
       </label>
       <span class="toggle-label">Demo Mode 🎭</span>
     </div>
-    <div class="theme-selector-container" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--panel-border);">
-      <span class="subtext" style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Aura Color</span>
-      <div class="theme-picker">
-        <div class="theme-circle bg-blue active" data-theme="theme-blue"></div>
-        <div class="theme-circle bg-red" data-theme="theme-red"></div>
-        <div class="theme-circle bg-green" data-theme="theme-green"></div>
-        <div class="theme-circle bg-purple" data-theme="theme-purple"></div>
-        <div class="theme-circle bg-gold" data-theme="theme-gold"></div>
-      </div>
-    </div>
+
   </aside>
 
   <!-- Main Content Area -->
@@ -236,6 +240,37 @@
           </select>
         </div>
         <button id="run-speed-btn" class="btn action">Apply Warp</button>
+      </section>
+
+      <!-- GIF MAKER -->
+      <section id="gif" class="tool-view glass-panel" style="display: none;">
+        <div class="tool-header">
+          <h3>Elite GIF Maker</h3>
+          <p>Convert your pain into high-quality, shareable loops.</p>
+        </div>
+        <div class="control-group">
+          <label>Width (px)</label>
+          <input type="number" id="gif-width" value="480">
+        </div>
+        <div class="control-group">
+          <label>FPS (Higher = Smoother)</label>
+          <input type="number" id="gif-fps" value="15">
+        </div>
+        <button id="run-gif-btn" class="btn action">Generate Elite GIF</button>
+      </section>
+
+      <!-- VIDEO MERGER -->
+      <section id="merger" class="tool-view glass-panel" style="display: none;">
+        <div class="tool-header">
+          <h3>Video Merger</h3>
+          <p>Join multiple memories into one timeline.</p>
+        </div>
+        <p class="subtext">Select videos in the **Batch Processor** tab first, then come here to join them.</p>
+        <div class="control-group">
+          <label>Output Filename</label>
+          <input type="text" id="merge-filename" placeholder="merged_video.mp4">
+        </div>
+        <button id="run-merge-btn" class="btn action highlight">Merge Selected Videos</button>
       </section>
 
       <!-- BATCH PROCESSOR -->

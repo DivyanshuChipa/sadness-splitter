@@ -58,6 +58,8 @@ body {
   padding: 20px;
 }
 
+
+
 .brand {
   margin-bottom: 30px;
   text-align: center;
@@ -91,7 +93,14 @@ nav {
   flex-direction: column;
   gap: 8px;
   flex-grow: 1;
+  overflow-y: auto;
+  margin: 10px 0;
+  padding-right: 5px; /* Tiny space for breathability */
 }
+
+/* Hide scrollbar for Navigation */
+nav::-webkit-scrollbar { display: none; }
+nav { -ms-overflow-style: none; scrollbar-width: none; }
 
 .nav-btn {
   background: transparent;
@@ -112,7 +121,7 @@ nav {
 }
 
 .nav-btn.active {
-  background: rgba(59, 130, 246, 0.15);
+  background: var(--accent-glow);
   color: var(--accent);
   border-left: 3px solid var(--accent);
 }
@@ -189,16 +198,24 @@ input[type="text"], input[type="number"], select {
   padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid var(--panel-border);
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(15, 17, 21, 0.6);
   color: var(--text-primary);
   font-family: inherit;
   font-size: 0.9rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+select option {
+  background: #1e293b;
+  color: white;
+  padding: 10px;
 }
 
 input[type="text"]:focus, select:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
 input[readonly] {
@@ -240,14 +257,14 @@ input[readonly] {
   width: 100%;
   padding: 14px;
   margin-top: 20px;
-  background: linear-gradient(135deg, var(--accent), #4f46e5);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   color: white;
   font-size: 1rem;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 15px var(--accent-glow);
 }
 .btn.action:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 6px 20px var(--accent-glow);
 }
 
 .btn.action.highlight {
@@ -364,7 +381,7 @@ input[type="range"] {
 .progress-bar-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
   transition: width 0.3s ease;
 }
 
@@ -399,3 +416,29 @@ input[type="range"] {
 .bg-green { background: #10b981; }
 .bg-purple { background: #8b5cf6; }
 .bg-gold { background: #f59e0b; }
+
+/* --- Custom Scrollbar --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* For elements with auto scroll */
+.content, .batch-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
