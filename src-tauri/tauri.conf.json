@@ -1,0 +1,25 @@
+{
+  "productName": "Sadness Splitter 3000",
+  "version": "0.1.0",
+  "identifier": "com.pumpkin.sadness-splitter",
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "frontendDist": "../src"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "Sadness Splitter 3000",
+        "width": 900,
+        "height": 650,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  }
+}
