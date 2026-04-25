@@ -86,6 +86,26 @@ fn process_video(window: Window, args: Vec<String>, total_duration: f64) {
 }
 
 #[tauri::command]
+fn generate_thumbnail(file_path: String) -> String {
+    let temp_dir = std::env::temp_dir();
+    let thumb_path = temp_dir.join("sadness_thumb.jpg");
+    let thumb_str = thumb_path.to_str().unwrap_or("");
+
+    // ffmpeg -i input -ss 00:00:01 -vframes 1 -q:v 2 output.jpg
+    let _ = Command::new("ffmpeg")
+        .args([
+            "-i", &file_path,
+            "-ss", "00:00:01",
+            "-vframes", "1",
+            "-q:v", "2",
+            "-y", thumb_str,
+        ])
+        .output();
+
+    thumb_str.to_string()
+}
+
+#[tauri::command]
 fn list_videos_in_folder(folder_path: String) -> Vec<String> {
     let mut videos = Vec::new();
     if let Ok(entries) = std::fs::read_dir(folder_path) {
@@ -110,7 +130,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder])
+        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder, generate_thumbnail])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

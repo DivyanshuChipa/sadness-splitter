@@ -47,6 +47,7 @@
 
 ### 📝 Change Log (Git-Style)
 
+- **feat(elite)**: [2026-04-24] Added Video Stabilizer (Anti-Shake) and Thumbnail Contact Sheet generator.
 - **feat(elite)**: [2026-04-24] Started Elite Plan: Added High-Quality GIF Maker and Video Merger tools.
 - **feat(ffmpeg)**: [2026-04-24] Added support for FFmpeg Presets (Ultrafast to Veryslow) and H.265 (HEVC) Codec.
 - **feat(tools)**: [2026-04-24] Fully implemented all 9 tools (Split, Trim, Rotate, Audio, Convert, Subtitle, Speed, Batch) in `main.js`.

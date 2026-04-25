@@ -1,6 +1,6 @@
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
-const tauriDialog = window.__TAURI__?.dialog || window.__TAURI__?.plugin?.dialog;
+const tauriDialog = window.__TAURI__?.dialog || window.__TAURI__?.pluginDialog || window.__TAURI__?.plugin?.dialog;
 
 // --- UI Elements ---
 const navBtns = document.querySelectorAll('.nav-btn');
@@ -57,20 +57,34 @@ document.getElementById('browse-input-btn').addEventListener('click', async () =
       globalInputPath = file;
       document.getElementById('global-input-path').value = file;
       
-      // Get Duration
-      videoDuration = await invoke('get_video_duration', { filePath: file });
-      updateStatus(`Video selected. Duration: ${videoDuration.toFixed(2)}s`);
+      const filename = file.split(/[\/\\]/).pop();
+      updateStatus(`Selected: ${filename}`);
+
+      // Get Duration (Needed for Sliders)
+      videoDuration = await invoke('get_video_duration', { file_path: file });
+
+      // Initialize Timeline Sliders
+      const splitSlider = document.getElementById('split-slider');
+      if (splitSlider) {
+        splitSlider.max = Math.floor(videoDuration);
+        splitSlider.value = 0;
+        document.getElementById('split-slider-value').textContent = "00:00:00";
+      }
+
+      const trimStart = document.getElementById('trim-slider-start');
+      const trimEnd = document.getElementById('trim-slider-end');
+      if (trimStart && trimEnd) {
+        trimStart.max = Math.floor(videoDuration);
+        trimEnd.max = Math.floor(videoDuration);
+        trimStart.value = 0;
+        trimEnd.value = Math.floor(videoDuration);
+        document.getElementById('trim-label-start').textContent = "00:00:00";
+        document.getElementById('trim-label-end').textContent = formatTime(Math.floor(videoDuration));
+      }
     }
   } catch (e) {
-    console.error("Dialog error (Make sure dialog plugin is installed in Cargo.toml if using Tauri v2):", e);
-    // Fallback if dialog plugin is missing in global scope
-    const val = prompt("Enter full path to input video:");
-    if (val) {
-      globalInputPath = val;
-      document.getElementById('global-input-path').value = val;
-      videoDuration = await invoke('get_video_duration', { filePath: val });
-      updateStatus(`Video selected. Duration: ${videoDuration.toFixed(2)}s`);
-    }
+    console.error("Dialog error:", e);
+    updateStatus("Failed to open file dialog. Check permissions.");
   }
 });
 
@@ -83,12 +97,8 @@ document.getElementById('browse-output-btn').addEventListener('click', async () 
       updateStatus(`Output folder set: ${folder}`);
     }
   } catch (e) {
-    const val = prompt("Enter full path to output folder:");
-    if (val) {
-      globalOutputPath = val;
-      document.getElementById('global-output-path').value = val;
-      updateStatus(`Output folder set: ${val}`);
-    }
+    console.error("Dialog error:", e);
+    updateStatus("Failed to open folder dialog.");
   }
 });
 
@@ -113,6 +123,36 @@ listen('finished', (event) => {
     updateStatus("Error processing emotional baggage. FFmpeg failed.");
   }
   setTimeout(() => { progressContainer.style.display = 'none'; }, 5000);
+});
+
+function formatTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+// Slider listeners
+document.getElementById('split-slider')?.addEventListener('input', (e) => {
+  document.getElementById('split-slider-value').textContent = formatTime(e.target.value);
+});
+
+document.getElementById('trim-slider-start')?.addEventListener('input', (e) => {
+  const start = parseInt(e.target.value);
+  const end = parseInt(document.getElementById('trim-slider-end').value);
+  if (start >= end) {
+    e.target.value = end - 1;
+  }
+  document.getElementById('trim-label-start').textContent = formatTime(e.target.value);
+});
+
+document.getElementById('trim-slider-end')?.addEventListener('input', (e) => {
+  const end = parseInt(e.target.value);
+  const start = parseInt(document.getElementById('trim-slider-start').value);
+  if (end <= start) {
+    e.target.value = start + 1;
+  }
+  document.getElementById('trim-label-end').textContent = formatTime(e.target.value);
 });
 
 // --- Compressor Tool ---
@@ -259,19 +299,23 @@ async function executeFFmpegTask(taskName, args) {
 
 // --- Split Tool ---
 document.getElementById('run-split-btn').addEventListener('click', () => {
-  const start = document.getElementById('split-start').value || "00:00:00";
-  const duration = document.getElementById('split-duration').value || "00:01:00";
+  const startSeconds = document.getElementById('split-slider').value;
+  const start = formatTime(startSeconds);
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/split_${filename}`;
   
-  const args = ["-i", globalInputPath, "-ss", start, "-t", duration, "-c", "copy", "-y", output];
+  // Note: For split, we usually just want to cut from a point to the end, or a fixed duration.
+  // We'll cut from 'start' till the end.
+  const args = ["-i", globalInputPath, "-ss", start, "-c", "copy", "-y", output];
   executeFFmpegTask("Splitting", args);
 });
 
 // --- Trim Tool ---
 document.getElementById('run-trim-btn').addEventListener('click', () => {
-  const start = document.getElementById('trim-start').value || "00:00:00";
-  const end = document.getElementById('trim-end').value || "00:01:00";
+  const startSeconds = document.getElementById('trim-slider-start').value;
+  const endSeconds = document.getElementById('trim-slider-end').value;
+  const start = formatTime(startSeconds);
+  const end = formatTime(endSeconds);
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/trimmed_${filename}`;
   
@@ -435,6 +479,45 @@ document.getElementById('run-merge-btn').addEventListener('click', async () => {
   
   // Note: Duration estimation for merge is tricky, we'll just set it to 0 to show indefinite progress
   executeFFmpegTask("Video Merging", args);
+});
+
+// --- Video Stabilizer Tool ---
+document.getElementById('run-stabilize-btn').addEventListener('click', async () => {
+  const shake = document.getElementById('stabilize-level').value || "5";
+  const smooth = document.getElementById('stabilize-smooth').value || "30";
+  const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
+  const output = `${globalOutputPath}/stabilized_${filename}.mp4`;
+  const trfPath = `${globalOutputPath}/transforms.trf`;
+  
+  // Pass 1: Detect shakiness
+  updateStatus("Pass 1: Detecting shakiness... 📊");
+  const args1 = ["-i", globalInputPath, "-vf", `vidstabdetect=shake=${shake}:result='${trfPath}'`, "-f", "null", "-"];
+  
+  try {
+    // Run Pass 1
+    await invoke('process_video', { args: args1 });
+    
+    // Pass 2: Apply stabilization
+    updateStatus("Pass 2: Smoothing memories... ✨");
+    const args2 = ["-i", globalInputPath, "-vf", `vidstabtransform=smoothing=${smooth}:input='${trfPath}'`, "-y", output];
+    executeFFmpegTask("Stabilization", args2);
+  } catch (err) {
+    updateStatus(`Error in Pass 1: ${err}`);
+  }
+});
+
+// --- Contact Sheet Tool ---
+document.getElementById('run-contact-btn').addEventListener('click', () => {
+  const grid = document.getElementById('contact-grid').value || "4x4";
+  const width = document.getElementById('contact-width').value || "300";
+  const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
+  const output = `${globalOutputPath}/${filename}_contact_sheet.png`;
+  
+  // Filter for grid of thumbnails
+  const filter = `thumbnail,scale=${width}:-1,tile=${grid}`;
+  
+  const args = ["-i", globalInputPath, "-vf", filter, "-frames:v", "1", "-y", output];
+  executeFFmpegTask("Contact Sheet", args);
 });
 
 // --- Theme Switcher Logic ---

@@ -39,6 +39,8 @@
       <button class="nav-btn" data-target="speed">Speed Warp</button>
       <button class="nav-btn" data-target="gif">GIF Maker</button>
       <button class="nav-btn" data-target="merger">Video Merger</button>
+      <button class="nav-btn" data-target="stabilize">Video Stabilizer</button>
+      <button class="nav-btn" data-target="contact">Contact Sheet</button>
       <button class="nav-btn" data-target="batch">Batch Processor</button>
     </nav>
     <div class="demo-toggle-container">
@@ -71,7 +73,9 @@
         </div>
       </div>
     </section>
-
+    
+    </section>
+ 
     <!-- Tool Views -->
     <div class="tool-views">
       
@@ -124,12 +128,14 @@
           <p>Break up your video starting at a specific time.</p>
         </div>
         <div class="control-group">
-          <label>Start Time (HH:MM:SS)</label>
-          <input type="text" id="split-start" placeholder="00:00:00">
-        </div>
-        <div class="control-group">
-          <label>Duration (HH:MM:SS)</label>
-          <input type="text" id="split-duration" placeholder="00:01:00">
+          <label>Split Point (Timeline)</label>
+          <div class="timeline-container">
+            <input type="range" id="split-slider" min="0" max="100" value="0" class="timeline-slider">
+          </div>
+          <div class="timeline-labels">
+            <span>Start</span>
+            <span id="split-slider-value">00:00:00</span>
+          </div>
         </div>
         <button id="run-split-btn" class="btn action">Split Video</button>
       </section>
@@ -141,12 +147,15 @@
           <p>Cut out the toxic parts.</p>
         </div>
         <div class="control-group">
-          <label>Start Time (HH:MM:SS)</label>
-          <input type="text" id="trim-start" placeholder="00:00:00">
-        </div>
-        <div class="control-group">
-          <label>End Time (HH:MM:SS)</label>
-          <input type="text" id="trim-end" placeholder="00:01:00">
+          <label>Trim Range (Timeline)</label>
+          <div class="timeline-container dual-range">
+            <input type="range" id="trim-slider-start" min="0" max="100" value="0" class="timeline-slider">
+            <input type="range" id="trim-slider-end" min="0" max="100" value="100" class="timeline-slider">
+          </div>
+          <div class="timeline-labels">
+            <span id="trim-label-start">00:00:00</span>
+            <span id="trim-label-end">End</span>
+          </div>
         </div>
         <button id="run-trim-btn" class="btn action">Trim Video</button>
       </section>
@@ -271,6 +280,45 @@
           <input type="text" id="merge-filename" placeholder="merged_video.mp4">
         </div>
         <button id="run-merge-btn" class="btn action highlight">Merge Selected Videos</button>
+      </section>
+
+      <!-- VIDEO STABILIZER -->
+      <section id="stabilize" class="tool-view glass-panel" style="display: none;">
+        <div class="tool-header">
+          <h3>Video Stabilizer (Anti-Shake)</h3>
+          <p>Fix shaky memories and make them smooth.</p>
+        </div>
+        <div class="control-group">
+          <label>Shakiness Level (1-10)</label>
+          <input type="number" id="stabilize-level" value="5" min="1" max="10">
+        </div>
+        <div class="control-group">
+          <label>Smoothness</label>
+          <input type="number" id="stabilize-smooth" value="30" min="1" max="60">
+        </div>
+        <button id="run-stabilize-btn" class="btn action highlight">Stabilize Footage (Two-Pass)</button>
+        <p class="subtext" style="margin-top:10px;">Note: This runs two passes for maximum precision.</p>
+      </section>
+
+      <!-- CONTACT SHEET -->
+      <section id="contact" class="tool-view glass-panel" style="display: none;">
+        <div class="tool-header">
+          <h3>Thumbnail Contact Sheet</h3>
+          <p>Generate a professional summary image of your video.</p>
+        </div>
+        <div class="control-group">
+          <label>Grid Size (e.g., 4x4)</label>
+          <select id="contact-grid">
+            <option value="3x3">3x3 (9 Frames)</option>
+            <option value="4x4" selected>4x4 (16 Frames)</option>
+            <option value="5x5">5x5 (25 Frames)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>Thumbnail Width (px)</label>
+          <input type="number" id="contact-width" value="300">
+        </div>
+        <button id="run-contact-btn" class="btn action">Generate Sheet</button>
       </section>
 
       <!-- BATCH PROCESSOR -->
