@@ -1,4 +1,4 @@
-const { invoke } = window.__TAURI__.core;
+const { invoke, convertFileSrc } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
 const tauriDialog = window.__TAURI__?.dialog || window.__TAURI__?.pluginDialog || window.__TAURI__?.plugin?.dialog;
 
@@ -16,6 +16,14 @@ let globalInputPath = "";
 let globalOutputPath = "";
 let videoDuration = 0;
 
+// Preview Elements
+const previewSection = document.getElementById('preview-section');
+const previewVideo = document.getElementById('preview-video');
+const previewImage = document.getElementById('preview-image');
+const previewPlaceholder = document.getElementById('preview-placeholder');
+const previewTitle = document.getElementById('preview-title');
+let currentActiveTool = 'compress'; // Default active tool
+
 // Emotional Stages
 const emotionalStages = [
   { min: 0, max: 25, msg: "Denial phase: pretending everything is fine..." },
@@ -25,6 +33,54 @@ const emotionalStages = [
   { min: 100, max: 101, msg: "Acceptance: sadness re-encoded successfully 💛" }
 ];
 
+// --- Preview Logic ---
+async function updatePreviewMode() {
+  if (!globalInputPath) {
+    previewSection.style.display = 'none';
+    return;
+  }
+
+  if (currentActiveTool === 'batch') {
+    previewSection.style.display = 'none';
+    return;
+  }
+
+  previewSection.style.display = 'flex';
+  previewTitle.textContent = globalInputPath.split(/[\/\\]/).pop();
+
+  if (currentActiveTool === 'trim' || currentActiveTool === 'split') {
+    // Show Video
+    previewImage.style.display = 'none';
+    previewPlaceholder.style.display = 'none';
+    previewVideo.style.display = 'block';
+
+    // Set video source if not already set
+    const assetUrl = convertFileSrc(globalInputPath);
+    if (previewVideo.src !== assetUrl) {
+      previewVideo.src = assetUrl;
+      previewVideo.load();
+    }
+  } else {
+    // Show Thumbnail
+    previewVideo.style.display = 'none';
+
+    try {
+      previewPlaceholder.style.display = 'flex';
+      previewImage.style.display = 'none';
+      const thumbPath = await invoke('generate_thumbnail', { filePath: globalInputPath });
+      const thumbUrl = convertFileSrc(thumbPath) + "?t=" + new Date().getTime(); // Prevent caching
+      previewImage.src = thumbUrl;
+      previewImage.onload = () => {
+        previewPlaceholder.style.display = 'none';
+        previewImage.style.display = 'block';
+      };
+    } catch (e) {
+      console.error("Failed to generate thumbnail:", e);
+      previewPlaceholder.querySelector('.stat-label').textContent = "Failed to load thumbnail";
+    }
+  }
+}
+
 // --- Navigation ---
 navBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -32,7 +88,10 @@ navBtns.forEach(btn => {
     toolViews.forEach(v => v.style.display = 'none');
     
     btn.classList.add('active');
-    document.getElementById(btn.dataset.target).style.display = 'block';
+    currentActiveTool = btn.dataset.target;
+    document.getElementById(currentActiveTool).style.display = 'block';
+
+    updatePreviewMode();
   });
 });
 
@@ -81,6 +140,9 @@ document.getElementById('browse-input-btn').addEventListener('click', async () =
         document.getElementById('trim-label-start').textContent = "00:00:00";
         document.getElementById('trim-label-end').textContent = formatTime(Math.floor(videoDuration));
       }
+
+      // Update preview immediately after loading a file
+      updatePreviewMode();
     }
   } catch (e) {
     console.error("Dialog error:", e);
@@ -135,6 +197,9 @@ function formatTime(seconds) {
 // Slider listeners
 document.getElementById('split-slider')?.addEventListener('input', (e) => {
   document.getElementById('split-slider-value').textContent = formatTime(e.target.value);
+  if (currentActiveTool === 'split' && previewVideo) {
+    previewVideo.currentTime = e.target.value;
+  }
 });
 
 document.getElementById('trim-slider-start')?.addEventListener('input', (e) => {
@@ -144,6 +209,9 @@ document.getElementById('trim-slider-start')?.addEventListener('input', (e) => {
     e.target.value = end - 1;
   }
   document.getElementById('trim-label-start').textContent = formatTime(e.target.value);
+  if (currentActiveTool === 'trim' && previewVideo) {
+    previewVideo.currentTime = e.target.value;
+  }
 });
 
 document.getElementById('trim-slider-end')?.addEventListener('input', (e) => {
@@ -153,6 +221,9 @@ document.getElementById('trim-slider-end')?.addEventListener('input', (e) => {
     e.target.value = start + 1;
   }
   document.getElementById('trim-label-end').textContent = formatTime(e.target.value);
+  if (currentActiveTool === 'trim' && previewVideo) {
+    previewVideo.currentTime = e.target.value;
+  }
 });
 
 // --- Compressor Tool ---
