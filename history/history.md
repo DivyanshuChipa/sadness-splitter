@@ -35,8 +35,9 @@
 3. **[Data Flow]**: `stderr` is parsed via Regex in Rust; percentage is emitted to JS; JS updates the "Sadness Meter" DOM.
 
 ### 🚧 What's In Progress
-- [x] **Active Task**: Environment setup and Core features (Compress, Browse, etc.).
-- [ ] **Next Up**: Test Batch Processor with multiple files.
+- [x] **Active Task**: All 13+ Video Tools fully functional.
+- [x] **Next Up**: Resolution Scaling and legacy 3GP support.
+- [ ] **Upcoming**: Integration with Social Media aspect ratio presets.
 
 ### 📉 Technical Debt & Gotchas
 - **[Constraint]**: **No Node.js/NPM**. Do not add packages via `npm`. Use CDNs or native web APIs only.
@@ -47,6 +48,10 @@
 
 ### 📝 Change Log (Git-Style)
 
+- **feat(resolution)**: [2026-04-27] Added Dynamic Resolution Scaling (1080p to 240p) and 3GP support.
+- **feat(experience)**: [2026-04-27] Implemented Guided Tour and Emotional Visualizer with custom dialogs.
+- **feat(ui-fix)**: [2026-04-27] Fixed layout scrolling issues and made Bento cards more compact.
+- **feat(offline)**: [2026-04-27] Migrated to local Lucide icons for 100% offline functionality.
 - **feat(elite)**: [2026-04-24] Added Video Stabilizer (Anti-Shake) and Thumbnail Contact Sheet generator.
 - **feat(elite)**: [2026-04-24] Started Elite Plan: Added High-Quality GIF Maker and Video Merger tools.
 - **feat(ffmpeg)**: [2026-04-24] Added support for FFmpeg Presets (Ultrafast to Veryslow) and H.265 (HEVC) Codec.
