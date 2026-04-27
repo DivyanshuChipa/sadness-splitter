@@ -33,28 +33,41 @@ let currentTourStep = 0;
 
 function showTourStep(stepIndex) {
   const step = tourSteps[stepIndex];
-  const targetEl = document.querySelector(step.target);
-  const tooltip = document.getElementById('tour-tooltip');
-  const tooltipText = document.getElementById('tour-text');
-  const stepCount = document.getElementById('tour-step-count');
-
-  if (!targetEl) return;
-
-  // Cleanup previous highlights
-  document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
-
-  // Highlight new target
-  targetEl.classList.add('tour-highlight');
+  
+  // Run step action first (e.g. click a tab)
   step.action();
 
-  // Position Tooltip
-  const rect = targetEl.getBoundingClientRect();
-  tooltip.style.display = 'block';
-  tooltip.style.top = `${rect.bottom + 15 + window.scrollY}px`;
-  tooltip.style.left = `${rect.left}px`;
+  // Give DOM a moment to switch tabs and render
+  setTimeout(() => {
+    const targetEl = document.querySelector(step.target);
+    const tooltip = document.getElementById('tour-tooltip');
+    const tooltipText = document.getElementById('tour-text');
+    const stepCount = document.getElementById('tour-step-count');
 
-  tooltipText.innerText = step.text;
-  stepCount.innerText = `${stepIndex + 1}/${tourSteps.length}`;
+    if (!targetEl) return;
+
+    // Cleanup previous highlights
+    document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+
+    // Highlight new target
+    targetEl.classList.add('tour-highlight');
+
+    // Position Tooltip
+    const rect = targetEl.getBoundingClientRect();
+    tooltip.style.display = 'block';
+    
+    // Better positioning: if it's the sidebar, put it to the right, else below
+    if (step.target === '.sidebar') {
+      tooltip.style.top = `${rect.top + 50}px`;
+      tooltip.style.left = `${rect.right + 20}px`;
+    } else {
+      tooltip.style.top = `${rect.bottom + 15 + window.scrollY}px`;
+      tooltip.style.left = `${rect.left}px`;
+    }
+
+    tooltipText.innerText = step.text;
+    stepCount.innerText = `${stepIndex + 1}/${tourSteps.length}`;
+  }, 100); // 100ms delay for tab switching
 }
 
 // --- Emotional Mode ---
@@ -64,12 +77,12 @@ function startEmotionalMode() {
   let i = 0;
   
   // Show a greeting
-  showStatus("Emotional Mode Activated. Embracing all stages of sadness...", "info");
+  if (typeof updateStatus === 'function') updateStatus("Emotional Mode Activated. Embracing all stages of sadness...");
   
   emotionalInterval = setInterval(() => {
     document.body.className = themes[i];
     const msg = sadnessMessages[Math.floor(Math.random() * sadnessMessages.length)];
-    showStatus(msg.msg, "info");
+    if (typeof updateStatus === 'function') updateStatus(msg.msg);
     
     i = (i + 1) % themes.length;
   }, 3000);
@@ -105,7 +118,7 @@ document.getElementById('tour-next-btn').addEventListener('click', () => {
   } else {
     document.getElementById('tour-tooltip').style.display = 'none';
     document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
-    showStatus("Tour Complete! You're ready to split some sadness. 🎃", "success");
+    if (typeof updateStatus === 'function') updateStatus("Tour Complete! You're ready to split some sadness. 🎃");
   }
 });
 

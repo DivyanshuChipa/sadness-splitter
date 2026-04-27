@@ -88,7 +88,6 @@
   position: relative;
   z-index: 1050;
   box-shadow: 0 0 0 4px var(--accent), 0 0 20px var(--accent-glow) !important;
-  pointer-events: none;
 }
 
 /* --- DEMO EXPERIENCE BOX --- */
