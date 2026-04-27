@@ -172,7 +172,12 @@ listen('finished', (event) => {
     updateStatus("Error processing emotional baggage. FFmpeg failed.");
     updatePersonaFace(40); // Anger face for failure
   }
-  setTimeout(() => { progressContainer.style.display = 'none'; }, 5000);
+  setTimeout(() => {
+    progressContainer.style.display = 'none';
+    if (event.payload.success) {
+      setTimeout(() => updatePersonaFace(0), 10000); // Back to neutral after some time
+    }
+  }, 5000);
 });
 
 function formatTime(seconds) {

@@ -129,6 +129,23 @@ body {
   font-size: 3rem;
   margin-bottom: 10px;
   animation: float 3s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+#reactive-face {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+}
+
+#reactive-face:hover {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 15px var(--accent));
 }
 
 .brand h2 {
