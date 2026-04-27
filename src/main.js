@@ -5,13 +5,12 @@ const tauriDialog = window.__TAURI__?.dialog || window.__TAURI__?.pluginDialog |
 // --- UI Elements ---
 const navBtns = document.querySelectorAll('.nav-btn');
 const toolViews = document.querySelectorAll('.tool-view');
-const demoToggle = document.getElementById('demo-mode-toggle');
 const statusText = document.getElementById('status-text');
 const progressContainer = document.getElementById('progress-container');
 const progressFill = document.getElementById('progress-fill');
 const progressLabel = document.getElementById('progress-label');
 
-let isDemoMode = false;
+let isDemoMode = false; // Controlled by tour/emotional mode choices
 let globalInputPath = "";
 let globalOutputPath = "";
 let videoDuration = 0;
@@ -25,21 +24,33 @@ const emotionalStages = [
   { min: 100, max: 101, msg: "Acceptance: sadness re-encoded successfully 💛" }
 ];
 
+// Initialize Lucide Icons
+window.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+});
+
 // --- Navigation ---
 navBtns.forEach(btn => {
   btn.addEventListener('click', () => {
+    // Remove active class from all buttons and tool views
     navBtns.forEach(b => b.classList.remove('active'));
-    toolViews.forEach(v => v.style.display = 'none');
+    toolViews.forEach(v => {
+      v.classList.remove('active');
+      v.style.display = 'none'; // Keep this for backup if needed, but class is primary
+    });
     
+    // Add active class to clicked button and target view
     btn.classList.add('active');
-    document.getElementById(btn.dataset.target).style.display = 'block';
+    const targetView = document.getElementById(btn.dataset.target);
+    targetView.classList.add('active');
+    targetView.style.display = 'block';
+    
+    // Refresh icons just in case (though usually not needed)
+    lucide.createIcons();
   });
 });
 
-demoToggle.addEventListener('change', (e) => {
-  isDemoMode = e.target.checked;
-  updateStatus(isDemoMode ? "Demo mode activated 🎭" : "Demo mode off");
-});
+// Demo mode logic is now handled in tour.js via the dialog.
 
 function updateStatus(msg) {
   statusText.textContent = msg;

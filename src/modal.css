@@ -1,0 +1,125 @@
+
+/* --- CUSTOM MODAL --- */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  padding: 40px 30px !important;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.modal-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 25px 0;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* --- TOUR TOOLTIP --- */
+.tour-tooltip {
+  position: absolute;
+  z-index: 1100;
+  max-width: 280px;
+  padding: 15px !important;
+  border: 1px solid var(--accent);
+  box-shadow: 0 10px 30px var(--accent-glow);
+  animation: slideIn 0.3s ease;
+}
+
+.tooltip-arrow {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--panel-bg);
+  border-left: 1px solid var(--accent);
+  border-top: 1px solid var(--accent);
+  transform: rotate(45deg);
+  top: -7px;
+  left: 20px;
+}
+
+.tooltip-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  font-size: 0.8rem;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+/* --- HIGHLIGHTING --- */
+.tour-highlight {
+  position: relative;
+  z-index: 1050;
+  box-shadow: 0 0 0 4px var(--accent), 0 0 20px var(--accent-glow) !important;
+  pointer-events: none;
+}
+
+/* --- DEMO EXPERIENCE BOX --- */
+.demo-experience {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 12px;
+}
+
+.demo-info span { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-primary); }
+.demo-info small { font-size: 0.65rem; color: var(--text-secondary); }
+
+.icon-btn-small {
+  background: var(--accent);
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.icon-btn-small:hover { transform: scale(1.1); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

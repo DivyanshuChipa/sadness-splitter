@@ -5,10 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sadness Splitter 3000</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="modal.css">
   <!-- Google Fonts: Inter for a modern look -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="lucide.min.js"></script>
 </head>
-<body>
+<body class="aura-blue">
+  <div class="mesh-gradient"></div>
+  <div class="app-container">
 
   <!-- Sidebar Navigation -->
   <aside class="sidebar">
@@ -29,26 +33,26 @@
       </div>
     </div>
     <nav>
-      <button class="nav-btn active" data-target="compress">Compress</button>
-      <button class="nav-btn" data-target="split">Split</button>
-      <button class="nav-btn" data-target="trim">Trim</button>
-      <button class="nav-btn" data-target="rotate">Rotate</button>
-      <button class="nav-btn" data-target="audio">Audio Extractor</button>
-      <button class="nav-btn" data-target="convert">Format Converter</button>
-      <button class="nav-btn" data-target="subtitle">Subtitle Burner</button>
-      <button class="nav-btn" data-target="speed">Speed Warp</button>
-      <button class="nav-btn" data-target="gif">GIF Maker</button>
-      <button class="nav-btn" data-target="merger">Video Merger</button>
-      <button class="nav-btn" data-target="stabilize">Video Stabilizer</button>
-      <button class="nav-btn" data-target="contact">Contact Sheet</button>
-      <button class="nav-btn" data-target="batch">Batch Processor</button>
+      <button class="nav-btn active" data-target="compress"><i data-lucide="zap"></i> Compress</button>
+      <button class="nav-btn" data-target="split"><i data-lucide="scissors"></i> Split</button>
+      <button class="nav-btn" data-target="trim"><i data-lucide="scissors-line-dashed"></i> Trim</button>
+      <button class="nav-btn" data-target="rotate"><i data-lucide="rotate-cw"></i> Rotate</button>
+      <button class="nav-btn" data-target="audio"><i data-lucide="music"></i> Audio Extractor</button>
+      <button class="nav-btn" data-target="convert"><i data-lucide="refresh-cw"></i> Format Converter</button>
+      <button class="nav-btn" data-target="subtitle"><i data-lucide="type"></i> Subtitle Burner</button>
+      <button class="nav-btn" data-target="speed"><i data-lucide="gauge"></i> Speed Warp</button>
+      <button class="nav-btn" data-target="gif"><i data-lucide="image"></i> GIF Maker</button>
+      <button class="nav-btn" data-target="merger"><i data-lucide="layers"></i> Video Merger</button>
+      <button class="nav-btn" data-target="stabilize"><i data-lucide="wind"></i> Video Stabilizer</button>
+      <button class="nav-btn" data-target="contact"><i data-lucide="grid"></i> Contact Sheet</button>
+      <button class="nav-btn" data-target="batch"><i data-lucide="package"></i> Batch Processor</button>
     </nav>
-    <div class="demo-toggle-container">
-      <label class="toggle">
-        <input type="checkbox" id="demo-mode-toggle">
-        <span class="slider"></span>
-      </label>
-      <span class="toggle-label">Demo Mode 🎭</span>
+    <div class="demo-experience glass-panel">
+      <div class="demo-info">
+        <span>Experience</span>
+        <small>Guided Tour</small>
+      </div>
+      <button id="demo-trigger-btn" class="icon-btn-small" title="Explore Experience"><i data-lucide="sparkles"></i></button>
     </div>
 
   </aside>
@@ -352,6 +356,37 @@
     </footer>
   </main>
 
+  </div> <!-- End App Container -->
+
+  <!-- CUSTOM DIALOG MODAL -->
+  <div id="custom-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <div class="modal-icon">✨</div>
+        <h3>Choose Your Experience</h3>
+      </div>
+      <p>How would you like to explore Sadness Splitter today?</p>
+      <div class="modal-actions">
+        <button id="start-tour-btn" class="btn secondary"><i data-lucide="map"></i> Guided Tour</button>
+        <button id="start-emotional-btn" class="btn action"><i data-lucide="sparkles"></i> Emotional Mode</button>
+      </div>
+      <button id="close-modal-btn" class="modal-close">Skip for now</button>
+    </div>
+  </div>
+
+  <!-- TOUR TOOLTIP -->
+  <div id="tour-tooltip" class="tour-tooltip glass-panel" style="display: none;">
+    <div class="tooltip-arrow"></div>
+    <div class="tooltip-content">
+      <p id="tour-text">Step explanation goes here...</p>
+      <div class="tooltip-footer">
+        <span id="tour-step-count">1/5</span>
+        <button id="tour-next-btn" class="btn-small">Next <i data-lucide="arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+
   <script src="main.js"></script>
+  <script src="tour.js"></script>
 </body>
 </html>
