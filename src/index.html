@@ -121,6 +121,19 @@
             <option value="libx265">H.265 / HEVC (Best for Storage)</option>
           </select>
         </div>
+
+        <div class="control-group">
+          <label>Resolution (Scaling)</label>
+          <select id="compress-resolution">
+            <option value="original" selected>Original (No Scaling)</option>
+            <option value="1920:1080">1080p (FHD)</option>
+            <option value="1280:720">720p (HD)</option>
+            <option value="854:480">480p (SD)</option>
+            <option value="640:360">360p</option>
+            <option value="320:240">240p (Mobile)</option>
+            <option value="half">50% Smaller (Auto)</option>
+          </select>
+        </div>
         
         <button id="run-compress-btn" class="btn action">Compress Video</button>
       </section>
@@ -212,6 +225,7 @@
             <option value="avi">AVI</option>
             <option value="mov">MOV</option>
             <option value="webm">WEBM</option>
+            <option value="3gp">3GP (Legacy Mobile)</option>
           </select>
         </div>
         <div class="control-group checkbox-group">

@@ -200,18 +200,29 @@ document.getElementById('run-compress-btn').addEventListener('click', () => {
   const crf = crfInput.value;
   const preset = document.getElementById('compress-preset').value;
   const codec = document.getElementById('compress-codec').value;
+  const resolution = document.getElementById('compress-resolution').value;
   
-  // Get filename from path
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/compressed_${filename}`;
   
-  const args = [
+  let args = [
     "-i", globalInputPath,
     "-vcodec", codec,
     "-crf", crf.toString(),
-    "-preset", preset,
-    "-y", output
+    "-preset", preset
   ];
+
+  // Apply scaling if selected
+  if (resolution !== "original") {
+    if (resolution === "half") {
+      args.push("-vf", "scale=iw/2:-1");
+    } else {
+      const [w, h] = resolution.split(':');
+      args.push("-vf", `scale=${w}:${h}:force_original_aspect_ratio=decrease,pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2`);
+    }
+  }
+
+  args.push("-y", output);
   
   progressContainer.style.display = 'block';
   progressFill.style.width = '0%';
@@ -362,17 +373,19 @@ document.getElementById('run-audio-btn').addEventListener('click', () => {
 // --- Convert Tool ---
 document.getElementById('run-convert-btn').addEventListener('click', () => {
   const format = document.getElementById('convert-format').value;
-  const linkCrf = document.getElementById('link-crf-checkbox').checked;
   const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
   const output = `${globalOutputPath}/converted_${filename}.${format}`;
   
-  let args = ["-i", globalInputPath, "-y", output];
-  if (linkCrf) {
-    const crf = document.getElementById('crf-input').value;
-    const preset = document.getElementById('compress-preset').value;
-    const codec = document.getElementById('compress-codec').value;
-    args = ["-i", globalInputPath, "-vcodec", codec, "-crf", crf.toString(), "-preset", preset, "-y", output];
+  let args = ["-i", globalInputPath];
+
+  // Specific handling for legacy formats like 3GP
+  if (format === '3gp') {
+    args.push("-vcodec", "libx264", "-acodec", "aac", "-strict", "experimental");
+  } else if (format === 'gif') {
+    args.push("-vf", "fps=15,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse");
   }
+
+  args.push("-y", output);
   executeFFmpegTask("Conversion", args);
 });
 
