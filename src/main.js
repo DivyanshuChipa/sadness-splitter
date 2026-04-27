@@ -31,7 +31,7 @@ let annoyanceTimer = null;
 
 function updatePersonaFace(percent) {
   if (annoyanceLevel > 5) return; // Don't override if angry
-  
+
   const stage = emotionalStages.find(s => percent >= s.min && percent <= s.max);
   if (stage && reactiveFace) {
     reactiveFace.src = `emotive-ani-character/${stage.face}`;
@@ -42,11 +42,11 @@ function updatePersonaFace(percent) {
 if (reactiveFace) {
   reactiveFace.addEventListener('mouseenter', () => {
     annoyanceLevel++;
-    
+
     if (annoyanceLevel > 5) {
       reactiveFace.src = `emotive-ani-character/face_anger.png`;
       updateStatus("HEY! Stop poking me and focus on your work! 💢");
-      
+
       // Reset annoyance after a few seconds
       clearTimeout(annoyanceTimer);
       annoyanceTimer = setTimeout(() => {
@@ -74,13 +74,13 @@ navBtns.forEach(btn => {
       v.classList.remove('active');
       v.style.display = 'none'; // Keep this for backup if needed, but class is primary
     });
-    
+
     // Add active class to clicked button and target view
     btn.classList.add('active');
     const targetView = document.getElementById(btn.dataset.target);
     targetView.classList.add('active');
     targetView.style.display = 'block';
-    
+
     // Refresh icons just in case (though usually not needed)
     lucide.createIcons();
   });
@@ -103,7 +103,7 @@ document.getElementById('browse-input-btn').addEventListener('click', async () =
     if (file) {
       globalInputPath = file;
       document.getElementById('global-input-path').value = file;
-      
+
       const filename = file.split(/[\/\\]/).pop();
       updateStatus(`Selected: ${filename}`);
 
@@ -154,7 +154,7 @@ listen('progress', (event) => {
   const percent = event.payload.percentage;
   progressFill.style.width = `${percent}%`;
   progressLabel.textContent = `Emotional Level: ${percent}%`;
-  
+
   const stage = emotionalStages.find(s => percent >= s.min && percent < s.max);
   if (stage) {
     updateStatus(`Sadness Meter: ${stage.msg}`);
@@ -172,12 +172,7 @@ listen('finished', (event) => {
     updateStatus("Error processing emotional baggage. FFmpeg failed.");
     updatePersonaFace(40); // Anger face for failure
   }
-  setTimeout(() => { 
-    progressContainer.style.display = 'none'; 
-    if (event.payload.success) {
-      setTimeout(() => updatePersonaFace(0), 10000); // Back to neutral after some time
-    }
-  }, 5000);
+  setTimeout(() => { progressContainer.style.display = 'none'; }, 5000);
 });
 
 function formatTime(seconds) {
@@ -235,7 +230,7 @@ document.getElementById('run-compress-btn').addEventListener('click', () => {
     alert("Please select input video and output folder.");
     return;
   }
-  
+
   if (isDemoMode) {
     updateStatus("Sadness compressed. Emotional baggage reduced 💛 (Demo)");
     return;
@@ -245,10 +240,10 @@ document.getElementById('run-compress-btn').addEventListener('click', () => {
   const preset = document.getElementById('compress-preset').value;
   const codec = document.getElementById('compress-codec').value;
   const resolution = document.getElementById('compress-resolution').value;
-  
+
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/compressed_${filename}`;
-  
+
   let args = [
     "-i", globalInputPath,
     "-vcodec", codec,
@@ -267,11 +262,11 @@ document.getElementById('run-compress-btn').addEventListener('click', () => {
   }
 
   args.push("-y", output);
-  
+
   progressContainer.style.display = 'block';
   progressFill.style.width = '0%';
   updateStatus("Beginning the process of emotional containment...");
-  
+
   invoke('process_video', { args, totalDuration: videoDuration });
 });
 
@@ -345,7 +340,7 @@ async function executeFFmpegTask(taskName, args) {
     alert("Please select input video and output folder.");
     return;
   }
-  
+
   if (isDemoMode) {
     updateStatus(`${taskName} completed (Demo mode activated 🎭)`);
     return;
@@ -354,7 +349,7 @@ async function executeFFmpegTask(taskName, args) {
   progressContainer.style.display = 'block';
   progressFill.style.width = '0%';
   updateStatus(`Initiating ${taskName.toLowerCase()}...`);
-  
+
   try {
     await invoke('process_video', { args, totalDuration: videoDuration });
   } catch (e) {
@@ -369,7 +364,7 @@ document.getElementById('run-split-btn').addEventListener('click', () => {
   const start = formatTime(startSeconds);
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/split_${filename}`;
-  
+
   // Note: For split, we usually just want to cut from a point to the end, or a fixed duration.
   // We'll cut from 'start' till the end.
   const args = ["-i", globalInputPath, "-ss", start, "-c", "copy", "-y", output];
@@ -384,7 +379,7 @@ document.getElementById('run-trim-btn').addEventListener('click', () => {
   const end = formatTime(endSeconds);
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/trimmed_${filename}`;
-  
+
   const args = ["-i", globalInputPath, "-ss", start, "-to", end, "-c", "copy", "-y", output];
   executeFFmpegTask("Trimming", args);
 });
@@ -399,7 +394,7 @@ document.getElementById('run-rotate-btn').addEventListener('click', () => {
   };
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/rotated_${filename}`;
-  
+
   const args = ["-i", globalInputPath, "-vf", rotationMap[type], "-y", output];
   executeFFmpegTask("Rotation", args);
 });
@@ -409,7 +404,7 @@ document.getElementById('run-audio-btn').addEventListener('click', () => {
   const format = document.getElementById('audio-format').value;
   const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
   const output = `${globalOutputPath}/${filename}_audio.${format}`;
-  
+
   const args = ["-i", globalInputPath, "-q:a", "0", "-map", "a", "-y", output];
   executeFFmpegTask("Audio Extraction", args);
 });
@@ -419,7 +414,7 @@ document.getElementById('run-convert-btn').addEventListener('click', () => {
   const format = document.getElementById('convert-format').value;
   const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
   const output = `${globalOutputPath}/converted_${filename}.${format}`;
-  
+
   let args = ["-i", globalInputPath];
 
   // Specific handling for legacy formats like 3GP
@@ -446,10 +441,10 @@ document.getElementById('browse-subtitle-btn').addEventListener('click', async (
 document.getElementById('run-subtitle-btn').addEventListener('click', () => {
   const subPath = document.getElementById('subtitle-path').value;
   if (!subPath) { alert("Please select a subtitle file."); return; }
-  
+
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/subtitled_${filename}`;
-  
+
   // FFmpeg expects forward slashes in filter paths
   const safeSubPath = subPath.replace(/\\/g, '/').replace(/:/g, '\\:');
   const args = ["-i", globalInputPath, "-vf", `subtitles='${safeSubPath}'`, "-c:a", "copy", "-y", output];
@@ -462,13 +457,13 @@ document.getElementById('run-speed-btn').addEventListener('click', () => {
   const ptsMap = { "0.5": "2.0*PTS", "1.5": "0.667*PTS", "2.0": "0.5*PTS", "4.0": "0.25*PTS" };
   const ptsFactor = ptsMap[speed];
   const audioFactor = parseFloat(speed);
-  
+
   let atempo = `atempo=${audioFactor}`;
-  if (audioFactor > 2.0) atempo = `atempo=2.0,atempo=${audioFactor/2.0}`;
-  
+  if (audioFactor > 2.0) atempo = `atempo=2.0,atempo=${audioFactor / 2.0}`;
+
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/speedwarp_${speed}x_${filename}`;
-  
+
   const args = [
     "-i", globalInputPath,
     "-filter_complex", `[0:v]setpts=${ptsFactor}[v];[0:a]${atempo}[a]`,
@@ -482,23 +477,23 @@ document.getElementById('run-batch-btn').addEventListener('click', async () => {
   const batchList = document.querySelectorAll('#batch-list li:not(.empty-msg)');
   if (batchList.length === 0) { alert("Batch list is empty."); return; }
   if (!globalOutputPath) { alert("Please select an output folder."); return; }
-  
+
   const crf = document.getElementById('crf-input').value;
   updateStatus(`Starting batch processing for ${batchList.length} files...`);
-  
+
   for (let i = 0; i < batchList.length; i++) {
     const input = batchList[i].dataset.path;
     const filename = input.split(/[\/\\]/).pop();
     const output = `${globalOutputPath}/BATCH_CRF${crf}_${filename}`;
-    
-    updateStatus(`Batch: Processing ${i+1}/${batchList.length} - ${filename}`);
-    
+
+    updateStatus(`Batch: Processing ${i + 1}/${batchList.length} - ${filename}`);
+
     const args = ["-i", input, "-vcodec", "libx264", "-crf", crf.toString(), "-preset", "medium", "-y", output];
-    
+
     // We run them one by one for now to avoid CPU overload
     const duration = await invoke('get_video_duration', { filePath: input });
     await invoke('process_video', { args, totalDuration: duration });
-    
+
     // Wait for the 'finished' event before moving to next (simplified loop)
     await new Promise(resolve => {
       const unlisten = listen('finished', () => {
@@ -516,10 +511,10 @@ document.getElementById('run-gif-btn').addEventListener('click', () => {
   const fps = document.getElementById('gif-fps').value || "15";
   const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
   const output = `${globalOutputPath}/${filename}_elite.gif`;
-  
+
   // High Quality GIF filter chain
   const filter = `fps=${fps},scale=${width}:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`;
-  
+
   const args = ["-i", globalInputPath, "-vf", filter, "-y", output];
   executeFFmpegTask("GIF Creation", args);
 });
@@ -529,22 +524,22 @@ document.getElementById('run-merge-btn').addEventListener('click', async () => {
   const batchList = document.querySelectorAll('#batch-list li:not(.empty-msg)');
   if (batchList.length < 2) { alert("Please add at least 2 videos in the Batch Processor tab."); return; }
   if (!globalOutputPath) { alert("Please select an output folder."); return; }
-  
+
   const outName = document.getElementById('merge-filename').value || "merged_video.mp4";
   const output = `${globalOutputPath}/${outName}`;
-  
+
   let inputArgs = [];
   let filterStr = "";
-  
+
   batchList.forEach((li, index) => {
     inputArgs.push("-i", li.dataset.path);
     filterStr += `[${index}:v][${index}:a]`;
   });
-  
+
   filterStr += `concat=n=${batchList.length}:v=1:a=1[v][a]`;
-  
+
   const args = [...inputArgs, "-filter_complex", filterStr, "-map", "[v]", "-map", "[a]", "-y", output];
-  
+
   // Note: Duration estimation for merge is tricky, we'll just set it to 0 to show indefinite progress
   executeFFmpegTask("Video Merging", args);
 });
@@ -556,15 +551,15 @@ document.getElementById('run-stabilize-btn').addEventListener('click', async () 
   const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
   const output = `${globalOutputPath}/stabilized_${filename}.mp4`;
   const trfPath = `${globalOutputPath}/transforms.trf`;
-  
+
   // Pass 1: Detect shakiness
   updateStatus("Pass 1: Detecting shakiness... 📊");
   const args1 = ["-i", globalInputPath, "-vf", `vidstabdetect=shake=${shake}:result='${trfPath}'`, "-f", "null", "-"];
-  
+
   try {
     // Run Pass 1
     await invoke('process_video', { args: args1 });
-    
+
     // Pass 2: Apply stabilization
     updateStatus("Pass 2: Smoothing memories... ✨");
     const args2 = ["-i", globalInputPath, "-vf", `vidstabtransform=smoothing=${smooth}:input='${trfPath}'`, "-y", output];
@@ -580,10 +575,10 @@ document.getElementById('run-contact-btn').addEventListener('click', () => {
   const width = document.getElementById('contact-width').value || "300";
   const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
   const output = `${globalOutputPath}/${filename}_contact_sheet.png`;
-  
+
   // Filter for grid of thumbnails
   const filter = `thumbnail,scale=${width}:-1,tile=${grid}`;
-  
+
   const args = ["-i", globalInputPath, "-vf", filter, "-frames:v", "1", "-y", output];
   executeFFmpegTask("Contact Sheet", args);
 });
@@ -607,13 +602,13 @@ function setTheme(themeName) {
   // Remove existing themes
   body.classList.remove('theme-blue', 'theme-red', 'theme-green', 'theme-purple', 'theme-gold');
   body.classList.add(themeName);
-  
+
   // Update active state in UI
   themeCircles.forEach(c => {
     if (c.dataset.theme === themeName) c.classList.add('active');
     else c.classList.remove('active');
   });
-  
+
   localStorage.setItem('app-theme', themeName);
 }
 
