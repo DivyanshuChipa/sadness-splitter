@@ -48,6 +48,8 @@
 
 ### 📝 Change Log (Git-Style)
 
+- **fix(backend)**: [2026-04-27] Reverted smooth progress tracking to standard line-reader for maximum stability.
+- **feat(persona)**: [2026-04-27] Added **Aura**, the reactive anime persona, with progress-based emotions and sassy hover interactions.
 - **feat(resolution)**: [2026-04-27] Added Dynamic Resolution Scaling (1080p to 240p) and 3GP support.
 - **feat(experience)**: [2026-04-27] Implemented Guided Tour and Emotional Visualizer with custom dialogs.
 - **feat(ui-fix)**: [2026-04-27] Fixed layout scrolling issues and made Bento cards more compact.

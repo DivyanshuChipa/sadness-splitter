@@ -17,12 +17,48 @@ let videoDuration = 0;
 
 // Emotional Stages
 const emotionalStages = [
-  { min: 0, max: 25, msg: "Denial phase: pretending everything is fine..." },
-  { min: 25, max: 50, msg: "Anger phase: codec fighting bitrate..." },
-  { min: 50, max: 75, msg: "Bargaining phase: CRF negotiating with pixels..." },
-  { min: 75, max: 100, msg: "Depression phase: slow contemplation of life's choices..." },
-  { min: 100, max: 101, msg: "Acceptance: sadness re-encoded successfully 💛" }
+  { min: 0, max: 20, msg: "Denial phase: pretending everything is fine...", face: "face_denial.png" },
+  { min: 20, max: 40, msg: "Anger phase: codec fighting bitrate...", face: "face_anger.png" },
+  { min: 40, max: 60, msg: "Bargaining phase: CRF negotiating with pixels...", face: "face_bargaining.png" },
+  { min: 60, max: 80, msg: "Depression phase: slow contemplation of life's choices...", face: "face_depression.png" },
+  { min: 80, max: 101, msg: "Acceptance: sadness re-encoded successfully 💛", face: "face_acceptance.png" }
 ];
+
+// --- Reactive Persona System ---
+const reactiveFace = document.getElementById('reactive-face');
+let annoyanceLevel = 0;
+let annoyanceTimer = null;
+
+function updatePersonaFace(percent) {
+  if (annoyanceLevel > 5) return; // Don't override if angry
+  
+  const stage = emotionalStages.find(s => percent >= s.min && percent <= s.max);
+  if (stage && reactiveFace) {
+    reactiveFace.src = `emotive-ani-character/${stage.face}`;
+  }
+}
+
+// Sassy Interaction
+if (reactiveFace) {
+  reactiveFace.addEventListener('mouseenter', () => {
+    annoyanceLevel++;
+    
+    if (annoyanceLevel > 5) {
+      reactiveFace.src = `emotive-ani-character/face_anger.png`;
+      updateStatus("HEY! Stop poking me and focus on your work! 💢");
+      
+      // Reset annoyance after a few seconds
+      clearTimeout(annoyanceTimer);
+      annoyanceTimer = setTimeout(() => {
+        annoyanceLevel = 0;
+        // Restore face based on current progress
+        const currentPercent = parseFloat(progressFill.style.width) || 0;
+        updatePersonaFace(currentPercent);
+        updateStatus("Ready to process emotional baggage.");
+      }, 3000);
+    }
+  });
+}
 
 // Initialize Lucide Icons
 window.addEventListener('DOMContentLoaded', () => {
@@ -122,6 +158,7 @@ listen('progress', (event) => {
   const stage = emotionalStages.find(s => percent >= s.min && percent < s.max);
   if (stage) {
     updateStatus(`Sadness Meter: ${stage.msg}`);
+    updatePersonaFace(percent);
   }
 });
 
@@ -130,10 +167,17 @@ listen('finished', (event) => {
     progressFill.style.width = `100%`;
     progressLabel.textContent = `Emotional Level: 100%`;
     updateStatus(emotionalStages[4].msg);
+    updatePersonaFace(100);
   } else {
     updateStatus("Error processing emotional baggage. FFmpeg failed.");
+    updatePersonaFace(40); // Anger face for failure
   }
-  setTimeout(() => { progressContainer.style.display = 'none'; }, 5000);
+  setTimeout(() => { 
+    progressContainer.style.display = 'none'; 
+    if (event.payload.success) {
+      setTimeout(() => updatePersonaFace(0), 10000); // Back to neutral after some time
+    }
+  }, 5000);
 });
 
 function formatTime(seconds) {

@@ -4,7 +4,7 @@
 [![Engine](https://img.shields.io/badge/Engine-FFmpeg-green?style=for-the-badge&logo=ffmpeg)](https://ffmpeg.org/)
 [![UI Style](https://img.shields.io/badge/Style-Bento%20Glassmorphism-purple?style=for-the-badge)](https://linear.app/)
 
-**Sadness Splitter 3000** is a premium, high-performance video utility designed to help you process your digital memories (and emotional baggage) with style. Built on the lightning-fast **Tauri v2** framework and powered by the legendary **FFmpeg** engine.
+**Sadness Splitter 3000** is a premium, high-performance video utility managed by **Aura**, your reactive anime persona. Designed to help you process your digital memories (and emotional baggage) with style. Built on the lightning-fast **Tauri v2** framework and powered by the legendary **FFmpeg** engine.
 
 ---
 
@@ -15,6 +15,7 @@
 - **Mesh Gradients**: Dynamic, animated backgrounds that breathe life into the app.
 - **Glassmorphism**: Deep blur effects and sleek transparency for a state-of-the-art feel.
 - **Emotional Auras**: Choose your theme—Blue (Peace), Red (Passion), Gold (Acceptance), and more.
+- **Aura the Mascot**: Meet your reactive anime companion who evolves with your processing progress and has a sassy personality!
 
 ### 🛠️ Professional Tool Suite
 - **Compress & Resize**: Shrink videos with CRF control and downscale to any resolution (1080p to 240p).
