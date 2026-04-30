@@ -5,6 +5,7 @@ use std::io::{BufRead, BufReader};
 use regex::Regex;
 use serde::Serialize;
 use tauri::{Emitter, Window};
+use sysinfo::System;
 
 #[derive(Clone, Serialize)]
 struct ProgressPayload {
@@ -126,6 +127,35 @@ fn list_videos_in_folder(folder_path: String) -> Vec<String> {
     videos
 }
 
+
+#[derive(Clone, Serialize)]
+struct SystemMetricsPayload {
+    cpu_percent: f32,
+    ram_percent: f32,
+}
+
+#[tauri::command]
+fn get_system_metrics() -> Result<SystemMetricsPayload, String> {
+    let mut sys = System::new_all();
+    sys.refresh_memory();
+    sys.refresh_cpu();
+    std::thread::sleep(std::time::Duration::from_millis(120));
+    sys.refresh_cpu();
+
+    let total_mem = sys.total_memory();
+    let used_mem = sys.used_memory();
+
+    let ram_percent = if total_mem > 0 {
+        ((used_mem as f64 / total_mem as f64) * 100.0) as f32
+    } else {
+        0.0
+    };
+
+    let cpu_percent = sys.global_cpu_info().cpu_usage();
+
+    Ok(SystemMetricsPayload { cpu_percent, ram_percent })
+}
+
 #[tauri::command]
 fn check_ffmpeg() -> bool {
     Command::new("ffmpeg")
@@ -141,7 +171,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder, generate_thumbnail, check_ffmpeg])
+        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder, generate_thumbnail, check_ffmpeg, get_system_metrics])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
