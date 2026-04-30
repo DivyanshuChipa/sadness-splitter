@@ -48,6 +48,13 @@
 
 ### 📝 Change Log (Git-Style)
 
+- **feat(ui)**: [2026-04-30] Polished Right Panel with a new **Hero Feature Card** and colorized Tech Stack icons.
+- **fix(ui)**: [2026-04-30] Fixed Modal buttons (Tour, Emotional Mode, Skip) and consolidated event listeners.
+- **feat(ui)**: [2026-04-30] Refined 3-column layout: Moved **Guided Tour** to Right Panel, restored **System Log** to main footer.
+- **feat(links)**: [2026-04-30] Added Aura Creator's Artist ID (IbisPaint), Instagram, and YouTube links.
+- **feat(engine)**: [2026-04-30] Integrated **FFmpeg Installer** link for easy setup if engine is missing.
+- **feat(ui)**: [2026-04-30] Implemented a **3-Column Dashboard Layout** with a responsive Right Info Panel.
+- **feat(engine)**: [2026-04-30] Added **FFmpeg Health Indicator** (Green/Red dot) with real-time backend verification.
 - **feat(ui)**: [2026-04-30] Relocated status messages to a new **Aura Speech Bubble** in the sidebar for better interactivity.
 - **feat(persona)**: [2026-04-30] Upgraded to **Aura Persona 2.0** with 25+ expressions and tool-specific contextual reactions.
 - **fix(backend)**: [2026-04-27] Reverted smooth progress tracking to standard line-reader for maximum stability.

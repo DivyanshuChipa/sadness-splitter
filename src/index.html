@@ -54,14 +54,17 @@
       <button class="nav-btn" data-target="contact"><i data-lucide="grid"></i> Contact Sheet</button>
       <button class="nav-btn" data-target="batch"><i data-lucide="package"></i> Batch Processor</button>
     </nav>
-    <div class="demo-experience glass-panel">
-      <div class="demo-info">
-        <span>Experience</span>
-        <small>Guided Tour</small>
-      </div>
-      <button id="demo-trigger-btn" class="icon-btn-small" title="Explore Experience"><i data-lucide="sparkles"></i></button>
-    </div>
 
+    <div class="sidebar-footer" style="margin-top: auto; padding-top: 15px; border-top: 1px solid var(--panel-border);">
+      <div id="technical-log-sidebar" class="subtext" style="font-size: 0.7rem; color: var(--text-secondary); opacity: 0.7; text-align: center; margin-bottom: 10px;">System Ready.</div>
+      <div class="demo-experience glass-panel">
+        <div class="demo-info">
+          <span>Experience</span>
+          <small>Guided Tour</small>
+        </div>
+        <button id="demo-trigger-btn" class="icon-btn-small" title="Explore Experience"><i data-lucide="sparkles"></i></button>
+      </div>
+    </div>
   </aside>
 
   <!-- Main Content Area -->
@@ -373,9 +376,57 @@
         </div>
         <div class="progress-label" id="progress-label">Emotional Level: 0%</div>
       </div>
-      <div id="technical-log" class="subtext" style="font-size: 0.7rem; color: var(--text-secondary); opacity: 0.7;">System Ready.</div>
+      <div id="technical-log" class="subtext" style="font-size: 0.7rem; color: var(--text-secondary); opacity: 0.7; text-align: center; width: 100%;">System Ready.</div>
     </footer>
   </main>
+
+  <!-- Right Info Panel (Desktop Only) -->
+  <aside class="right-panel">
+    <div class="panel-header">
+      <span class="subtext uppercase bold">Dashboard Info</span>
+    </div>
+
+    <!-- Redesigned Experience Card -->
+    <div class="feature-card glass-panel tour-card">
+      <div class="feature-icon"><i data-lucide="sparkles"></i></div>
+      <div class="feature-content">
+        <h4>Unlock Aura</h4>
+        <p>Explore the full emotional spectrum with our guided tour.</p>
+        <button id="demo-trigger-btn-right" class="btn primary btn-small">Start Experience</button>
+      </div>
+    </div>
+
+    <div class="info-card glass-panel">
+      <h3>System Engine</h3>
+      <div class="status-indicator">
+        <div class="indicator-item">
+          <span class="dot" id="ffmpeg-dot"></span>
+          <span id="ffmpeg-status-text">FFmpeg Check...</span>
+        </div>
+        <a id="ffmpeg-fix-link" href="https://release-assets.githubusercontent.com/github-production-release-asset/899872930/30cbe86c-00c1-4908-b9ba-6f6b391514c3?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-30T05%3A37%3A08Z&rscd=attachment%3B+filename%3DFFmpegInstaller.exe&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-30T04%3A36%3A37Z&ske=2026-04-30T05%3A37%3A08Z&sks=b&skv=2018-11-09&sig=cEEN%2BEIZWBFvy8IL2EbxdBZVGKL9APyGkEvOffP0540%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc3NzUyNjk4MywibmJmIjoxNzc3NTI1MTgzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.ohqMaV7WTCUHlF06V9SylsRnT_ibTwgRDTjYZRPxrvc&response-content-disposition=attachment%3B%20filename%3DFFmpegInstaller.exe&response-content-type=application%2Foctet-stream" target="_blank" class="subtext" style="display: none; color: var(--danger); margin-top: 8px; text-decoration: underline;">Download FFmpeg Installer</a>
+      </div>
+
+      <div class="tech-stack">
+        <div class="tech-item"><i data-lucide="box"></i> Tauri v2 Core</div>
+        <div class="tech-item"><i data-lucide="cpu"></i> FFmpeg Backend</div>
+        <div class="tech-item"><i data-lucide="palette"></i> Lucide Icons</div>
+      </div>
+
+      <div class="social-links">
+        <label class="subtext" style="font-weight: 700; font-size: 0.7rem; margin-top: 10px; display: block; text-transform: uppercase;">Aura Creator</label>
+        <a href="https://github.com/DivyanshuChipa/sadness-splitter" target="_blank" class="social-btn"><i data-lucide="github"></i> GitHub Repo</a>
+        <a href="https://ibispaint.com/artist2/402424453665966" target="_blank" class="social-btn"><i data-lucide="palette"></i> Artist ID</a>
+        <a href="https://instagram.com/divyanshushopra" target="_blank" class="social-btn"><i data-lucide="instagram"></i> Instagram</a>
+        <a href="https://www.youtube.com/@divyanshuchipa9677" target="_blank" class="social-btn"><i data-lucide="youtube"></i> YouTube</a>
+      </div>
+      
+      <div class="version-info">
+        <span>v0.1.0-alpha</span>
+        <small>Portable Version Coming Soon</small>
+        <small>Made with 💛 by Aura Team</small>
+      </div>
+    </div>
+  </aside>
 
   </div> <!-- End App Container -->
 

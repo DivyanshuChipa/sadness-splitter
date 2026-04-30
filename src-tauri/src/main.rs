@@ -126,11 +126,22 @@ fn list_videos_in_folder(folder_path: String) -> Vec<String> {
     videos
 }
 
+#[tauri::command]
+fn check_ffmpeg() -> bool {
+    Command::new("ffmpeg")
+        .arg("-version")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder, generate_thumbnail])
+        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder, generate_thumbnail, check_ffmpeg])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

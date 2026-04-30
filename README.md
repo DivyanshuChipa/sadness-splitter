@@ -3,6 +3,7 @@
 [![Tech Stack](https://img.shields.io/badge/Powered%20By-Tauri%20v2-blue?style=for-the-badge&logo=tauri)](https://tauri.app/)
 [![Engine](https://img.shields.io/badge/Engine-FFmpeg-green?style=for-the-badge&logo=ffmpeg)](https://ffmpeg.org/)
 [![UI Style](https://img.shields.io/badge/Style-Bento%20Glassmorphism-purple?style=for-the-badge)](https://linear.app/)
+[![GitHub Repo](https://img.shields.io/badge/Repo-GitHub-lightgrey?style=for-the-badge&logo=github)](https://github.com/DivyanshuChipa/sadness-splitter)
 
 **Sadness Splitter 3000** is a premium, high-performance video utility managed by **Aura**, your reactive anime persona. Designed to help you process your digital memories (and emotional baggage) with style. Built on the lightning-fast **Tauri v2** framework and powered by the legendary **FFmpeg** engine.
 

@@ -115,6 +115,76 @@ navBtns.forEach(btn => {
   });
 });
 
+// --- System Engine Check ---
+async function checkEngineStatus() {
+  const ffmpegDot = document.getElementById('ffmpeg-dot');
+  const ffmpegStatus = document.getElementById('ffmpeg-status-text');
+  const ffmpegFix = document.getElementById('ffmpeg-fix-link');
+  
+  try {
+    const isReady = await invoke('check_ffmpeg');
+    if (isReady) {
+      ffmpegDot.className = 'dot green';
+      ffmpegStatus.textContent = 'FFmpeg Engine: Active';
+      ffmpegFix.style.display = 'none';
+    } else {
+      ffmpegDot.className = 'dot red';
+      ffmpegStatus.textContent = 'FFmpeg: Not Found';
+      ffmpegFix.style.display = 'block';
+      updateStatus("Aura noticed FFmpeg is missing! Please install it. 🔴");
+    }
+  } catch (e) {
+    ffmpegDot.className = 'dot red';
+    ffmpegStatus.textContent = 'FFmpeg: Error';
+    ffmpegFix.style.display = 'block';
+  }
+}
+
+// Initialize
+window.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  checkEngineStatus();
+
+  // Listeners for both tour trigger buttons
+  const triggers = ['demo-trigger-btn', 'demo-trigger-btn-right'];
+  
+  const openModal = () => {
+    const modal = document.getElementById('custom-modal');
+    if (modal) modal.style.display = 'flex';
+  };
+
+  triggers.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', openModal);
+  });
+
+  // Modal Action Buttons
+  const startTourBtn = document.getElementById('start-tour-btn');
+  const startEmotionalBtn = document.getElementById('start-emotional-btn');
+  const closeModalBtn = document.getElementById('close-modal-btn');
+
+  if (startTourBtn) {
+    startTourBtn.addEventListener('click', () => {
+      document.getElementById('custom-modal').style.display = 'none';
+      if (typeof window.startTour === 'function') window.startTour();
+      else if (typeof currentTourStep !== 'undefined') { currentTourStep = 0; showTourStep(0); }
+    });
+  }
+
+  if (startEmotionalBtn) {
+    startEmotionalBtn.addEventListener('click', () => {
+      document.getElementById('custom-modal').style.display = 'none';
+      if (typeof startEmotionalMode === 'function') startEmotionalMode();
+    });
+  }
+
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+      document.getElementById('custom-modal').style.display = 'none';
+    });
+  }
+});
+
 // Demo mode logic is now handled in tour.js via the dialog.
 
 function updateStatus(msg) {
