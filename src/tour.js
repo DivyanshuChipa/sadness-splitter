@@ -31,6 +31,13 @@ const tourSteps = [
 
 let currentTourStep = 0;
 
+const sadnessMessages = [
+  { msg: "Some frames heal with time. Some need re-encoding. 💛" },
+  { msg: "Breathe in… breathe out… processing your timeline." },
+  { msg: "Emotion detected. Stabilizing your inner bitrate." },
+  { msg: "Tiny progress is still progress." }
+];
+
 function showTourStep(stepIndex) {
   const step = tourSteps[stepIndex];
   
@@ -72,57 +79,61 @@ function showTourStep(stepIndex) {
 
 // --- Emotional Mode ---
 let emotionalInterval;
-function startEmotionalMode() {
+let emotionalStopTimeout;
+let emotionalModeActive = false;
+let emotionalSettings = { intensity: "normal", autoStop: true };
+function startEmotionalMode(options = {}) {
   const themes = ['theme-blue', 'theme-red', 'theme-purple', 'theme-gold', 'theme-green'];
+  const speedMap = { calm: 5000, normal: 3000, hyper: 1600 };
+  const settings = { ...emotionalSettings, ...options };
+  emotionalSettings = settings;
+  const intervalMs = speedMap[settings.intensity] || speedMap.normal;
   let i = 0;
-  
-  // Show a greeting
+
+  stopEmotionalMode({ silent: true });
+  emotionalModeActive = true;
+  if (typeof window.onEmotionalModeChange === 'function') window.onEmotionalModeChange(true);
+
   if (typeof updateStatus === 'function') updateStatus("Emotional Mode Activated. Embracing all stages of sadness...");
-  
+
   emotionalInterval = setInterval(() => {
-    document.body.className = themes[i];
+    document.body.classList.remove(...themes);
+    document.body.classList.add(themes[i]);
     const msg = sadnessMessages[Math.floor(Math.random() * sadnessMessages.length)];
     if (typeof updateStatus === 'function') updateStatus(msg.msg);
-    
+
     i = (i + 1) % themes.length;
-  }, 3000);
+  }, intervalMs);
 
-  // Stop after 30 seconds or if user clicks something else
-  setTimeout(() => stopEmotionalMode(), 30000);
+  if (settings.autoStop) emotionalStopTimeout = setTimeout(() => stopEmotionalMode(), 30000);
 }
 
-function stopEmotionalMode() {
+function stopEmotionalMode(options = {}) {
   clearInterval(emotionalInterval);
-  document.body.className = 'theme-blue';
+  clearTimeout(emotionalStopTimeout);
+  emotionalModeActive = false;
+  const savedTheme = localStorage.getItem('app-theme') || 'theme-blue';
+  document.body.classList.remove('theme-blue','theme-red','theme-purple','theme-gold','theme-green');
+  document.body.classList.add(savedTheme);
+  if (!options.silent && typeof updateStatus === 'function') updateStatus('Emotional Mode turned off. Back to calm blue.');
+  if (typeof window.onEmotionalModeChange === 'function') window.onEmotionalModeChange(false);
 }
 
-// --- Event Listeners for Demo Features ---
-document.getElementById('demo-trigger-btn').addEventListener('click', () => {
-  document.getElementById('custom-modal').style.display = 'flex';
-});
 
-document.getElementById('close-modal-btn').addEventListener('click', () => {
-  document.getElementById('custom-modal').style.display = 'none';
-});
 
-document.getElementById('start-tour-btn').addEventListener('click', () => {
-  document.getElementById('custom-modal').style.display = 'none';
-  currentTourStep = 0;
-  showTourStep(0);
-});
-
-document.getElementById('tour-next-btn').addEventListener('click', () => {
+window.showTourStep = showTourStep;
+window.startTour = () => { currentTourStep = 0; showTourStep(0); };
+window.nextTourStep = () => {
   currentTourStep++;
-  if (currentTourStep < tourSteps.length) {
-    showTourStep(currentTourStep);
-  } else {
+  if (currentTourStep < tourSteps.length) showTourStep(currentTourStep);
+  else {
     document.getElementById('tour-tooltip').style.display = 'none';
     document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
-    if (typeof updateStatus === 'function') updateStatus("Tour Complete! You're ready to split some sadness. 🎃");
+    if (typeof updateStatus === 'function') updateStatus("Tour Complete! You're ready to split some sadness.");
   }
-});
-
-document.getElementById('start-emotional-btn').addEventListener('click', () => {
-  document.getElementById('custom-modal').style.display = 'none';
-  startEmotionalMode();
-});
+};
+window.startEmotionalMode = startEmotionalMode;
+window.stopEmotionalMode = stopEmotionalMode;
+window.isEmotionalModeActive = () => emotionalModeActive;
+window.setEmotionalSettings = (settings = {}) => { emotionalSettings = { ...emotionalSettings, ...settings }; };
+window.getEmotionalSettings = () => ({ ...emotionalSettings });
