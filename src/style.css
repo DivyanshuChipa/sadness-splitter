@@ -1085,3 +1085,55 @@ input[type="range"] {
 
 .version-info span { font-weight: 700; color: var(--accent); font-size: 0.8rem; }
 .version-info small { color: var(--text-secondary); font-size: 0.7rem; }
+.demo-experience-sidebar {
+  margin-top: auto;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.metrics-card {
+  margin-bottom: 10px;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.metric-item {
+  text-align: center;
+}
+
+.metric-ring {
+  --metric-value: 0%;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  margin: 0 auto 6px;
+  background: conic-gradient(var(--accent) var(--metric-value), rgba(255,255,255,0.12) 0);
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.metric-ring::before {
+  content: '';
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #11151d;
+  border: 1px solid var(--panel-border);
+}
+
+.metric-ring span {
+  position: relative;
+  z-index: 1;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
