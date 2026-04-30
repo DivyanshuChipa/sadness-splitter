@@ -119,6 +119,14 @@ navBtns.forEach(btn => {
 
 function updateStatus(msg) {
   statusText.textContent = msg;
+  
+  // Trigger pop animation on speech bubble
+  const container = document.getElementById('aura-speech-container');
+  if (container) {
+    container.classList.remove('speech-update');
+    void container.offsetWidth; // Trigger reflow
+    container.classList.add('speech-update');
+  }
 }
 
 // --- Global Setup ---

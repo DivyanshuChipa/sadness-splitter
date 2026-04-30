@@ -48,6 +48,7 @@
 
 ### 📝 Change Log (Git-Style)
 
+- **feat(ui)**: [2026-04-30] Relocated status messages to a new **Aura Speech Bubble** in the sidebar for better interactivity.
 - **feat(persona)**: [2026-04-30] Upgraded to **Aura Persona 2.0** with 25+ expressions and tool-specific contextual reactions.
 - **fix(backend)**: [2026-04-27] Reverted smooth progress tracking to standard line-reader for maximum stability.
 - **feat(persona)**: [2026-04-27] Added **Aura**, the reactive anime persona, with progress-based emotions and sassy hover interactions.
