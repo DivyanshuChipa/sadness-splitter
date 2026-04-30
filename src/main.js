@@ -29,6 +29,22 @@ const reactiveFace = document.getElementById('reactive-face');
 let annoyanceLevel = 0;
 let annoyanceTimer = null;
 
+const toolReactions = {
+  'compress': { face: 'face_confident.png', msg: "File too heavy? Let’s shrink it down! 💪" },
+  'split': { face: 'face_thinking.png', msg: "Where should I cut? I’m figuring it out… 🤔" },
+  'trim': { face: 'face_determined.png', msg: "Time to clean up the unnecessary junk! ✂️" },
+  'rotate': { face: 'face_surprised.png', msg: "Want a new perspective? Got it! 🔄" },
+  'audio': { face: 'face_curious.png', msg: "Only need the sound? Aura is listening… 🎧" },
+  'convert': { face: 'face_smug.png', msg: "Changing format? Easy peasy! ✨" },
+  'subtitle': { face: 'face_thinking.png', msg: "Words matter. Let’s burn those subtitles in! ✍️" },
+  'speed': { face: 'face_exicited.png', msg: "Speed warp! Fast or slow, Aura handles it all! ⚡" },
+  'gif': { face: 'face_laughing.png', msg: "Meme time! Let’s make a cool GIF! 😂" },
+  'merger': { face: 'face_love.png', msg: "Combine them both? Sweet! 💖" },
+  'stabilize': { face: 'face_shocked.png', msg: "So much shake?! Don’t worry, I’ll fix it! 😵‍💫" },
+  'contact': { face: 'face_curious.png', msg: "Want to see everything at once? Let’s go! 🖼️" },
+  'batch': { face: 'face_surprised.png', msg: "So many files? Looks like you’ve got me working overtime…" }
+};
+
 function updatePersonaFace(percent) {
   if (annoyanceLevel > 5) return; // Don't override if angry
 
@@ -36,6 +52,12 @@ function updatePersonaFace(percent) {
   if (stage && reactiveFace) {
     reactiveFace.src = `emotive-ani-character/${stage.face}`;
   }
+}
+
+function setPersonaEmotion(face, message) {
+  if (annoyanceLevel > 5) return;
+  if (reactiveFace) reactiveFace.src = `emotive-ani-character/${face}`;
+  if (message) updateStatus(message);
 }
 
 // Sassy Interaction
@@ -76,10 +98,17 @@ navBtns.forEach(btn => {
     });
 
     // Add active class to clicked button and target view
+    const targetId = btn.dataset.target;
     btn.classList.add('active');
-    const targetView = document.getElementById(btn.dataset.target);
+    const targetView = document.getElementById(targetId);
     targetView.classList.add('active');
     targetView.style.display = 'block';
+
+    // Aura Reacts to Tab Change
+    const reaction = toolReactions[targetId];
+    if (reaction) {
+      setPersonaEmotion(reaction.face, reaction.msg);
+    }
 
     // Refresh icons just in case (though usually not needed)
     lucide.createIcons();
@@ -106,6 +135,7 @@ document.getElementById('browse-input-btn').addEventListener('click', async () =
 
       const filename = file.split(/[\/\\]/).pop();
       updateStatus(`Selected: ${filename}`);
+      setPersonaEmotion('face_happy.png', `Mil gayi file! Ab shuru karein? ${filename}`);
 
       // Get Duration (Needed for Sliders)
       videoDuration = await invoke('get_video_duration', { file_path: file });
