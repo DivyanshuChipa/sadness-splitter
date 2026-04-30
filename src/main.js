@@ -120,7 +120,7 @@ async function checkEngineStatus() {
   const ffmpegDot = document.getElementById('ffmpeg-dot');
   const ffmpegStatus = document.getElementById('ffmpeg-status-text');
   const ffmpegFix = document.getElementById('ffmpeg-fix-link');
-  
+
   try {
     const isReady = await invoke('check_ffmpeg');
     if (isReady) {
@@ -147,7 +147,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Listeners for both tour trigger buttons
   const triggers = ['demo-trigger-btn'];
-  
+
   const openModal = () => {
     const modal = document.getElementById('custom-modal');
     if (modal) modal.style.display = 'flex';
@@ -208,7 +208,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function updateStatus(msg) {
   statusText.textContent = msg;
-  
+
   // Trigger pop animation on speech bubble
   const container = document.getElementById('aura-speech-container');
   if (container) {
@@ -811,5 +811,4 @@ function setTheme(themeName) {
 
   localStorage.setItem('app-theme', themeName);
 }
-
 
