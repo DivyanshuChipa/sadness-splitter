@@ -5,7 +5,7 @@ const tourSteps = [
   {
     target: '.sidebar',
     text: "This is your control center. Switch between tools like Compress, Split, and Trim here.",
-    action: () => {}
+    action: () => { }
   },
   {
     target: '[data-target="compress"]',
@@ -15,17 +15,17 @@ const tourSteps = [
   {
     target: '#crf-slider',
     text: "Move this slider to balance between file size and video quality. 23 is the sweet spot!",
-    action: () => {}
+    action: () => { }
   },
   {
     target: '.file-picker',
     text: "Pick your video file here. We support almost all formats thanks to FFmpeg!",
-    action: () => {}
+    action: () => { }
   },
   {
     target: '#run-compress-btn',
     text: "Once ready, hit this button. We'll handle the emotional (and digital) weight for you.",
-    action: () => {}
+    action: () => { }
   }
 ];
 
@@ -40,7 +40,7 @@ const sadnessMessages = [
 
 function showTourStep(stepIndex) {
   const step = tourSteps[stepIndex];
-  
+
   // Run step action first (e.g. click a tab)
   step.action();
 
@@ -62,7 +62,7 @@ function showTourStep(stepIndex) {
     // Position Tooltip
     const rect = targetEl.getBoundingClientRect();
     tooltip.style.display = 'block';
-    
+
     // Better positioning: if it's the sidebar, put it to the right, else below
     if (step.target === '.sidebar') {
       tooltip.style.top = `${rect.top + 50}px`;
@@ -107,7 +107,7 @@ function stopEmotionalMode(options = {}) {
   clearInterval(emotionalInterval);
   clearTimeout(emotionalStopTimeout);
   emotionalModeActive = false;
-  document.body.classList.remove('theme-red','theme-purple','theme-gold','theme-green');
+  document.body.classList.remove('theme-red', 'theme-purple', 'theme-gold', 'theme-green');
   document.body.classList.add('theme-blue');
   if (!options.silent && typeof updateStatus === 'function') updateStatus('Emotional Mode turned off. Back to calm blue.');
   if (typeof window.onEmotionalModeChange === 'function') window.onEmotionalModeChange(false);
