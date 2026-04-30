@@ -146,7 +146,7 @@ window.addEventListener('DOMContentLoaded', () => {
   checkEngineStatus();
 
   // Listeners for both tour trigger buttons
-  const triggers = ['demo-trigger-btn', 'demo-trigger-btn-right'];
+  const triggers = ['demo-trigger-btn'];
   
   const openModal = () => {
     const modal = document.getElementById('custom-modal');
@@ -167,7 +167,6 @@ window.addEventListener('DOMContentLoaded', () => {
     startTourBtn.addEventListener('click', () => {
       document.getElementById('custom-modal').style.display = 'none';
       if (typeof window.startTour === 'function') window.startTour();
-      else if (typeof currentTourStep !== 'undefined') { currentTourStep = 0; showTourStep(0); }
     });
   }
 
@@ -183,6 +182,14 @@ window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('custom-modal').style.display = 'none';
     });
   }
+  const nextTourBtn = document.getElementById('tour-next-btn');
+  if (nextTourBtn) {
+    nextTourBtn.addEventListener('click', () => {
+      if (typeof window.nextTourStep === 'function') window.nextTourStep();
+    });
+  }
+
+  startSystemMetrics();
 });
 
 // Demo mode logic is now handled in tour.js via the dialog.
@@ -257,11 +264,43 @@ document.getElementById('browse-output-btn').addEventListener('click', async () 
   }
 });
 
+let displayedProgress = 0;
+
+function setProgressSmooth(target) {
+  const clamped = Math.max(displayedProgress, Math.min(100, Number(target) || 0));
+  displayedProgress += (clamped - displayedProgress) * 0.35;
+  if (Math.abs(clamped - displayedProgress) < 0.5) displayedProgress = clamped;
+  progressFill.style.width = `${displayedProgress.toFixed(1)}%`;
+  progressLabel.textContent = `Emotional Level: ${Math.round(displayedProgress)}%`;
+}
+
+function setMetricRing(el, value) {
+  if (!el) return;
+  const v = Math.max(0, Math.min(100, Math.round(value)));
+  el.style.setProperty('--metric-value', `${v}%`);
+}
+
+function startSystemMetrics() {
+  const ramRing = document.getElementById('ram-ring');
+  const cpuRing = document.getElementById('cpu-ring');
+  const ramValue = document.getElementById('ram-value');
+  const cpuValue = document.getElementById('cpu-value');
+  let cpuSeed = 20;
+  setInterval(() => {
+    const mem = performance?.memory;
+    const ram = mem ? (mem.usedJSHeapSize / mem.jsHeapSizeLimit) * 100 : (navigator.deviceMemory ? Math.min(100, navigator.deviceMemory * 10) : 35);
+    cpuSeed = Math.max(5, Math.min(95, cpuSeed + (Math.random() * 16 - 8)));
+    setMetricRing(ramRing, ram);
+    setMetricRing(cpuRing, cpuSeed);
+    if (ramValue) ramValue.textContent = `${Math.round(ram)}%`;
+    if (cpuValue) cpuValue.textContent = `${Math.round(cpuSeed)}%`;
+  }, 1200);
+}
+
 // --- Progress Listener ---
 listen('progress', (event) => {
   const percent = event.payload.percentage;
-  progressFill.style.width = `${percent}%`;
-  progressLabel.textContent = `Emotional Level: ${percent}%`;
+  setProgressSmooth(percent);
 
   const stage = emotionalStages.find(s => percent >= s.min && percent < s.max);
   if (stage) {
@@ -272,8 +311,8 @@ listen('progress', (event) => {
 
 listen('finished', (event) => {
   if (event.payload.success) {
-    progressFill.style.width = `100%`;
-    progressLabel.textContent = `Emotional Level: 100%`;
+    displayedProgress = Math.max(displayedProgress, 99);
+    setProgressSmooth(100);
     updateStatus(emotionalStages[4].msg);
     updatePersonaFace(100);
   } else {
@@ -377,6 +416,7 @@ document.getElementById('run-compress-btn').addEventListener('click', () => {
   args.push("-y", output);
 
   progressContainer.style.display = 'block';
+  displayedProgress = 0;
   progressFill.style.width = '0%';
   updateStatus("Beginning the process of emotional containment...");
 
@@ -460,6 +500,7 @@ async function executeFFmpegTask(taskName, args) {
   }
 
   progressContainer.style.display = 'block';
+  displayedProgress = 0;
   progressFill.style.width = '0%';
   updateStatus(`Initiating ${taskName.toLowerCase()}...`);
 
