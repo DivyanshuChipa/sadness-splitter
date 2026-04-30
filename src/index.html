@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,423 +11,422 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="lucide.min.js"></script>
 </head>
+
 <body class="aura-blue">
   <div class="mesh-gradient"></div>
   <div class="app-container">
 
-  <!-- Sidebar Navigation -->
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="logo">
-        <img id="reactive-face" src="emotive-ani-character/face_neutral.png" alt="Persona">
-      </div>
-      <h2>Sadness Splitter</h2>
-      <span class="version">Video Utility</span>
-      
-      <!-- Aura's Speech Bubble -->
-      <div class="aura-speech" id="aura-speech-container">
-        <div id="status-text">Ready to process emotional baggage.</div>
-      </div>
-    </div>
-    
-    <div class="theme-selector-container" style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--panel-border);">
-      <span class="subtext" style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Aura Color</span>
-      <div class="theme-picker">
-        <div class="theme-circle bg-blue active" data-theme="theme-blue"></div>
-        <div class="theme-circle bg-red" data-theme="theme-red"></div>
-        <div class="theme-circle bg-green" data-theme="theme-green"></div>
-        <div class="theme-circle bg-purple" data-theme="theme-purple"></div>
-        <div class="theme-circle bg-gold" data-theme="theme-gold"></div>
-      </div>
-    </div>
-    <nav>
-      <button class="nav-btn active" data-target="compress"><i data-lucide="zap"></i> Compress</button>
-      <button class="nav-btn" data-target="split"><i data-lucide="scissors"></i> Split</button>
-      <button class="nav-btn" data-target="trim"><i data-lucide="scissors-line-dashed"></i> Trim</button>
-      <button class="nav-btn" data-target="rotate"><i data-lucide="rotate-cw"></i> Rotate</button>
-      <button class="nav-btn" data-target="audio"><i data-lucide="music"></i> Audio Extractor</button>
-      <button class="nav-btn" data-target="convert"><i data-lucide="refresh-cw"></i> Format Converter</button>
-      <button class="nav-btn" data-target="subtitle"><i data-lucide="type"></i> Subtitle Burner</button>
-      <button class="nav-btn" data-target="speed"><i data-lucide="gauge"></i> Speed Warp</button>
-      <button class="nav-btn" data-target="gif"><i data-lucide="image"></i> GIF Maker</button>
-      <button class="nav-btn" data-target="merger"><i data-lucide="layers"></i> Video Merger</button>
-      <button class="nav-btn" data-target="stabilize"><i data-lucide="wind"></i> Video Stabilizer</button>
-      <button class="nav-btn" data-target="contact"><i data-lucide="grid"></i> Contact Sheet</button>
-      <button class="nav-btn" data-target="batch"><i data-lucide="package"></i> Batch Processor</button>
-    </nav>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">
+          <img id="reactive-face" src="emotive-ani-character/face_neutral.png" alt="Persona">
+        </div>
+        <h2>Sadness Splitter</h2>
+        <span class="version">Video Utility</span>
 
-    <div class="sidebar-footer" style="margin-top: auto; padding-top: 15px; border-top: 1px solid var(--panel-border);">
-      <div id="technical-log-sidebar" class="subtext" style="font-size: 0.7rem; color: var(--text-secondary); opacity: 0.7; text-align: center; margin-bottom: 10px;">System Ready.</div>
-      <div class="demo-experience glass-panel">
+        <!-- Aura's Speech Bubble -->
+        <div class="aura-speech" id="aura-speech-container">
+          <div id="status-text">Ready to process emotional baggage.</div>
+        </div>
+      </div>
+
+      <div class="theme-selector-container"
+        style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--panel-border);">
+        <span class="subtext"
+          style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Aura
+          Color</span>
+        <div class="theme-picker">
+          <div class="theme-circle bg-blue active" data-theme="theme-blue"></div>
+          <div class="theme-circle bg-red" data-theme="theme-red"></div>
+          <div class="theme-circle bg-green" data-theme="theme-green"></div>
+          <div class="theme-circle bg-purple" data-theme="theme-purple"></div>
+          <div class="theme-circle bg-gold" data-theme="theme-gold"></div>
+        </div>
+      </div>
+      <nav>
+        <button class="nav-btn active" data-target="compress"><i data-lucide="zap"></i> Compress</button>
+        <button class="nav-btn" data-target="split"><i data-lucide="scissors"></i> Split</button>
+        <button class="nav-btn" data-target="trim"><i data-lucide="scissors-line-dashed"></i> Trim</button>
+        <button class="nav-btn" data-target="rotate"><i data-lucide="rotate-cw"></i> Rotate</button>
+        <button class="nav-btn" data-target="audio"><i data-lucide="music"></i> Audio Extractor</button>
+        <button class="nav-btn" data-target="convert"><i data-lucide="refresh-cw"></i> Format Converter</button>
+        <button class="nav-btn" data-target="subtitle"><i data-lucide="type"></i> Subtitle Burner</button>
+        <button class="nav-btn" data-target="speed"><i data-lucide="gauge"></i> Speed Warp</button>
+        <button class="nav-btn" data-target="gif"><i data-lucide="image"></i> GIF Maker</button>
+        <button class="nav-btn" data-target="merger"><i data-lucide="layers"></i> Video Merger</button>
+        <button class="nav-btn" data-target="stabilize"><i data-lucide="wind"></i> Video Stabilizer</button>
+        <button class="nav-btn" data-target="contact"><i data-lucide="grid"></i> Contact Sheet</button>
+        <button class="nav-btn" data-target="batch"><i data-lucide="package"></i> Batch Processor</button>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content">
+
+      <!-- Shared Global Input/Output File Selection -->
+      <section class="global-controls glass-panel">
+        <div class="file-picker">
+          <label>Input Video</label>
+          <div class="input-group">
+            <input type="text" id="global-input-path" readonly placeholder="No video selected">
+            <button id="browse-input-btn" class="btn primary">Browse</button>
+          </div>
+        </div>
+        <div class="file-picker">
+          <label>Output Folder</label>
+          <div class="input-group">
+            <input type="text" id="global-output-path" readonly placeholder="No output folder selected">
+            <button id="browse-output-btn" class="btn secondary">Select Folder</button>
+          </div>
+        </div>
+      </section>
+
+      </section>
+
+      <!-- Tool Views -->
+      <div class="tool-views">
+
+        <!-- COMPRESS TOOL -->
+        <section id="compress" class="tool-view active glass-panel">
+          <div class="tool-header">
+            <h3>Compress (CRF Control)</h3>
+            <p>Reduce the weight of your emotional baggage.</p>
+          </div>
+
+          <div class="control-group">
+            <label>CRF Quality (Lower = Better Quality, Larger File)</label>
+            <div class="slider-container">
+              <input type="range" id="crf-slider" min="18" max="28" value="23">
+              <input type="number" id="crf-input" value="23" min="18" max="28">
+            </div>
+            <span id="crf-description" class="subtext">Balanced</span>
+          </div>
+
+          <div class="control-group">
+            <label>Compression Speed (Preset)</label>
+            <select id="compress-preset">
+              <option value="ultrafast">Ultrafast (Quick, Low Compression)</option>
+              <option value="superfast">Superfast</option>
+              <option value="veryfast">Veryfast</option>
+              <option value="faster">Faster</option>
+              <option value="fast">Fast</option>
+              <option value="medium" selected>Medium (Balanced)</option>
+              <option value="slow">Slow (Better Compression)</option>
+              <option value="slower">Slower</option>
+              <option value="veryslow">Veryslow (Best Compression, Slowest)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Video Codec</label>
+            <select id="compress-codec">
+              <option value="libx264" selected>H.264 (Most Compatible)</option>
+              <option value="libx265">H.265 / HEVC (Best for Storage)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Resolution (Scaling)</label>
+            <select id="compress-resolution">
+              <option value="original" selected>Original (No Scaling)</option>
+              <option value="1920:1080">1080p (FHD)</option>
+              <option value="1280:720">720p (HD)</option>
+              <option value="854:480">480p (SD)</option>
+              <option value="640:360">360p</option>
+              <option value="320:240">240p (Mobile)</option>
+              <option value="half">50% Smaller (Auto)</option>
+            </select>
+          </div>
+
+          <button id="run-compress-btn" class="btn action">Compress Video</button>
+        </section>
+
+        <!-- SPLIT TOOL -->
+        <section id="split" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Split Video</h3>
+            <p>Break up your video starting at a specific time.</p>
+          </div>
+          <div class="control-group">
+            <label>Split Point (Timeline)</label>
+            <div class="timeline-container">
+              <input type="range" id="split-slider" min="0" max="100" value="0" class="timeline-slider">
+            </div>
+            <div class="timeline-labels">
+              <span>Start</span>
+              <span id="split-slider-value">00:00:00</span>
+            </div>
+          </div>
+          <button id="run-split-btn" class="btn action">Split Video</button>
+        </section>
+
+        <!-- TRIM TOOL -->
+        <section id="trim" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Trim Video</h3>
+            <p>Cut out the toxic parts.</p>
+          </div>
+          <div class="control-group">
+            <label>Trim Range (Timeline)</label>
+            <div class="timeline-container dual-range">
+              <input type="range" id="trim-slider-start" min="0" max="100" value="0" class="timeline-slider">
+              <input type="range" id="trim-slider-end" min="0" max="100" value="100" class="timeline-slider">
+            </div>
+            <div class="timeline-labels">
+              <span id="trim-label-start">00:00:00</span>
+              <span id="trim-label-end">End</span>
+            </div>
+          </div>
+          <button id="run-trim-btn" class="btn action">Trim Video</button>
+        </section>
+
+        <!-- ROTATE TOOL -->
+        <section id="rotate" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Rotate Video</h3>
+            <p>Shift your perspective.</p>
+          </div>
+          <div class="control-group">
+            <label>Rotation Type</label>
+            <select id="rotate-select">
+              <option value="90 Clockwise">90° Clockwise</option>
+              <option value="90 Counter">90° Counter-Clockwise</option>
+              <option value="180 Flip">180° Flip</option>
+            </select>
+          </div>
+          <button id="run-rotate-btn" class="btn action">Rotate Video</button>
+        </section>
+
+        <!-- AUDIO EXTRACTOR -->
+        <section id="audio" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Audio Extractor</h3>
+            <p>Isolate the voices of the past.</p>
+          </div>
+          <div class="control-group">
+            <label>Format</label>
+            <select id="audio-format">
+              <option value="mp3">MP3</option>
+              <option value="wav">WAV</option>
+              <option value="aac">AAC</option>
+            </select>
+          </div>
+          <button id="run-audio-btn" class="btn action">Extract Audio</button>
+        </section>
+
+        <!-- FORMAT CONVERTER -->
+        <section id="convert" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Format Converter</h3>
+            <p>Identity crisis: rebirth your video.</p>
+          </div>
+          <div class="control-group">
+            <label>Output Format</label>
+            <select id="convert-format">
+              <option value="mp4">MP4</option>
+              <option value="mkv">MKV</option>
+              <option value="avi">AVI</option>
+              <option value="mov">MOV</option>
+              <option value="webm">WEBM</option>
+              <option value="3gp">3GP (Legacy Mobile)</option>
+            </select>
+          </div>
+          <div class="control-group checkbox-group">
+            <input type="checkbox" id="link-crf-checkbox">
+            <label for="link-crf-checkbox">Link to Compressor (Apply CRF value)</label>
+          </div>
+          <button id="run-convert-btn" class="btn action">Convert Format</button>
+        </section>
+
+        <!-- SUBTITLE BURNER -->
+        <section id="subtitle" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Subtitle Burner</h3>
+            <p>Burn your pain into the pixels.</p>
+          </div>
+          <div class="control-group">
+            <label>Subtitle File (.srt / .ass)</label>
+            <div class="input-group">
+              <input type="text" id="subtitle-path" readonly placeholder="No subtitle selected">
+              <button id="browse-subtitle-btn" class="btn secondary">Browse</button>
+            </div>
+          </div>
+          <button id="run-subtitle-btn" class="btn action">Burn Subtitles</button>
+        </section>
+
+        <!-- SPEED WARP -->
+        <section id="speed" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Speed Warp</h3>
+            <p>Temporal distortion.</p>
+          </div>
+          <div class="control-group">
+            <label>Speed Factor</label>
+            <select id="speed-factor">
+              <option value="0.5">0.5x (Slow)</option>
+              <option value="1.5">1.5x (Fast)</option>
+              <option value="2.0">2.0x (Hyper Fast)</option>
+              <option value="4.0">4.0x (Time-Lapse)</option>
+            </select>
+          </div>
+          <button id="run-speed-btn" class="btn action">Apply Warp</button>
+        </section>
+
+        <!-- GIF MAKER -->
+        <section id="gif" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Elite GIF Maker</h3>
+            <p>Convert your pain into high-quality, shareable loops.</p>
+          </div>
+          <div class="control-group">
+            <label>Width (px)</label>
+            <input type="number" id="gif-width" value="480">
+          </div>
+          <div class="control-group">
+            <label>FPS (Higher = Smoother)</label>
+            <input type="number" id="gif-fps" value="15">
+          </div>
+          <button id="run-gif-btn" class="btn action">Generate Elite GIF</button>
+        </section>
+
+        <!-- VIDEO MERGER -->
+        <section id="merger" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Video Merger</h3>
+            <p>Join multiple memories into one timeline.</p>
+          </div>
+          <p class="subtext">Select videos in the **Batch Processor** tab first, then come here to join them.</p>
+          <div class="control-group">
+            <label>Output Filename</label>
+            <input type="text" id="merge-filename" placeholder="merged_video.mp4">
+          </div>
+          <button id="run-merge-btn" class="btn action highlight">Merge Selected Videos</button>
+        </section>
+
+        <!-- VIDEO STABILIZER -->
+        <section id="stabilize" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Video Stabilizer (Anti-Shake)</h3>
+            <p>Fix shaky memories and make them smooth.</p>
+          </div>
+          <div class="control-group">
+            <label>Shakiness Level (1-10)</label>
+            <input type="number" id="stabilize-level" value="5" min="1" max="10">
+          </div>
+          <div class="control-group">
+            <label>Smoothness</label>
+            <input type="number" id="stabilize-smooth" value="30" min="1" max="60">
+          </div>
+          <button id="run-stabilize-btn" class="btn action highlight">Stabilize Footage (Two-Pass)</button>
+          <p class="subtext" style="margin-top:10px;">Note: This runs two passes for maximum precision.</p>
+        </section>
+
+        <!-- CONTACT SHEET -->
+        <section id="contact" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Thumbnail Contact Sheet</h3>
+            <p>Generate a professional summary image of your video.</p>
+          </div>
+          <div class="control-group">
+            <label>Grid Size (e.g., 4x4)</label>
+            <select id="contact-grid">
+              <option value="3x3">3x3 (9 Frames)</option>
+              <option value="4x4" selected>4x4 (16 Frames)</option>
+              <option value="5x5">5x5 (25 Frames)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>Thumbnail Width (px)</label>
+            <input type="number" id="contact-width" value="300">
+          </div>
+          <button id="run-contact-btn" class="btn action">Generate Sheet</button>
+        </section>
+
+        <!-- BATCH PROCESSOR -->
+        <section id="batch" class="tool-view glass-panel" style="display: none;">
+          <div class="tool-header">
+            <h3>Batch Processor</h3>
+            <p>Process multiple files with Compressor settings.</p>
+          </div>
+          <div class="batch-controls">
+            <button id="add-batch-files-btn" class="btn secondary">➕ Add Videos</button>
+            <button id="add-batch-folder-btn" class="btn secondary">📂 Add Folder</button>
+            <button id="clear-batch-list-btn" class="btn danger">🧹 Clear List</button>
+          </div>
+          <ul id="batch-list" class="batch-list empty">
+            <li class="empty-msg">No files in batch.</li>
+          </ul>
+          <button id="run-batch-btn" class="btn action highlight">▶️ RUN BATCH</button>
+        </section>
+
+      </div>
+
+      <!-- Progress Footer (Sadness Meter) -->
+      <footer class="status-footer glass-panel">
+        <div class="progress-container" id="progress-container" style="display: none;">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-label" id="progress-label">Emotional Level: 0%</div>
+        </div>
+        <div id="technical-log" class="subtext"
+          style="font-size: 0.7rem; color: var(--text-secondary); opacity: 0.7; text-align: center; width: 100%;">System
+          Ready.</div>
+      </footer>
+    </main>
+
+    <!-- Right Info Panel (Desktop Only) -->
+    <aside class="right-panel">
+      <!-- Moved Guided Tour Here -->
+      <div class="demo-experience glass-panel" style="margin-bottom: 10px;">
         <div class="demo-info">
           <span>Experience</span>
           <small>Guided Tour</small>
         </div>
-        <button id="demo-trigger-btn" class="icon-btn-small" title="Explore Experience"><i data-lucide="sparkles"></i></button>
+        <button id="demo-trigger-btn-right" class="icon-btn-small" title="Explore Experience"><i
+            data-lucide="sparkles"></i></button>
       </div>
-    </div>
-  </aside>
 
-  <!-- Main Content Area -->
-  <main class="content">
-    
-    <!-- Shared Global Input/Output File Selection -->
-    <section class="global-controls glass-panel">
-      <div class="file-picker">
-        <label>Input Video</label>
-        <div class="input-group">
-          <input type="text" id="global-input-path" readonly placeholder="No video selected">
-          <button id="browse-input-btn" class="btn primary">Browse</button>
-        </div>
-      </div>
-      <div class="file-picker">
-        <label>Output Folder</label>
-        <div class="input-group">
-          <input type="text" id="global-output-path" readonly placeholder="No output folder selected">
-          <button id="browse-output-btn" class="btn secondary">Select Folder</button>
-        </div>
-      </div>
-    </section>
-    
-    </section>
- 
-    <!-- Tool Views -->
-    <div class="tool-views">
-      
-      <!-- COMPRESS TOOL -->
-      <section id="compress" class="tool-view active glass-panel">
-        <div class="tool-header">
-          <h3>Compress (CRF Control)</h3>
-          <p>Reduce the weight of your emotional baggage.</p>
-        </div>
-        
-        <div class="control-group">
-          <label>CRF Quality (Lower = Better Quality, Larger File)</label>
-          <div class="slider-container">
-            <input type="range" id="crf-slider" min="18" max="28" value="23">
-            <input type="number" id="crf-input" value="23" min="18" max="28">
+      <div class="info-card glass-panel">
+        <h3>System Engine</h3>
+        <div class="status-indicator">
+          <div class="indicator-item">
+            <span class="dot" id="ffmpeg-dot"></span>
+            <span id="ffmpeg-status-text">FFmpeg Check...</span>
           </div>
-          <span id="crf-description" class="subtext">Balanced</span>
-        </div>
-        
-        <div class="control-group">
-          <label>Compression Speed (Preset)</label>
-          <select id="compress-preset">
-            <option value="ultrafast">Ultrafast (Quick, Low Compression)</option>
-            <option value="superfast">Superfast</option>
-            <option value="veryfast">Veryfast</option>
-            <option value="faster">Faster</option>
-            <option value="fast">Fast</option>
-            <option value="medium" selected>Medium (Balanced)</option>
-            <option value="slow">Slow (Better Compression)</option>
-            <option value="slower">Slower</option>
-            <option value="veryslow">Veryslow (Best Compression, Slowest)</option>
-          </select>
+          <a id="ffmpeg-fix-link"
+            href="https://release-assets.githubusercontent.com/github-production-release-asset/899872930/30cbe86c-00c1-4908-b9ba-6f6b391514c3?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-30T05%3A37%3A08Z&rscd=attachment%3B+filename%3DFFmpegInstaller.exe&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-30T04%3A36%3A37Z&ske=2026-04-30T05%3A37%3A08Z&sks=b&skv=2018-11-09&sig=cEEN%2BEIZWBFvy8IL2EbxdBZVGKL9APyGkEvOffP0540%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc3NzUyNjk4MywibmJmIjoxNzc3NTI1MTgzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.ohqMaV7WTCUHlF06V9SylsRnT_ibTwgRDTjYZRPxrvc&response-content-disposition=attachment%3B%20filename%3DFFmpegInstaller.exe&response-content-type=application%2Foctet-stream"
+            target="_blank" class="subtext"
+            style="display: none; color: var(--danger); margin-top: 8px; text-decoration: underline;">Download FFmpeg
+            Installer</a>
         </div>
 
-        <div class="control-group">
-          <label>Video Codec</label>
-          <select id="compress-codec">
-            <option value="libx264" selected>H.264 (Most Compatible)</option>
-            <option value="libx265">H.265 / HEVC (Best for Storage)</option>
-          </select>
+        <div class="tech-stack">
+          <div class="tech-item"><i data-lucide="box"></i> Tauri v2 Core</div>
+          <div class="tech-item"><i data-lucide="cpu"></i> FFmpeg Backend</div>
+          <div class="tech-item"><i data-lucide="palette"></i> Lucide Icons</div>
         </div>
 
-        <div class="control-group">
-          <label>Resolution (Scaling)</label>
-          <select id="compress-resolution">
-            <option value="original" selected>Original (No Scaling)</option>
-            <option value="1920:1080">1080p (FHD)</option>
-            <option value="1280:720">720p (HD)</option>
-            <option value="854:480">480p (SD)</option>
-            <option value="640:360">360p</option>
-            <option value="320:240">240p (Mobile)</option>
-            <option value="half">50% Smaller (Auto)</option>
-          </select>
+        <div class="social-links">
+          <label class="subtext"
+            style="font-weight: 700; font-size: 0.7rem; margin-top: 10px; display: block; text-transform: uppercase;">Aura
+            Creator</label>
+          <a href="https://ibispaint.com/artist2/402424453665966/" target="_blank" class="social-btn"><i
+              data-lucide="palette"></i> Artist ID</a>
+          <a href="https://instagram.com/divyanshushopra" target="_blank" class="social-btn"><i
+              data-lucide="instagram"></i> Instagram</a>
+          <a href="https://www.youtube.com/@divyanshuchipa9677" target="_blank" class="social-btn"><i
+              data-lucide="youtube"></i> YouTube</a>
         </div>
-        
-        <button id="run-compress-btn" class="btn action">Compress Video</button>
-      </section>
 
-      <!-- SPLIT TOOL -->
-      <section id="split" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Split Video</h3>
-          <p>Break up your video starting at a specific time.</p>
+        <div class="version-info">
+          <span>v0.1.0-alpha</span>
+          <small>Portable Version Coming Soon</small>
+          <small>Made with 💛 by Aura Team</small>
         </div>
-        <div class="control-group">
-          <label>Split Point (Timeline)</label>
-          <div class="timeline-container">
-            <input type="range" id="split-slider" min="0" max="100" value="0" class="timeline-slider">
-          </div>
-          <div class="timeline-labels">
-            <span>Start</span>
-            <span id="split-slider-value">00:00:00</span>
-          </div>
-        </div>
-        <button id="run-split-btn" class="btn action">Split Video</button>
-      </section>
-
-      <!-- TRIM TOOL -->
-      <section id="trim" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Trim Video</h3>
-          <p>Cut out the toxic parts.</p>
-        </div>
-        <div class="control-group">
-          <label>Trim Range (Timeline)</label>
-          <div class="timeline-container dual-range">
-            <input type="range" id="trim-slider-start" min="0" max="100" value="0" class="timeline-slider">
-            <input type="range" id="trim-slider-end" min="0" max="100" value="100" class="timeline-slider">
-          </div>
-          <div class="timeline-labels">
-            <span id="trim-label-start">00:00:00</span>
-            <span id="trim-label-end">End</span>
-          </div>
-        </div>
-        <button id="run-trim-btn" class="btn action">Trim Video</button>
-      </section>
-
-      <!-- ROTATE TOOL -->
-      <section id="rotate" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Rotate Video</h3>
-          <p>Shift your perspective.</p>
-        </div>
-        <div class="control-group">
-          <label>Rotation Type</label>
-          <select id="rotate-select">
-            <option value="90 Clockwise">90° Clockwise</option>
-            <option value="90 Counter">90° Counter-Clockwise</option>
-            <option value="180 Flip">180° Flip</option>
-          </select>
-        </div>
-        <button id="run-rotate-btn" class="btn action">Rotate Video</button>
-      </section>
-
-      <!-- AUDIO EXTRACTOR -->
-      <section id="audio" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Audio Extractor</h3>
-          <p>Isolate the voices of the past.</p>
-        </div>
-        <div class="control-group">
-          <label>Format</label>
-          <select id="audio-format">
-            <option value="mp3">MP3</option>
-            <option value="wav">WAV</option>
-            <option value="aac">AAC</option>
-          </select>
-        </div>
-        <button id="run-audio-btn" class="btn action">Extract Audio</button>
-      </section>
-
-      <!-- FORMAT CONVERTER -->
-      <section id="convert" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Format Converter</h3>
-          <p>Identity crisis: rebirth your video.</p>
-        </div>
-        <div class="control-group">
-          <label>Output Format</label>
-          <select id="convert-format">
-            <option value="mp4">MP4</option>
-            <option value="mkv">MKV</option>
-            <option value="avi">AVI</option>
-            <option value="mov">MOV</option>
-            <option value="webm">WEBM</option>
-            <option value="3gp">3GP (Legacy Mobile)</option>
-          </select>
-        </div>
-        <div class="control-group checkbox-group">
-          <input type="checkbox" id="link-crf-checkbox">
-          <label for="link-crf-checkbox">Link to Compressor (Apply CRF value)</label>
-        </div>
-        <button id="run-convert-btn" class="btn action">Convert Format</button>
-      </section>
-
-      <!-- SUBTITLE BURNER -->
-      <section id="subtitle" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Subtitle Burner</h3>
-          <p>Burn your pain into the pixels.</p>
-        </div>
-        <div class="control-group">
-          <label>Subtitle File (.srt / .ass)</label>
-          <div class="input-group">
-            <input type="text" id="subtitle-path" readonly placeholder="No subtitle selected">
-            <button id="browse-subtitle-btn" class="btn secondary">Browse</button>
-          </div>
-        </div>
-        <button id="run-subtitle-btn" class="btn action">Burn Subtitles</button>
-      </section>
-
-      <!-- SPEED WARP -->
-      <section id="speed" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Speed Warp</h3>
-          <p>Temporal distortion.</p>
-        </div>
-        <div class="control-group">
-          <label>Speed Factor</label>
-          <select id="speed-factor">
-            <option value="0.5">0.5x (Slow)</option>
-            <option value="1.5">1.5x (Fast)</option>
-            <option value="2.0">2.0x (Hyper Fast)</option>
-            <option value="4.0">4.0x (Time-Lapse)</option>
-          </select>
-        </div>
-        <button id="run-speed-btn" class="btn action">Apply Warp</button>
-      </section>
-
-      <!-- GIF MAKER -->
-      <section id="gif" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Elite GIF Maker</h3>
-          <p>Convert your pain into high-quality, shareable loops.</p>
-        </div>
-        <div class="control-group">
-          <label>Width (px)</label>
-          <input type="number" id="gif-width" value="480">
-        </div>
-        <div class="control-group">
-          <label>FPS (Higher = Smoother)</label>
-          <input type="number" id="gif-fps" value="15">
-        </div>
-        <button id="run-gif-btn" class="btn action">Generate Elite GIF</button>
-      </section>
-
-      <!-- VIDEO MERGER -->
-      <section id="merger" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Video Merger</h3>
-          <p>Join multiple memories into one timeline.</p>
-        </div>
-        <p class="subtext">Select videos in the **Batch Processor** tab first, then come here to join them.</p>
-        <div class="control-group">
-          <label>Output Filename</label>
-          <input type="text" id="merge-filename" placeholder="merged_video.mp4">
-        </div>
-        <button id="run-merge-btn" class="btn action highlight">Merge Selected Videos</button>
-      </section>
-
-      <!-- VIDEO STABILIZER -->
-      <section id="stabilize" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Video Stabilizer (Anti-Shake)</h3>
-          <p>Fix shaky memories and make them smooth.</p>
-        </div>
-        <div class="control-group">
-          <label>Shakiness Level (1-10)</label>
-          <input type="number" id="stabilize-level" value="5" min="1" max="10">
-        </div>
-        <div class="control-group">
-          <label>Smoothness</label>
-          <input type="number" id="stabilize-smooth" value="30" min="1" max="60">
-        </div>
-        <button id="run-stabilize-btn" class="btn action highlight">Stabilize Footage (Two-Pass)</button>
-        <p class="subtext" style="margin-top:10px;">Note: This runs two passes for maximum precision.</p>
-      </section>
-
-      <!-- CONTACT SHEET -->
-      <section id="contact" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Thumbnail Contact Sheet</h3>
-          <p>Generate a professional summary image of your video.</p>
-        </div>
-        <div class="control-group">
-          <label>Grid Size (e.g., 4x4)</label>
-          <select id="contact-grid">
-            <option value="3x3">3x3 (9 Frames)</option>
-            <option value="4x4" selected>4x4 (16 Frames)</option>
-            <option value="5x5">5x5 (25 Frames)</option>
-          </select>
-        </div>
-        <div class="control-group">
-          <label>Thumbnail Width (px)</label>
-          <input type="number" id="contact-width" value="300">
-        </div>
-        <button id="run-contact-btn" class="btn action">Generate Sheet</button>
-      </section>
-
-      <!-- BATCH PROCESSOR -->
-      <section id="batch" class="tool-view glass-panel" style="display: none;">
-        <div class="tool-header">
-          <h3>Batch Processor</h3>
-          <p>Process multiple files with Compressor settings.</p>
-        </div>
-        <div class="batch-controls">
-          <button id="add-batch-files-btn" class="btn secondary">➕ Add Videos</button>
-          <button id="add-batch-folder-btn" class="btn secondary">📂 Add Folder</button>
-          <button id="clear-batch-list-btn" class="btn danger">🧹 Clear List</button>
-        </div>
-        <ul id="batch-list" class="batch-list empty">
-          <li class="empty-msg">No files in batch.</li>
-        </ul>
-        <button id="run-batch-btn" class="btn action highlight">▶️ RUN BATCH</button>
-      </section>
-
-    </div>
-
-    <!-- Progress Footer (Sadness Meter) -->
-    <footer class="status-footer glass-panel">
-      <div class="progress-container" id="progress-container" style="display: none;">
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="progress-fill"></div>
-        </div>
-        <div class="progress-label" id="progress-label">Emotional Level: 0%</div>
       </div>
-      <div id="technical-log" class="subtext" style="font-size: 0.7rem; color: var(--text-secondary); opacity: 0.7; text-align: center; width: 100%;">System Ready.</div>
-    </footer>
-  </main>
-
-  <!-- Right Info Panel (Desktop Only) -->
-  <aside class="right-panel">
-    <div class="panel-header">
-      <span class="subtext uppercase bold">Dashboard Info</span>
-    </div>
-
-    <!-- Redesigned Experience Card -->
-    <div class="feature-card glass-panel tour-card">
-      <div class="feature-icon"><i data-lucide="sparkles"></i></div>
-      <div class="feature-content">
-        <h4>Unlock Aura</h4>
-        <p>Explore the full emotional spectrum with our guided tour.</p>
-        <button id="demo-trigger-btn-right" class="btn primary btn-small">Start Experience</button>
-      </div>
-    </div>
-
-    <div class="info-card glass-panel">
-      <h3>System Engine</h3>
-      <div class="status-indicator">
-        <div class="indicator-item">
-          <span class="dot" id="ffmpeg-dot"></span>
-          <span id="ffmpeg-status-text">FFmpeg Check...</span>
-        </div>
-        <a id="ffmpeg-fix-link" href="https://release-assets.githubusercontent.com/github-production-release-asset/899872930/30cbe86c-00c1-4908-b9ba-6f6b391514c3?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-30T05%3A37%3A08Z&rscd=attachment%3B+filename%3DFFmpegInstaller.exe&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-30T04%3A36%3A37Z&ske=2026-04-30T05%3A37%3A08Z&sks=b&skv=2018-11-09&sig=cEEN%2BEIZWBFvy8IL2EbxdBZVGKL9APyGkEvOffP0540%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc3NzUyNjk4MywibmJmIjoxNzc3NTI1MTgzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.ohqMaV7WTCUHlF06V9SylsRnT_ibTwgRDTjYZRPxrvc&response-content-disposition=attachment%3B%20filename%3DFFmpegInstaller.exe&response-content-type=application%2Foctet-stream" target="_blank" class="subtext" style="display: none; color: var(--danger); margin-top: 8px; text-decoration: underline;">Download FFmpeg Installer</a>
-      </div>
-
-      <div class="tech-stack">
-        <div class="tech-item"><i data-lucide="box"></i> Tauri v2 Core</div>
-        <div class="tech-item"><i data-lucide="cpu"></i> FFmpeg Backend</div>
-        <div class="tech-item"><i data-lucide="palette"></i> Lucide Icons</div>
-      </div>
-
-      <div class="social-links">
-        <label class="subtext" style="font-weight: 700; font-size: 0.7rem; margin-top: 10px; display: block; text-transform: uppercase;">Aura Creator</label>
-        <a href="https://github.com/DivyanshuChipa/sadness-splitter" target="_blank" class="social-btn"><i data-lucide="github"></i> GitHub Repo</a>
-        <a href="https://ibispaint.com/artist2/402424453665966" target="_blank" class="social-btn"><i data-lucide="palette"></i> Artist ID</a>
-        <a href="https://instagram.com/divyanshushopra" target="_blank" class="social-btn"><i data-lucide="instagram"></i> Instagram</a>
-        <a href="https://www.youtube.com/@divyanshuchipa9677" target="_blank" class="social-btn"><i data-lucide="youtube"></i> YouTube</a>
-      </div>
-      
-      <div class="version-info">
-        <span>v0.1.0-alpha</span>
-        <small>Portable Version Coming Soon</small>
-        <small>Made with 💛 by Aura Team</small>
-      </div>
-    </div>
-  </aside>
+    </aside>
 
   </div> <!-- End App Container -->
 
@@ -461,4 +461,5 @@
   <script src="main.js"></script>
   <script src="tour.js"></script>
 </body>
+
 </html>
