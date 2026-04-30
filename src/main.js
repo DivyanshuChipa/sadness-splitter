@@ -120,7 +120,7 @@ async function checkEngineStatus() {
   const ffmpegDot = document.getElementById('ffmpeg-dot');
   const ffmpegStatus = document.getElementById('ffmpeg-status-text');
   const ffmpegFix = document.getElementById('ffmpeg-fix-link');
-  
+
   try {
     const isReady = await invoke('check_ffmpeg');
     if (isReady) {
@@ -147,7 +147,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Listeners for both tour trigger buttons
   const triggers = ['demo-trigger-btn'];
-  
+
   const openModal = () => {
     const modal = document.getElementById('custom-modal');
     if (modal) modal.style.display = 'flex';
@@ -189,6 +189,18 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const emotionalToggleBtn = document.getElementById('emotional-toggle-btn');
+  window.onEmotionalModeChange = updateEmotionalToggleUI;
+  updateEmotionalToggleUI(typeof window.isEmotionalModeActive === 'function' ? window.isEmotionalModeActive() : false);
+
+  if (emotionalToggleBtn) {
+    emotionalToggleBtn.addEventListener('click', () => {
+      const isActive = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
+      if (isActive) window.stopEmotionalMode?.();
+      else window.startEmotionalMode?.();
+    });
+  }
+
   startSystemMetrics();
 });
 
@@ -196,7 +208,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function updateStatus(msg) {
   statusText.textContent = msg;
-  
+
   // Trigger pop animation on speech bubble
   const container = document.getElementById('aura-speech-container');
   if (container) {
@@ -280,6 +292,15 @@ function setMetricRing(el, value) {
   el.style.setProperty('--metric-value', `${v}%`);
 }
 
+
+function updateEmotionalToggleUI(isActive) {
+  const btn = document.getElementById('emotional-toggle-btn');
+  if (!btn) return;
+  btn.textContent = isActive ? 'ON' : 'OFF';
+  btn.classList.toggle('active', isActive);
+  btn.setAttribute('aria-pressed', String(isActive));
+}
+
 function startSystemMetrics() {
   const ramRing = document.getElementById('ram-ring');
   const cpuRing = document.getElementById('cpu-ring');
@@ -288,11 +309,18 @@ function startSystemMetrics() {
   let cpuSeed = 20;
   setInterval(() => {
     const mem = performance?.memory;
-    const ram = mem ? (mem.usedJSHeapSize / mem.jsHeapSizeLimit) * 100 : (navigator.deviceMemory ? Math.min(100, navigator.deviceMemory * 10) : 35);
+    const ram = mem && mem.jsHeapSizeLimit ? (mem.usedJSHeapSize / mem.jsHeapSizeLimit) * 100 : null;
     cpuSeed = Math.max(5, Math.min(95, cpuSeed + (Math.random() * 16 - 8)));
-    setMetricRing(ramRing, ram);
+    if (ram === null) {
+      if (ramValue) ramValue.textContent = 'N/A';
+      if (ramRing) ramRing.style.setProperty('--metric-value', '0%');
+      ramRing?.classList.add('metric-unavailable');
+    } else {
+      setMetricRing(ramRing, ram);
+      ramRing?.classList.remove('metric-unavailable');
+      if (ramValue) ramValue.textContent = `${Math.round(ram)}%`;
+    }
     setMetricRing(cpuRing, cpuSeed);
-    if (ramValue) ramValue.textContent = `${Math.round(ram)}%`;
     if (cpuValue) cpuValue.textContent = `${Math.round(cpuSeed)}%`;
   }, 1200);
 }
@@ -765,5 +793,4 @@ function setTheme(themeName) {
 
   localStorage.setItem('app-theme', themeName);
 }
-
 
