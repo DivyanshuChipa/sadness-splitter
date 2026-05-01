@@ -44,6 +44,14 @@
           <div class="theme-circle bg-gold" data-theme="theme-gold"></div>
         </div>
       </div>
+      <div class="demo-experience demo-experience-sidebar glass-panel">
+        <div class="demo-info">
+          <span>Experience</span>
+          <small>Guided Tour</small>
+        </div>
+        <button id="demo-trigger-btn" class="icon-btn-small" title="Explore Experience"><i data-lucide="sparkles"></i></button>
+      </div>
+
       <nav>
         <button class="nav-btn active" data-target="compress"><i data-lucide="zap"></i> Compress</button>
         <button class="nav-btn" data-target="split"><i data-lucide="scissors"></i> Split</button>
@@ -378,14 +386,35 @@
 
     <!-- Right Info Panel (Desktop Only) -->
     <aside class="right-panel">
-      <!-- Moved Guided Tour Here -->
-      <div class="demo-experience glass-panel" style="margin-bottom: 10px;">
-        <div class="demo-info">
-          <span>Experience</span>
-          <small>Guided Tour</small>
+      <div class="metrics-card glass-panel">
+        <h3>System Metrics</h3>
+        <div class="emotion-toggle-row">
+          <span>Emotional Mode</span>
+          <button id="emotional-toggle-btn" class="toggle-btn" aria-pressed="false">OFF</button>
         </div>
-        <button id="demo-trigger-btn-right" class="icon-btn-small" title="Explore Experience"><i
-            data-lucide="sparkles"></i></button>
+        <div class="emotion-controls">
+          <label class="subtext" for="emotion-intensity">Intensity</label>
+          <select id="emotion-intensity" class="compact-select">
+            <option value="calm">Calm</option>
+            <option value="normal" selected>Normal</option>
+            <option value="hyper">Hyper</option>
+          </select>
+          <label class="emotion-auto-stop">
+            <input type="checkbox" id="emotion-auto-stop" checked>
+            <span>Auto stop (30s)</span>
+          </label>
+        </div>
+        <button id="restart-tour-btn" class="btn secondary btn-compact">Restart Guided Tour</button>
+        <div class="metric-grid">
+          <div class="metric-item">
+            <div class="metric-ring" id="ram-ring"><span id="ram-value">--%</span></div>
+            <small>RAM</small>
+          </div>
+          <div class="metric-item">
+            <div class="metric-ring" id="cpu-ring"><span id="cpu-value">--%</span></div>
+            <small>CPU</small>
+          </div>
+        </div>
       </div>
 
       <div class="info-card glass-panel">

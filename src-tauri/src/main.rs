@@ -5,6 +5,7 @@ use std::io::{BufRead, BufReader};
 use regex::Regex;
 use serde::Serialize;
 use tauri::{Emitter, Window};
+use sysinfo::System;
 
 #[derive(Clone, Serialize)]
 struct ProgressPayload {
@@ -59,22 +60,32 @@ fn process_video(window: Window, args: Vec<String>, total_duration: f64) {
         // Regex to parse `time=HH:MM:SS.ms`
         let re = Regex::new(r"time=(\d{2}):(\d{2}):(\d{2}\.\d{2})").unwrap();
 
+        let mut last_percentage: i32 = 0;
+
         for line in reader.lines() {
             if let Ok(l) = line {
                 if let Some(caps) = re.captures(&l) {
                     let h: f64 = caps[1].parse().unwrap_or(0.0);
                     let m: f64 = caps[2].parse().unwrap_or(0.0);
                     let s: f64 = caps[3].parse().unwrap_or(0.0);
-                    
+
                     let current_seconds = h * 3600.0 + m * 60.0 + s;
-                    
+
                     if total_duration > 0.0 {
                         let mut percentage = ((current_seconds / total_duration) * 100.0) as i32;
                         if percentage > 100 {
                             percentage = 100;
                         }
-                        
-                        let _ = window.emit("progress", ProgressPayload { percentage });
+
+                        // Keep progress monotonic to avoid UI regressions.
+                        if percentage < last_percentage {
+                            percentage = last_percentage;
+                        }
+
+                        if percentage > last_percentage {
+                            last_percentage = percentage;
+                            let _ = window.emit("progress", ProgressPayload { percentage });
+                        }
                     }
                 }
             }
@@ -126,6 +137,35 @@ fn list_videos_in_folder(folder_path: String) -> Vec<String> {
     videos
 }
 
+
+#[derive(Clone, Serialize)]
+struct SystemMetricsPayload {
+    cpu_percent: f32,
+    ram_percent: f32,
+}
+
+#[tauri::command]
+fn get_system_metrics() -> Result<SystemMetricsPayload, String> {
+    let mut sys = System::new_all();
+    sys.refresh_memory();
+    sys.refresh_cpu();
+    std::thread::sleep(std::time::Duration::from_millis(120));
+    sys.refresh_cpu();
+
+    let total_mem = sys.total_memory();
+    let used_mem = sys.used_memory();
+
+    let ram_percent = if total_mem > 0 {
+        ((used_mem as f64 / total_mem as f64) * 100.0) as f32
+    } else {
+        0.0
+    };
+
+    let cpu_percent = sys.global_cpu_info().cpu_usage();
+
+    Ok(SystemMetricsPayload { cpu_percent, ram_percent })
+}
+
 #[tauri::command]
 fn check_ffmpeg() -> bool {
     Command::new("ffmpeg")
@@ -141,7 +181,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder, generate_thumbnail, check_ffmpeg])
+        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder, generate_thumbnail, check_ffmpeg, get_system_metrics])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

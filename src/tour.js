@@ -31,6 +31,29 @@ const tourSteps = [
 
 let currentTourStep = 0;
 
+const sadnessMessages = [
+  { msg: "Some frames heal with time. Some need re-encoding. 💛" },
+  { msg: "Breathe in… breathe out… processing your timeline." },
+  { msg: "Emotion detected. Stabilizing your inner bitrate." },
+  { msg: "Tiny progress is still progress." }
+];
+
+
+function clearTourUI() {
+  const tooltip = document.getElementById('tour-tooltip');
+  if (tooltip) tooltip.style.display = 'none';
+  document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function closeTour() {
+  clearTourUI();
+  if (typeof updateStatus === 'function') updateStatus('Tour closed. You can restart anytime from System Metrics.');
+}
+
 function showTourStep(stepIndex) {
   const step = tourSteps[stepIndex];
   
@@ -52,18 +75,28 @@ function showTourStep(stepIndex) {
     // Highlight new target
     targetEl.classList.add('tour-highlight');
 
-    // Position Tooltip
+    // Position Tooltip with viewport clamping
     const rect = targetEl.getBoundingClientRect();
     tooltip.style.display = 'block';
-    
-    // Better positioning: if it's the sidebar, put it to the right, else below
+
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const margin = 12;
+    let top;
+    let left;
+
     if (step.target === '.sidebar') {
-      tooltip.style.top = `${rect.top + 50}px`;
-      tooltip.style.left = `${rect.right + 20}px`;
+      top = rect.top + 40;
+      left = rect.right + 20;
     } else {
-      tooltip.style.top = `${rect.bottom + 15 + window.scrollY}px`;
-      tooltip.style.left = `${rect.left}px`;
+      top = rect.bottom + 15;
+      left = rect.left;
     }
+
+    top = clamp(top, margin, window.innerHeight - tooltipRect.height - margin);
+    left = clamp(left, margin, window.innerWidth - tooltipRect.width - margin);
+
+    tooltip.style.top = `${top + window.scrollY}px`;
+    tooltip.style.left = `${left + window.scrollX}px`;
 
     tooltipText.innerText = step.text;
     stepCount.innerText = `${stepIndex + 1}/${tourSteps.length}`;
@@ -72,57 +105,78 @@ function showTourStep(stepIndex) {
 
 // --- Emotional Mode ---
 let emotionalInterval;
-function startEmotionalMode() {
+let emotionalStopTimeout;
+let emotionalModeActive = false;
+let emotionalSettings = { intensity: "normal", autoStop: true };
+function startEmotionalMode(options = {}) {
   const themes = ['theme-blue', 'theme-red', 'theme-purple', 'theme-gold', 'theme-green'];
+  const speedMap = { calm: 5000, normal: 3000, hyper: 1600 };
+  const settings = { ...emotionalSettings, ...options };
+  emotionalSettings = settings;
+  const intervalMs = speedMap[settings.intensity] || speedMap.normal;
   let i = 0;
-  
-  // Show a greeting
+
+  stopEmotionalMode({ silent: true });
+  emotionalModeActive = true;
+  if (typeof window.onEmotionalModeChange === 'function') window.onEmotionalModeChange(true);
+
   if (typeof updateStatus === 'function') updateStatus("Emotional Mode Activated. Embracing all stages of sadness...");
-  
+
   emotionalInterval = setInterval(() => {
-    document.body.className = themes[i];
+    document.body.classList.remove(...themes);
+    document.body.classList.add(themes[i]);
     const msg = sadnessMessages[Math.floor(Math.random() * sadnessMessages.length)];
     if (typeof updateStatus === 'function') updateStatus(msg.msg);
-    
+
     i = (i + 1) % themes.length;
-  }, 3000);
+  }, intervalMs);
 
-  // Stop after 30 seconds or if user clicks something else
-  setTimeout(() => stopEmotionalMode(), 30000);
+  if (settings.autoStop) emotionalStopTimeout = setTimeout(() => stopEmotionalMode(), 30000);
 }
 
-function stopEmotionalMode() {
+function stopEmotionalMode(options = {}) {
   clearInterval(emotionalInterval);
-  document.body.className = 'theme-blue';
+  clearTimeout(emotionalStopTimeout);
+  emotionalModeActive = false;
+  const savedTheme = localStorage.getItem('app-theme') || 'theme-blue';
+  document.body.classList.remove('theme-blue','theme-red','theme-purple','theme-gold','theme-green');
+  document.body.classList.add(savedTheme);
+  if (!options.silent && typeof updateStatus === 'function') updateStatus('Emotional Mode turned off. Back to calm blue.');
+  if (typeof window.onEmotionalModeChange === 'function') window.onEmotionalModeChange(false);
 }
 
-// --- Event Listeners for Demo Features ---
-document.getElementById('demo-trigger-btn').addEventListener('click', () => {
-  document.getElementById('custom-modal').style.display = 'flex';
-});
 
-document.getElementById('close-modal-btn').addEventListener('click', () => {
-  document.getElementById('custom-modal').style.display = 'none';
-});
 
-document.getElementById('start-tour-btn').addEventListener('click', () => {
-  document.getElementById('custom-modal').style.display = 'none';
-  currentTourStep = 0;
-  showTourStep(0);
-});
-
-document.getElementById('tour-next-btn').addEventListener('click', () => {
+window.showTourStep = showTourStep;
+window.startTour = () => { currentTourStep = 0; showTourStep(0); };
+window.nextTourStep = () => {
   currentTourStep++;
-  if (currentTourStep < tourSteps.length) {
-    showTourStep(currentTourStep);
-  } else {
-    document.getElementById('tour-tooltip').style.display = 'none';
-    document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
-    if (typeof updateStatus === 'function') updateStatus("Tour Complete! You're ready to split some sadness. 🎃");
+  if (currentTourStep < tourSteps.length) showTourStep(currentTourStep);
+  else {
+    clearTourUI();
+    if (typeof updateStatus === 'function') updateStatus("Tour Complete! You're ready to split some sadness.");
   }
-});
+};
+window.startEmotionalMode = startEmotionalMode;
+window.stopEmotionalMode = stopEmotionalMode;
+window.isEmotionalModeActive = () => emotionalModeActive;
+window.setEmotionalSettings = (settings = {}) => { emotionalSettings = { ...emotionalSettings, ...settings }; };
+window.getEmotionalSettings = () => ({ ...emotionalSettings });
 
-document.getElementById('start-emotional-btn').addEventListener('click', () => {
-  document.getElementById('custom-modal').style.display = 'none';
-  startEmotionalMode();
+window.closeTour = closeTour;
+
+window.addEventListener('keydown', (event) => {
+  const tooltip = document.getElementById('tour-tooltip');
+  const isTourOpen = tooltip && tooltip.style.display === 'block';
+  if (!isTourOpen) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeTour();
+  }
+
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    window.nextTourStep?.();
+  }
 });
