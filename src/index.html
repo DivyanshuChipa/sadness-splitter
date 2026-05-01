@@ -31,11 +31,8 @@
         </div>
       </div>
 
-      <div class="theme-selector-container"
-        style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--panel-border);">
-        <span class="subtext"
-          style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Aura
-          Color</span>
+      <div class="theme-selector-container">
+        <span class="subtext uppercase bold theme-label">Aura Mood</span>
         <div class="theme-picker">
           <div class="theme-circle bg-blue active" data-theme="theme-blue"></div>
           <div class="theme-circle bg-red" data-theme="theme-red"></div>
@@ -43,14 +40,6 @@
           <div class="theme-circle bg-purple" data-theme="theme-purple"></div>
           <div class="theme-circle bg-gold" data-theme="theme-gold"></div>
         </div>
-      </div>
-      <div class="demo-experience demo-experience-sidebar glass-panel">
-        <div class="demo-info">
-          <span>Experience</span>
-          <small>Guided Tour</small>
-        </div>
-        <button id="demo-trigger-btn" class="icon-btn-small" title="Explore Experience"><i
-            data-lucide="sparkles"></i></button>
       </div>
 
       <nav>
@@ -72,6 +61,7 @@
 
     <!-- Main Content Area -->
     <main class="content">
+      <div class="scrollable-content">
 
       <!-- Shared Global Input/Output File Selection -->
       <section class="global-controls glass-panel">
@@ -89,8 +79,6 @@
             <button id="browse-output-btn" class="btn secondary">Select Folder</button>
           </div>
         </div>
-      </section>
-
       </section>
 
       <!-- Tool Views -->
@@ -310,7 +298,7 @@
             <label>Output Filename</label>
             <input type="text" id="merge-filename" placeholder="merged_video.mp4">
           </div>
-          <button id="run-merge-btn" class="btn action highlight">Merge Selected Videos</button>
+          <button id="run-merge-btn" class="btn action">Merge Selected Videos</button>
         </section>
 
         <!-- VIDEO STABILIZER -->
@@ -327,7 +315,7 @@
             <label>Smoothness</label>
             <input type="number" id="stabilize-smooth" value="30" min="1" max="60">
           </div>
-          <button id="run-stabilize-btn" class="btn action highlight">Stabilize Footage (Two-Pass)</button>
+          <button id="run-stabilize-btn" class="btn action">Stabilize Footage (Two-Pass)</button>
           <p class="subtext" style="margin-top:10px;">Note: This runs two passes for maximum precision.</p>
         </section>
 
@@ -366,9 +354,10 @@
           <ul id="batch-list" class="batch-list empty">
             <li class="empty-msg">No files in batch.</li>
           </ul>
-          <button id="run-batch-btn" class="btn action highlight">▶️ RUN BATCH</button>
+          <button id="run-batch-btn" class="btn action">▶️ RUN BATCH</button>
         </section>
 
+      </div>
       </div>
 
       <!-- Progress Footer (Sadness Meter) -->
@@ -387,25 +376,19 @@
 
     <!-- Right Info Panel (Desktop Only) -->
     <aside class="right-panel">
+      
+      <!-- Card 1: Quick Actions -->
+      <div class="quick-actions-card glass-panel">
+        <h3>Quick Actions</h3>
+        <div class="action-buttons-row">
+          <button id="restart-tour-btn" class="btn secondary btn-compact"><i data-lucide="help-circle"></i> Help</button>
+          <button id="emotional-toggle-btn" class="btn secondary btn-compact toggle-btn-glow" aria-pressed="false"><i data-lucide="sparkles"></i> Emotion Mode</button>
+        </div>
+      </div>
+
+      <!-- Card 2: System Metrics -->
       <div class="metrics-card glass-panel">
         <h3>System Metrics</h3>
-        <div class="emotion-toggle-row">
-          <span>Emotional Mode</span>
-          <button id="emotional-toggle-btn" class="toggle-btn" aria-pressed="false">OFF</button>
-        </div>
-        <div class="emotion-controls">
-          <label class="subtext" for="emotion-intensity">Intensity</label>
-          <select id="emotion-intensity" class="compact-select">
-            <option value="calm">Calm</option>
-            <option value="normal" selected>Normal</option>
-            <option value="hyper">Hyper</option>
-          </select>
-          <label class="emotion-auto-stop">
-            <input type="checkbox" id="emotion-auto-stop" checked>
-            <span>Auto stop (30s)</span>
-          </label>
-        </div>
-        <button id="restart-tour-btn" class="btn secondary btn-compact">Restart Guided Tour</button>
         <div class="metric-grid">
           <div class="metric-item">
             <div class="metric-ring" id="ram-ring"><span id="ram-value">--%</span></div>
@@ -418,9 +401,10 @@
         </div>
       </div>
 
-      <div class="info-card glass-panel">
+      <!-- Card 3: System Engine -->
+      <div class="engine-card glass-panel">
         <h3>System Engine</h3>
-        <div class="status-indicator">
+        <div class="status-indicator" style="padding:0; background:none;">
           <div class="indicator-item">
             <span class="dot" id="ffmpeg-dot"></span>
             <span id="ffmpeg-status-text">FFmpeg Check...</span>
@@ -428,32 +412,33 @@
           <a id="ffmpeg-fix-link"
             href="https://release-assets.githubusercontent.com/github-production-release-asset/899872930/30cbe86c-00c1-4908-b9ba-6f6b391514c3?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-30T05%3A37%3A08Z&rscd=attachment%3B+filename%3DFFmpegInstaller.exe&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-30T04%3A36%3A37Z&ske=2026-04-30T05%3A37%3A08Z&sks=b&skv=2018-11-09&sig=cEEN%2BEIZWBFvy8IL2EbxdBZVGKL9APyGkEvOffP0540%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc3NzUyNjk4MywibmJmIjoxNzc3NTI1MTgzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.ohqMaV7WTCUHlF06V9SylsRnT_ibTwgRDTjYZRPxrvc&response-content-disposition=attachment%3B%20filename%3DFFmpegInstaller.exe&response-content-type=application%2Foctet-stream"
             target="_blank" class="subtext"
-            style="display: none; color: var(--danger); margin-top: 8px; text-decoration: underline;">Download FFmpeg
-            Installer</a>
+            style="display: none; color: var(--danger); margin-top: 8px; text-decoration: underline;">Download FFmpeg Installer</a>
+        </div>
+      </div>
+
+      <!-- Card 4: Credits & Links -->
+      <div class="info-card glass-panel">
+        
+        <!-- Tech Stack Icons Row -->
+        <div class="tech-icons-row">
+          <div class="tech-icon-item" title="Tauri v2"><i data-lucide="box"></i></div>
+          <div class="tech-icon-item" title="FFmpeg Core"><i data-lucide="cpu"></i></div>
+          <div class="tech-icon-item" title="Lucide Icons"><i data-lucide="palette"></i></div>
         </div>
 
-        <div class="tech-stack">
-          <div class="tech-item"><i data-lucide="box"></i> Tauri v2 Core</div>
-          <div class="tech-item"><i data-lucide="cpu"></i> FFmpeg Backend</div>
-          <div class="tech-item"><i data-lucide="palette"></i> Lucide Icons</div>
-        </div>
-
-        <div class="social-links">
-          <label class="subtext"
-            style="font-weight: 700; font-size: 0.7rem; margin-top: 10px; display: block; text-transform: uppercase;">Aura
-            Creator</label>
+        <div class="social-links" style="margin-top:0;">
           <a href="https://ibispaint.com/artist2/402424453665966/" target="_blank" class="social-btn"><i
               data-lucide="palette"></i> Artist ID</a>
-          <a href="https://instagram.com/divyanshushopra" target="_blank" class="social-btn"><i
-              data-lucide="instagram"></i> Instagram</a>
           <a href="https://www.youtube.com/@divyanshuchipa9677" target="_blank" class="social-btn"><i
               data-lucide="youtube"></i> YouTube</a>
+          <a href="https://github.com/DivyanshuChipa/sadness-splitter" target="_blank" class="social-btn"><i
+              data-lucide="github"></i> GitHub Repo</a>
         </div>
 
         <div class="version-info">
           <span>v0.1.0-alpha</span>
-          <small>Portable Version Coming Soon</small>
           <small>Made with 💛 by Aura Team</small>
+          <small>Portable Version Coming Soon</small>
         </div>
       </div>
     </aside>
@@ -464,15 +449,16 @@
   <div id="custom-modal" class="modal-overlay" style="display: none;">
     <div class="modal-content glass-panel">
       <div class="modal-header">
-        <div class="modal-icon">✨</div>
-        <h3>Choose Your Experience</h3>
+        <div class="modal-icon">💡</div>
+        <h3>Help Center</h3>
       </div>
-      <p>How would you like to explore Sadness Splitter today?</p>
-      <div class="modal-actions">
-        <button id="start-tour-btn" class="btn secondary"><i data-lucide="map"></i> Guided Tour</button>
-        <button id="start-emotional-btn" class="btn action"><i data-lucide="sparkles"></i> Emotional Mode</button>
+      <p>In which tool do you need help today?</p>
+      <div class="modal-actions" style="flex-direction: column; gap: 10px;">
+        <button id="start-tour-btn" class="btn secondary" style="width:100%"><i data-lucide="zap"></i> Video Compress Guide</button>
+        <button class="btn secondary" style="width:100%" onclick="document.getElementById('custom-modal').style.display='none';"><i data-lucide="package"></i> Batch Processor Guide</button>
+        <button class="btn secondary" style="width:100%" onclick="document.getElementById('custom-modal').style.display='none';"><i data-lucide="more-horizontal"></i> More Help...</button>
       </div>
-      <button id="close-modal-btn" class="modal-close">Skip for now</button>
+      <button id="close-modal-btn" class="modal-close">Close</button>
     </div>
   </div>
 

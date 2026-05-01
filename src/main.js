@@ -145,22 +145,18 @@ window.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   checkEngineStatus();
 
-  // Listeners for both tour trigger buttons
-  const triggers = ['demo-trigger-btn'];
-
   const openModal = () => {
     const modal = document.getElementById('custom-modal');
     if (modal) modal.style.display = 'flex';
   };
 
-  triggers.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('click', openModal);
-  });
+  const restartTourBtn = document.getElementById('restart-tour-btn');
+  if (restartTourBtn) {
+    restartTourBtn.addEventListener('click', openModal);
+  }
 
   // Modal Action Buttons
   const startTourBtn = document.getElementById('start-tour-btn');
-  const startEmotionalBtn = document.getElementById('start-emotional-btn');
   const closeModalBtn = document.getElementById('close-modal-btn');
 
   if (startTourBtn) {
@@ -170,30 +166,16 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (startEmotionalBtn) {
-    startEmotionalBtn.addEventListener('click', () => {
-      document.getElementById('custom-modal').style.display = 'none';
-      if (typeof window.startEmotionalMode === 'function') window.startEmotionalMode(window.getEmotionalSettings?.());
-    });
-  }
-
   if (closeModalBtn) {
     closeModalBtn.addEventListener('click', () => {
       document.getElementById('custom-modal').style.display = 'none';
     });
   }
+
   const nextTourBtn = document.getElementById('tour-next-btn');
   if (nextTourBtn) {
     nextTourBtn.addEventListener('click', () => {
       if (typeof window.nextTourStep === 'function') window.nextTourStep();
-    });
-  }
-
-
-  const restartTourBtn = document.getElementById('restart-tour-btn');
-  if (restartTourBtn) {
-    restartTourBtn.addEventListener('click', () => {
-      if (typeof window.startTour === 'function') window.startTour();
     });
   }
 
@@ -205,24 +187,9 @@ window.addEventListener('DOMContentLoaded', () => {
     emotionalToggleBtn.addEventListener('click', () => {
       const isActive = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
       if (isActive) window.stopEmotionalMode?.();
-      else window.startEmotionalMode?.(window.getEmotionalSettings?.());
+      else window.startEmotionalMode?.();
     });
   }
-
-
-  const emotionIntensity = document.getElementById('emotion-intensity');
-  const emotionAutoStop = document.getElementById('emotion-auto-stop');
-
-  const syncEmotionSettings = () => {
-    window.setEmotionalSettings?.({
-      intensity: emotionIntensity?.value || 'normal',
-      autoStop: !!emotionAutoStop?.checked,
-    });
-  };
-
-  if (emotionIntensity) emotionIntensity.addEventListener('change', syncEmotionSettings);
-  if (emotionAutoStop) emotionAutoStop.addEventListener('change', syncEmotionSettings);
-  syncEmotionSettings();
 
   startSystemMetrics();
 });

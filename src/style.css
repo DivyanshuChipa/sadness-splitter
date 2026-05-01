@@ -202,6 +202,12 @@ body {
   backdrop-filter: blur(5px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   animation: speechPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.aura-speech:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 20px var(--accent-glow);
 }
 
 .aura-speech::before {
@@ -372,10 +378,20 @@ input:checked+.slider:before {
   flex: 1;
   display: flex;
   flex-direction: column;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.scrollable-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 30px;
   gap: 20px;
   overflow-y: auto;
-  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
 /* Ensure tool views don't get cut off */
@@ -495,10 +511,6 @@ input[readonly] {
   box-shadow: 0 6px 20px var(--accent-glow);
 }
 
-.btn.action.highlight {
-  background: linear-gradient(135deg, #f59e0b, #ea580c);
-  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-}
 
 /* Tool Views */
 .tool-views {
@@ -849,6 +861,20 @@ input[type="range"] {
 }
 
 /* Theme Picker UI */
+.theme-selector-container {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.theme-label {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
 .theme-picker {
   display: flex;
   gap: 8px;
@@ -914,7 +940,6 @@ input[type="range"] {
 }
 
 /* For elements with auto scroll */
-.content,
 .batch-list {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
@@ -1047,31 +1072,58 @@ input[type="range"] {
   box-shadow: 0 0 10px var(--danger);
 }
 
-.tech-stack {
+.action-buttons-row {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  justify-content: space-between;
 }
 
-.tech-item {
+.action-buttons-row .btn {
+  flex: 1;
+}
+
+.toggle-btn-glow {
+  transition: all 0.3s ease;
+}
+
+.toggle-btn-glow[aria-pressed="true"] {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 15px var(--accent-glow);
+  border-color: transparent;
+}
+
+.tech-icons-row {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.tech-icon-item {
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  cursor: help;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  padding: 5px 0;
+  justify-content: center;
 }
 
-.tech-item i[data-lucide="box"] {
+.tech-icon-item:hover i[data-lucide="box"] {
   color: #3b82f6;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
 }
 
-.tech-item i[data-lucide="cpu"] {
+.tech-icon-item:hover i[data-lucide="cpu"] {
   color: #10b981;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
 }
 
-.tech-item i[data-lucide="palette"] {
+.tech-icon-item:hover i[data-lucide="palette"] {
   color: #f59e0b;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
 }
 
 .social-links {

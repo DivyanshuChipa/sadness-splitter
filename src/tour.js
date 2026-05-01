@@ -105,15 +105,11 @@ function showTourStep(stepIndex) {
 
 // --- Emotional Mode ---
 let emotionalInterval;
-let emotionalStopTimeout;
 let emotionalModeActive = false;
-let emotionalSettings = { intensity: "normal", autoStop: true };
-function startEmotionalMode(options = {}) {
+let emotionalSettings = { intensity: "normal", autoStop: false };
+function startEmotionalMode() {
   const themes = ['theme-blue', 'theme-red', 'theme-purple', 'theme-gold', 'theme-green'];
-  const speedMap = { calm: 5000, normal: 3000, hyper: 1600 };
-  const settings = { ...emotionalSettings, ...options };
-  emotionalSettings = settings;
-  const intervalMs = speedMap[settings.intensity] || speedMap.normal;
+  const intervalMs = 3000;
   let i = 0;
 
   stopEmotionalMode({ silent: true });
@@ -130,13 +126,10 @@ function startEmotionalMode(options = {}) {
 
     i = (i + 1) % themes.length;
   }, intervalMs);
-
-  if (settings.autoStop) emotionalStopTimeout = setTimeout(() => stopEmotionalMode(), 30000);
 }
 
 function stopEmotionalMode(options = {}) {
   clearInterval(emotionalInterval);
-  clearTimeout(emotionalStopTimeout);
   emotionalModeActive = false;
   const savedTheme = localStorage.getItem('app-theme') || 'theme-blue';
   document.body.classList.remove('theme-blue', 'theme-red', 'theme-purple', 'theme-gold', 'theme-green');
