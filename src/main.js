@@ -179,12 +179,12 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const emotionalToggleBtn = document.getElementById('emotional-toggle-btn');
+  const emotionalToggleInput = document.getElementById('emotional-toggle-input');
   window.onEmotionalModeChange = updateEmotionalToggleUI;
   updateEmotionalToggleUI(typeof window.isEmotionalModeActive === 'function' ? window.isEmotionalModeActive() : false);
 
-  if (emotionalToggleBtn) {
-    emotionalToggleBtn.addEventListener('click', () => {
+  if (emotionalToggleInput) {
+    emotionalToggleInput.addEventListener('change', (e) => {
       const isActive = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
       if (isActive) window.stopEmotionalMode?.();
       else window.startEmotionalMode?.();
@@ -298,11 +298,9 @@ function setMetricRing(el, value) {
 
 
 function updateEmotionalToggleUI(isActive) {
-  const btn = document.getElementById('emotional-toggle-btn');
-  if (!btn) return;
-  btn.textContent = isActive ? 'ON' : 'OFF';
-  btn.classList.toggle('active', isActive);
-  btn.setAttribute('aria-pressed', String(isActive));
+  const input = document.getElementById('emotional-toggle-input');
+  if (!input) return;
+  input.checked = isActive;
 }
 
 function startSystemMetrics() {
@@ -807,7 +805,7 @@ themeCircles.forEach(circle => {
 
 function setTheme(themeName) {
   // Remove existing themes
-  body.classList.remove('theme-blue', 'theme-red', 'theme-green', 'theme-purple', 'theme-gold');
+  body.classList.remove('theme-blue', 'theme-red', 'theme-green', 'theme-purple', 'theme-gold', 'theme-pink', 'theme-white', 'theme-yellow');
   body.classList.add(themeName);
 
   // Update active state in UI
