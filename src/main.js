@@ -189,6 +189,14 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+
+  const restartTourBtn = document.getElementById('restart-tour-btn');
+  if (restartTourBtn) {
+    restartTourBtn.addEventListener('click', () => {
+      if (typeof window.startTour === 'function') window.startTour();
+    });
+  }
+
   const emotionalToggleBtn = document.getElementById('emotional-toggle-btn');
   window.onEmotionalModeChange = updateEmotionalToggleUI;
   updateEmotionalToggleUI(typeof window.isEmotionalModeActive === 'function' ? window.isEmotionalModeActive() : false);
@@ -293,6 +301,20 @@ document.getElementById('browse-output-btn').addEventListener('click', async () 
 
 let displayedProgress = 0;
 
+function setProgressMode(totalDuration = 0) {
+  const hasKnownDuration = Number(totalDuration) > 0;
+  progressFill.classList.toggle('indeterminate', !hasKnownDuration);
+  if (!hasKnownDuration) {
+    progressFill.style.width = '100%';
+    progressLabel.textContent = 'Emotional Level: Processing...';
+  } else {
+    progressFill.classList.remove('indeterminate');
+    progressFill.style.width = '0%';
+    progressLabel.textContent = 'Emotional Level: 0%';
+  }
+}
+
+
 function setProgressSmooth(target) {
   const clamped = Math.max(displayedProgress, Math.min(100, Number(target) || 0));
   displayedProgress += (clamped - displayedProgress) * 0.35;
@@ -361,6 +383,7 @@ function startSystemMetrics() {
 // --- Progress Listener ---
 listen('progress', (event) => {
   const percent = event.payload.percentage;
+  progressFill.classList.remove('indeterminate');
   setProgressSmooth(percent);
 
   const stage = emotionalStages.find(s => percent >= s.min && percent < s.max);
@@ -371,6 +394,7 @@ listen('progress', (event) => {
 });
 
 listen('finished', (event) => {
+  progressFill.classList.remove('indeterminate');
   if (event.payload.success) {
     displayedProgress = Math.max(displayedProgress, 99);
     setProgressSmooth(100);
@@ -382,6 +406,7 @@ listen('finished', (event) => {
   }
   setTimeout(() => {
     progressContainer.style.display = 'none';
+    progressFill.classList.remove('indeterminate');
     if (event.payload.success) {
       setTimeout(() => updatePersonaFace(0), 10000); // Back to neutral after some time
     }
@@ -478,7 +503,7 @@ document.getElementById('run-compress-btn').addEventListener('click', () => {
 
   progressContainer.style.display = 'block';
   displayedProgress = 0;
-  progressFill.style.width = '0%';
+  setProgressMode(videoDuration);
   updateStatus("Beginning the process of emotional containment...");
 
   invoke('process_video', { args, totalDuration: videoDuration });
@@ -562,7 +587,7 @@ async function executeFFmpegTask(taskName, args) {
 
   progressContainer.style.display = 'block';
   displayedProgress = 0;
-  progressFill.style.width = '0%';
+  setProgressMode(videoDuration);
   updateStatus(`Initiating ${taskName.toLowerCase()}...`);
 
   try {

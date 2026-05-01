@@ -60,22 +60,32 @@ fn process_video(window: Window, args: Vec<String>, total_duration: f64) {
         // Regex to parse `time=HH:MM:SS.ms`
         let re = Regex::new(r"time=(\d{2}):(\d{2}):(\d{2}\.\d{2})").unwrap();
 
+        let mut last_percentage: i32 = 0;
+
         for line in reader.lines() {
             if let Ok(l) = line {
                 if let Some(caps) = re.captures(&l) {
                     let h: f64 = caps[1].parse().unwrap_or(0.0);
                     let m: f64 = caps[2].parse().unwrap_or(0.0);
                     let s: f64 = caps[3].parse().unwrap_or(0.0);
-                    
+
                     let current_seconds = h * 3600.0 + m * 60.0 + s;
-                    
+
                     if total_duration > 0.0 {
                         let mut percentage = ((current_seconds / total_duration) * 100.0) as i32;
                         if percentage > 100 {
                             percentage = 100;
                         }
-                        
-                        let _ = window.emit("progress", ProgressPayload { percentage });
+
+                        // Keep progress monotonic to avoid UI regressions.
+                        if percentage < last_percentage {
+                            percentage = last_percentage;
+                        }
+
+                        if percentage > last_percentage {
+                            last_percentage = percentage;
+                            let _ = window.emit("progress", ProgressPayload { percentage });
+                        }
                     }
                 }
             }

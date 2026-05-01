@@ -38,6 +38,22 @@ const sadnessMessages = [
   { msg: "Tiny progress is still progress." }
 ];
 
+
+function clearTourUI() {
+  const tooltip = document.getElementById('tour-tooltip');
+  if (tooltip) tooltip.style.display = 'none';
+  document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function closeTour() {
+  clearTourUI();
+  if (typeof updateStatus === 'function') updateStatus('Tour closed. You can restart anytime from System Metrics.');
+}
+
 function showTourStep(stepIndex) {
   const step = tourSteps[stepIndex];
 
@@ -59,18 +75,28 @@ function showTourStep(stepIndex) {
     // Highlight new target
     targetEl.classList.add('tour-highlight');
 
-    // Position Tooltip
+    // Position Tooltip with viewport clamping
     const rect = targetEl.getBoundingClientRect();
     tooltip.style.display = 'block';
 
-    // Better positioning: if it's the sidebar, put it to the right, else below
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const margin = 12;
+    let top;
+    let left;
+
     if (step.target === '.sidebar') {
-      tooltip.style.top = `${rect.top + 50}px`;
-      tooltip.style.left = `${rect.right + 20}px`;
+      top = rect.top + 40;
+      left = rect.right + 20;
     } else {
-      tooltip.style.top = `${rect.bottom + 15 + window.scrollY}px`;
-      tooltip.style.left = `${rect.left}px`;
+      top = rect.bottom + 15;
+      left = rect.left;
     }
+
+    top = clamp(top, margin, window.innerHeight - tooltipRect.height - margin);
+    left = clamp(left, margin, window.innerWidth - tooltipRect.width - margin);
+
+    tooltip.style.top = `${top + window.scrollY}px`;
+    tooltip.style.left = `${left + window.scrollX}px`;
 
     tooltipText.innerText = step.text;
     stepCount.innerText = `${stepIndex + 1}/${tourSteps.length}`;
@@ -127,8 +153,7 @@ window.nextTourStep = () => {
   currentTourStep++;
   if (currentTourStep < tourSteps.length) showTourStep(currentTourStep);
   else {
-    document.getElementById('tour-tooltip').style.display = 'none';
-    document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+    clearTourUI();
     if (typeof updateStatus === 'function') updateStatus("Tour Complete! You're ready to split some sadness.");
   }
 };
@@ -137,3 +162,21 @@ window.stopEmotionalMode = stopEmotionalMode;
 window.isEmotionalModeActive = () => emotionalModeActive;
 window.setEmotionalSettings = (settings = {}) => { emotionalSettings = { ...emotionalSettings, ...settings }; };
 window.getEmotionalSettings = () => ({ ...emotionalSettings });
+
+window.closeTour = closeTour;
+
+window.addEventListener('keydown', (event) => {
+  const tooltip = document.getElementById('tour-tooltip');
+  const isTourOpen = tooltip && tooltip.style.display === 'block';
+  if (!isTourOpen) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeTour();
+  }
+
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    window.nextTourStep?.();
+  }
+});
