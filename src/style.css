@@ -1227,3 +1227,28 @@ input[type="range"] {
 .metric-ring.metric-unavailable {
   background: conic-gradient(rgba(255, 255, 255, 0.1) 100%, rgba(255, 255, 255, 0.1) 0);
 }
+
+.emotion-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.compact-select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--panel-border);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+}
+
+.emotion-auto-stop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}

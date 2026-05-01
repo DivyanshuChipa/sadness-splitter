@@ -393,6 +393,18 @@
           <span>Emotional Mode</span>
           <button id="emotional-toggle-btn" class="toggle-btn" aria-pressed="false">OFF</button>
         </div>
+        <div class="emotion-controls">
+          <label class="subtext" for="emotion-intensity">Intensity</label>
+          <select id="emotion-intensity" class="compact-select">
+            <option value="calm">Calm</option>
+            <option value="normal" selected>Normal</option>
+            <option value="hyper">Hyper</option>
+          </select>
+          <label class="emotion-auto-stop">
+            <input type="checkbox" id="emotion-auto-stop" checked>
+            <span>Auto stop (30s)</span>
+          </label>
+        </div>
         <div class="metric-grid">
           <div class="metric-item">
             <div class="metric-ring" id="ram-ring"><span id="ram-value">--%</span></div>

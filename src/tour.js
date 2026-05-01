@@ -81,8 +81,13 @@ function showTourStep(stepIndex) {
 let emotionalInterval;
 let emotionalStopTimeout;
 let emotionalModeActive = false;
-function startEmotionalMode() {
+let emotionalSettings = { intensity: "normal", autoStop: true };
+function startEmotionalMode(options = {}) {
   const themes = ['theme-blue', 'theme-red', 'theme-purple', 'theme-gold', 'theme-green'];
+  const speedMap = { calm: 5000, normal: 3000, hyper: 1600 };
+  const settings = { ...emotionalSettings, ...options };
+  emotionalSettings = settings;
+  const intervalMs = speedMap[settings.intensity] || speedMap.normal;
   let i = 0;
 
   stopEmotionalMode({ silent: true });
@@ -98,17 +103,18 @@ function startEmotionalMode() {
     if (typeof updateStatus === 'function') updateStatus(msg.msg);
 
     i = (i + 1) % themes.length;
-  }, 3000);
+  }, intervalMs);
 
-  emotionalStopTimeout = setTimeout(() => stopEmotionalMode(), 30000);
+  if (settings.autoStop) emotionalStopTimeout = setTimeout(() => stopEmotionalMode(), 30000);
 }
 
 function stopEmotionalMode(options = {}) {
   clearInterval(emotionalInterval);
   clearTimeout(emotionalStopTimeout);
   emotionalModeActive = false;
-  document.body.classList.remove('theme-red', 'theme-purple', 'theme-gold', 'theme-green');
-  document.body.classList.add('theme-blue');
+  const savedTheme = localStorage.getItem('app-theme') || 'theme-blue';
+  document.body.classList.remove('theme-blue', 'theme-red', 'theme-purple', 'theme-gold', 'theme-green');
+  document.body.classList.add(savedTheme);
   if (!options.silent && typeof updateStatus === 'function') updateStatus('Emotional Mode turned off. Back to calm blue.');
   if (typeof window.onEmotionalModeChange === 'function') window.onEmotionalModeChange(false);
 }
@@ -129,3 +135,5 @@ window.nextTourStep = () => {
 window.startEmotionalMode = startEmotionalMode;
 window.stopEmotionalMode = stopEmotionalMode;
 window.isEmotionalModeActive = () => emotionalModeActive;
+window.setEmotionalSettings = (settings = {}) => { emotionalSettings = { ...emotionalSettings, ...settings }; };
+window.getEmotionalSettings = () => ({ ...emotionalSettings });
