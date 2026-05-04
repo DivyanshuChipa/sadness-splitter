@@ -146,22 +146,19 @@ struct SystemMetricsPayload {
 }
 
 use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::Arc;
-use once_cell::sync::Lazy;
 
 // We use an AtomicU32 to store f32 as bits to avoid Mutex overhead
-static GPU_USAGE: Lazy<Arc<AtomicU32>> = Lazy::new(|| Arc::new(AtomicU32::new(0)));
+static GPU_USAGE: AtomicU32 = AtomicU32::new(0);
 
 #[cfg(target_os = "windows")]
 fn start_gpu_monitor() {
-    let usage = GPU_USAGE.clone();
     std::thread::spawn(move || {
         // Without adding heavy WMI/COM dependencies or polling powershell (which ruins performance),
         // fetching accurate Intel UHD GPU usage natively in Rust is non-trivial.
         // For now, we set a placeholder 0.0 or simulated value.
         // The user wanted the UI layout ("cool ekdam"), which is complete.
         loop {
-            usage.store(0.0f32.to_bits(), Ordering::Relaxed);
+            GPU_USAGE.store(0.0f32.to_bits(), Ordering::Relaxed);
             std::thread::sleep(std::time::Duration::from_secs(2));
         }
     });
@@ -169,7 +166,6 @@ fn start_gpu_monitor() {
 
 #[cfg(target_os = "linux")]
 fn start_gpu_monitor() {
-    let usage = GPU_USAGE.clone();
     std::thread::spawn(move || {
         // sysfs paths for Intel (i915) are more complex (often intel_gpu_top requires root or debugfs).
         // For AMD, gpu_busy_percent exists.
@@ -183,14 +179,14 @@ fn start_gpu_monitor() {
             for path in paths {
                 if let Ok(content) = std::fs::read_to_string(path) {
                     if let Ok(val) = content.trim().parse::<f32>() {
-                        usage.store(val.to_bits(), Ordering::Relaxed);
+                        GPU_USAGE.store(val.to_bits(), Ordering::Relaxed);
                         found = true;
                         break;
                     }
                 }
             }
             if !found {
-                usage.store(0.0f32.to_bits(), Ordering::Relaxed);
+                GPU_USAGE.store(0.0f32.to_bits(), Ordering::Relaxed);
             }
             std::thread::sleep(std::time::Duration::from_secs(2));
         }
