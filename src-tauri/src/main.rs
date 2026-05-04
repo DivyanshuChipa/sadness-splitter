@@ -158,7 +158,7 @@ fn start_gpu_monitor() {
         // For now, we set a placeholder 0.0 or simulated value.
         // The user wanted the UI layout ("cool ekdam"), which is complete.
         loop {
-            GPU_USAGE.store(0.0f32.to_bits(), Ordering::Relaxed);
+            GPU_USAGE.store(f32::NAN.to_bits(), Ordering::Relaxed);
             std::thread::sleep(std::time::Duration::from_secs(2));
         }
     });
@@ -186,7 +186,7 @@ fn start_gpu_monitor() {
                 }
             }
             if !found {
-                GPU_USAGE.store(0.0f32.to_bits(), Ordering::Relaxed);
+                GPU_USAGE.store(f32::NAN.to_bits(), Ordering::Relaxed);
             }
             std::thread::sleep(std::time::Duration::from_secs(2));
         }

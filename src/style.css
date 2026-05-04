@@ -1261,68 +1261,67 @@ input:checked + .ios-slider:before {
 .about-card {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
-  padding: 25px 20px !important;
+  padding: 20px 15px !important;
 }
 
 .about-heading {
-  font-size: 0.8rem !important;
+  font-size: 0.75rem !important;
   font-weight: 800 !important;
   letter-spacing: 1.5px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   text-transform: uppercase;
   margin: 0;
+}
+
+.glow-text {
+  text-shadow: 0 0 10px var(--accent-glow), 0 0 20px var(--accent-glow);
 }
 
 .about-links {
   display: flex;
   justify-content: center;
   gap: 30px;
-  margin-top: 5px;
+  margin-top: 0px;
 }
 
 .about-link {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
   text-decoration: none;
   color: var(--text-secondary);
   transition: all 0.2s ease;
 }
 
-.about-link i {
-  width: 24px;
-  height: 24px;
+.about-link i, .about-link svg {
+  width: 20px;
+  height: 20px;
   stroke-width: 1.5px;
-}
-
-.about-link span {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 1px;
 }
 
 .about-link:hover {
   color: var(--accent);
   transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px var(--accent-glow));
 }
 
 .about-tech {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 12px;
   width: 100%;
-  margin-top: 10px;
-  flex-wrap: wrap;
+  margin-top: 5px;
+  flex-wrap: nowrap;
 }
 
 .tech-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
+  gap: 4px;
+  font-size: 0.65rem;
+  white-space: nowrap;
 }
 
 .tech-label {
@@ -1337,8 +1336,8 @@ input:checked + .ios-slider:before {
 }
 
 .about-footer {
-  margin-top: 15px;
-  font-size: 0.7rem;
+  margin-top: 10px;
+  font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.4);
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -1362,6 +1361,13 @@ input:checked + .ios-slider:before {
   margin-bottom: 10px;
 }
 
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
 .metric-container {
   display: flex;
   flex-direction: column;
@@ -1380,7 +1386,7 @@ input:checked + .ios-slider:before {
 }
 
 .metric-row.bottom-row {
-  margin-top: -5px; /* Pull it slightly up for a tighter triangle look */
+  margin-top: -5px;
 }
 
 .metric-item {

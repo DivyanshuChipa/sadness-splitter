@@ -443,16 +443,12 @@ function startSystemMetrics() {
   const cpuValue = document.getElementById('cpu-value');
   const gpuValue = document.getElementById('gpu-value');
 
-  const setUnavailable = () => {
-    if (ramValue) ramValue.textContent = 'N/A';
-    if (cpuValue) cpuValue.textContent = 'N/A';
-    if (gpuValue) gpuValue.textContent = 'N/A';
-    if (ramRing) ramRing.style.setProperty('--metric-value', '0%');
-    if (cpuRing) cpuRing.style.setProperty('--metric-value', '0%');
-    if (gpuRing) gpuRing.style.setProperty('--metric-value', '0%');
-    ramRing?.classList.add('metric-unavailable');
-    cpuRing?.classList.add('metric-unavailable');
-    gpuRing?.classList.add('metric-unavailable');
+  const setUnavailable = (ring, valueEl) => {
+    if (valueEl) valueEl.textContent = 'N/A';
+    if (ring) {
+      ring.style.setProperty('--metric-value', '0%');
+      ring.classList.add('metric-unavailable');
+    }
   };
 
   const poll = async () => {
@@ -462,23 +458,34 @@ function startSystemMetrics() {
       const cpu = Number(metrics?.cpu_percent);
       const gpu = Number(metrics?.gpu_percent);
 
-      if (!Number.isFinite(ram) || !Number.isFinite(cpu) || !Number.isFinite(gpu)) {
-        setUnavailable();
-        return;
+      if (Number.isFinite(ram)) {
+        ramRing?.classList.remove('metric-unavailable');
+        setMetricRing(ramRing, ram);
+        if (ramValue) ramValue.textContent = `${Math.round(ram)}%`;
+      } else {
+        setUnavailable(ramRing, ramValue);
       }
 
-      ramRing?.classList.remove('metric-unavailable');
-      cpuRing?.classList.remove('metric-unavailable');
-      gpuRing?.classList.remove('metric-unavailable');
-      setMetricRing(ramRing, ram);
-      setMetricRing(cpuRing, cpu);
-      setMetricRing(gpuRing, gpu);
-      if (ramValue) ramValue.textContent = `${Math.round(ram)}%`;
-      if (cpuValue) cpuValue.textContent = `${Math.round(cpu)}%`;
-      if (gpuValue) gpuValue.textContent = `${Math.round(gpu)}%`;
+      if (Number.isFinite(cpu)) {
+        cpuRing?.classList.remove('metric-unavailable');
+        setMetricRing(cpuRing, cpu);
+        if (cpuValue) cpuValue.textContent = `${Math.round(cpu)}%`;
+      } else {
+        setUnavailable(cpuRing, cpuValue);
+      }
+
+      if (Number.isFinite(gpu)) {
+        gpuRing?.classList.remove('metric-unavailable');
+        setMetricRing(gpuRing, gpu);
+        if (gpuValue) gpuValue.textContent = `${Math.round(gpu)}%`;
+      } else {
+        setUnavailable(gpuRing, gpuValue);
+      }
     } catch (error) {
       console.warn('System metrics unavailable:', error);
-      setUnavailable();
+      setUnavailable(ramRing, ramValue);
+      setUnavailable(cpuRing, cpuValue);
+      setUnavailable(gpuRing, gpuValue);
     }
   };
 
