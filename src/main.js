@@ -26,8 +26,13 @@ const emotionalStages = [
 
 // --- Reactive Persona System ---
 const reactiveFace = document.getElementById('reactive-face');
-let annoyanceLevel = 0;
-let annoyanceTimer = null;
+let pokeCount = 0;
+let pokeTimer = null;
+let idleTimer = null;
+let isIdle = false;
+let flashTimer = null;
+let isFlashing = false;
+let autoGlowTimer = null;
 
 const toolReactions = {
   'compress': { face: 'face_confident.png', msg: "File too heavy? Let’s shrink it down! 💪" },
@@ -45,41 +50,161 @@ const toolReactions = {
   'batch': { face: 'face_surprised.png', msg: "So many files? Looks like you’ve got me working overtime…" }
 };
 
+const emoteThemeMap = {
+  'face_denial.png': 'theme-white',
+  'face_anger.png': 'theme-red',
+  'face_angry.png': 'theme-red',
+  'face_bargaining.png': 'theme-purple',
+  'face_depression.png': 'theme-blue',
+  'face_acceptance.png': 'theme-gold',
+  'face_confident.png': 'theme-yellow',
+  'face_thinking.png': 'theme-purple',
+  'face_determined.png': 'theme-blue',
+  'face_surprised.png': 'theme-yellow',
+  'face_curious.png': 'theme-purple',
+  'face_smug.png': 'theme-green',
+  'face_exicited.png': 'theme-pink',
+  'face_laughing.png': 'theme-yellow',
+  'face_love.png': 'theme-pink',
+  'face_shocked.png': 'theme-red',
+  'face_bored.png': 'theme-white',
+  'face_embrrasment.png': 'theme-pink',
+  'face_sleepy.png': 'theme-yellow'
+};
+
 function updatePersonaFace(percent) {
-  if (annoyanceLevel > 5) return; // Don't override if angry
+  if (pokeCount > 5) return; // Don't override if angry
 
   const stage = emotionalStages.find(s => percent >= s.min && percent <= s.max);
   if (stage && reactiveFace) {
     reactiveFace.src = `emotive-ani-character/${stage.face}`;
+    
+    // Apply theme mapping
+    if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
+      if (emoteThemeMap[stage.face]) setTheme(emoteThemeMap[stage.face]);
+    }
   }
 }
 
 function setPersonaEmotion(face, message) {
-  if (annoyanceLevel > 5) return;
+  if (pokeCount > 5) return;
   if (reactiveFace) reactiveFace.src = `emotive-ani-character/${face}`;
+  
+  // Apply theme mapping
+  if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
+    if (emoteThemeMap[face]) setTheme(emoteThemeMap[face]);
+  }
+  
   if (message) updateStatus(message);
 }
 
-// Sassy Interaction
+function flashRedYellow() {
+  if (isFlashing) return;
+  isFlashing = true;
+  let count = 0;
+  flashTimer = setInterval(() => {
+    if (count % 2 === 0) setTheme('theme-yellow');
+    else setTheme('theme-red');
+    count++;
+    if (count >= 8) { // 4 alternates
+      clearInterval(flashTimer);
+      isFlashing = false;
+      setTheme('theme-red'); // end on red
+    }
+  }, 300);
+}
+
+// Reset idle system
+function resetIdleTimer() {
+  if (isIdle) {
+    isIdle = false;
+    setTheme('theme-blue');
+    setPersonaEmotion('face_exicited.png', "Let's go!");
+  }
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    isIdle = true;
+    const isEmotional = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
+    if (isEmotional) {
+      setTheme('theme-white');
+    }
+    setPersonaEmotion('face_bored.png', "Hey man, do something! I am getting bored.");
+  }, 120000); // 2 minutes
+}
+
+// Attach idle listeners
+document.addEventListener('mousemove', resetIdleTimer);
+document.addEventListener('keydown', resetIdleTimer);
+document.addEventListener('click', resetIdleTimer);
+resetIdleTimer(); // Start timer
+
+// Sassy Interaction (Poking)
 if (reactiveFace) {
-  reactiveFace.addEventListener('mouseenter', () => {
-    annoyanceLevel++;
+  reactiveFace.addEventListener('click', () => {
+    pokeCount++;
+    const isEmotional = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
 
-    if (annoyanceLevel > 5) {
-      reactiveFace.src = `emotive-ani-character/face_anger.png`;
-      updateStatus("HEY! Stop poking me and focus on your work! 💢");
-
-      // Reset annoyance after a few seconds
-      clearTimeout(annoyanceTimer);
-      annoyanceTimer = setTimeout(() => {
-        annoyanceLevel = 0;
-        // Restore face based on current progress
+    if (pokeCount === 6) {
+      reactiveFace.src = `emotive-ani-character/face_angry.png`;
+      updateStatus("ENOUGH IS ENOUGH! 🌋");
+      if (isEmotional) flashRedYellow();
+      
+      clearTimeout(pokeTimer);
+      pokeTimer = setTimeout(() => {
+        pokeCount = 0;
         const currentPercent = parseFloat(progressFill.style.width) || 0;
         updatePersonaFace(currentPercent);
         updateStatus("Ready to process emotional baggage.");
+      }, 4000);
+    } else if (pokeCount > 6) {
+      // Ignore during flash
+    } else if (pokeCount === 5) {
+      reactiveFace.src = `emotive-ani-character/face_anger.png`;
+      updateStatus("HEY! Stop poking me and focus on your work! 💢");
+      if (isEmotional) setTheme('theme-red');
+
+      clearTimeout(pokeTimer);
+      pokeTimer = setTimeout(() => {
+        if (pokeCount === 5) { // Only reset if they didn't poke again to trigger 6
+          pokeCount = 0;
+          const currentPercent = parseFloat(progressFill.style.width) || 0;
+          updatePersonaFace(currentPercent);
+          updateStatus("Ready to process emotional baggage.");
+        }
       }, 3000);
     }
   });
+
+  // Easter Egg Contextual Hovers
+  const browseBtn = document.getElementById('browse-input-btn');
+  if (browseBtn) {
+    browseBtn.addEventListener('mouseenter', () => {
+      setPersonaEmotion('face_smug.png', "Want to select a video file?");
+      if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
+        setTheme('theme-green');
+      }
+    });
+  }
+
+  const metricsCard = document.querySelector('.metrics-card');
+  if (metricsCard) {
+    metricsCard.addEventListener('mouseenter', () => {
+      setPersonaEmotion('face_embrrasment.png', "Oh, you like my performance stats? 👉👈");
+      if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
+        setTheme('theme-pink');
+      }
+    });
+  }
+
+  const creatorCard = document.querySelector('.creator-card');
+  if (creatorCard) {
+    creatorCard.addEventListener('mouseenter', () => {
+      setPersonaEmotion('face_sleepy.png', "That section is just for showing off... yawn.");
+      if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
+        setTheme('theme-yellow');
+      }
+    });
+  }
 }
 
 // Initialize Lucide Icons
@@ -205,6 +330,13 @@ function updateStatus(msg) {
     container.classList.remove('speech-update');
     void container.offsetWidth; // Trigger reflow
     container.classList.add('speech-update');
+    
+    // Auto-glow for 4 seconds
+    container.classList.add('speech-auto-glow');
+    clearTimeout(autoGlowTimer);
+    autoGlowTimer = setTimeout(() => {
+      container.classList.remove('speech-auto-glow');
+    }, 4000);
   }
 }
 

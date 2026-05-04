@@ -107,34 +107,22 @@ function showTourStep(stepIndex) {
 let emotionalInterval;
 let emotionalModeActive = false;
 let emotionalSettings = { intensity: "normal", autoStop: false };
-function startEmotionalMode() {
-  const themes = ['theme-blue', 'theme-red', 'theme-purple', 'theme-gold', 'theme-green'];
-  const intervalMs = 3000;
-  let i = 0;
 
+function startEmotionalMode() {
   stopEmotionalMode({ silent: true });
   emotionalModeActive = true;
   if (typeof window.onEmotionalModeChange === 'function') window.onEmotionalModeChange(true);
 
-  if (typeof updateStatus === 'function') updateStatus("Emotional Mode Activated. Embracing all stages of sadness...");
-
-  emotionalInterval = setInterval(() => {
-    document.body.classList.remove(...themes);
-    document.body.classList.add(themes[i]);
-    const msg = sadnessMessages[Math.floor(Math.random() * sadnessMessages.length)];
-    if (typeof updateStatus === 'function') updateStatus(msg.msg);
-
-    i = (i + 1) % themes.length;
-  }, intervalMs);
+  if (typeof updateStatus === 'function') updateStatus("Emotional Mode Activated. Emotes will now control the UI themes!");
 }
 
 function stopEmotionalMode(options = {}) {
-  clearInterval(emotionalInterval);
   emotionalModeActive = false;
   const savedTheme = localStorage.getItem('app-theme') || 'theme-blue';
-  document.body.classList.remove('theme-blue', 'theme-red', 'theme-purple', 'theme-gold', 'theme-green');
+  document.body.classList.remove('theme-blue', 'theme-red', 'theme-purple', 'theme-gold', 'theme-green', 'theme-pink', 'theme-white', 'theme-yellow');
   document.body.classList.add(savedTheme);
-  if (!options.silent && typeof updateStatus === 'function') updateStatus('Emotional Mode turned off. Back to calm blue.');
+  
+  if (!options.silent && typeof updateStatus === 'function') updateStatus('Emotional Mode turned off. Back to saved theme.');
   if (typeof window.onEmotionalModeChange === 'function') window.onEmotionalModeChange(false);
 }
 
