@@ -1,11 +1,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::process::{Command, Stdio};
-use std::io::{BufRead, BufReader};
 use regex::Regex;
 use serde::Serialize;
-use tauri::{Emitter, Window};
+use std::io::{BufRead, BufReader};
+use std::process::{Command, Stdio};
+use std::str::FromStr;
 use sysinfo::System;
+use tauri::{Emitter, Window};
 
 #[derive(Clone, Serialize)]
 struct ProgressPayload {
@@ -21,9 +22,12 @@ struct FinishedPayload {
 fn get_video_duration(file_path: String) -> f64 {
     let output = Command::new("ffprobe")
         .args([
-            "-v", "error",
-            "-show_entries", "format=duration",
-            "-of", "default=noprint_wrappers=1:nokey=1",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
             &file_path,
         ])
         .output();
@@ -56,7 +60,7 @@ fn process_video(window: Window, args: Vec<String>, total_duration: f64) {
 
         let stderr = child.stderr.take().expect("Failed to open stderr");
         let reader = BufReader::new(stderr);
-        
+
         // Regex to parse `time=HH:MM:SS.ms`
         let re = Regex::new(r"time=(\d{2}):(\d{2}):(\d{2}\.\d{2})").unwrap();
 
@@ -92,7 +96,12 @@ fn process_video(window: Window, args: Vec<String>, total_duration: f64) {
         }
 
         let status = child.wait().expect("Failed to wait on child");
-        let _ = window.emit("finished", FinishedPayload { success: status.success() });
+        let _ = window.emit(
+            "finished",
+            FinishedPayload {
+                success: status.success(),
+            },
+        );
     });
 }
 
@@ -105,11 +114,7 @@ fn generate_thumbnail(file_path: String) -> String {
     // ffmpeg -i input -ss 00:00:01 -vframes 1 -q:v 2 output.jpg
     let _ = Command::new("ffmpeg")
         .args([
-            "-i", &file_path,
-            "-ss", "00:00:01",
-            "-vframes", "1",
-            "-q:v", "2",
-            "-y", thumb_str,
+            "-i", &file_path, "-ss", "00:00:01", "-vframes", "1", "-q:v", "2", "-y", thumb_str,
         ])
         .output();
 
@@ -137,11 +142,33 @@ fn list_videos_in_folder(folder_path: String) -> Vec<String> {
     videos
 }
 
-
 #[derive(Clone, Serialize)]
 struct SystemMetricsPayload {
     cpu_percent: f32,
     ram_percent: f32,
+    gpu_percent: Option<f32>,
+}
+
+fn read_gpu_usage_percent() -> Option<f32> {
+    let output = Command::new("nvidia-smi")
+        .args([
+            "--query-gpu=utilization.gpu",
+            "--format=csv,noheader,nounits",
+        ])
+        .output()
+        .ok()?;
+
+    if !output.status.success() {
+        return None;
+    }
+
+    let line = String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .next()?
+        .trim();
+
+    let value = f32::from_str(line).ok()?;
+    Some(value.clamp(0.0, 100.0))
 }
 
 #[tauri::command]
@@ -163,7 +190,11 @@ fn get_system_metrics() -> Result<SystemMetricsPayload, String> {
 
     let cpu_percent = sys.global_cpu_info().cpu_usage();
 
-    Ok(SystemMetricsPayload { cpu_percent, ram_percent })
+    Ok(SystemMetricsPayload {
+        cpu_percent,
+        ram_percent,
+        gpu_percent: read_gpu_usage_percent(),
+    })
 }
 
 #[tauri::command]
@@ -181,7 +212,14 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder, generate_thumbnail, check_ffmpeg, get_system_metrics])
+        .invoke_handler(tauri::generate_handler![
+            get_video_duration,
+            process_video,
+            list_videos_in_folder,
+            generate_thumbnail,
+            check_ffmpeg,
+            get_system_metrics
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
