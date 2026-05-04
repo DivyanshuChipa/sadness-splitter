@@ -438,16 +438,21 @@ function updateEmotionalToggleUI(isActive) {
 function startSystemMetrics() {
   const ramRing = document.getElementById('ram-ring');
   const cpuRing = document.getElementById('cpu-ring');
+  const gpuRing = document.getElementById('gpu-ring');
   const ramValue = document.getElementById('ram-value');
   const cpuValue = document.getElementById('cpu-value');
+  const gpuValue = document.getElementById('gpu-value');
 
   const setUnavailable = () => {
     if (ramValue) ramValue.textContent = 'N/A';
     if (cpuValue) cpuValue.textContent = 'N/A';
+    if (gpuValue) gpuValue.textContent = 'N/A';
     if (ramRing) ramRing.style.setProperty('--metric-value', '0%');
     if (cpuRing) cpuRing.style.setProperty('--metric-value', '0%');
+    if (gpuRing) gpuRing.style.setProperty('--metric-value', '0%');
     ramRing?.classList.add('metric-unavailable');
     cpuRing?.classList.add('metric-unavailable');
+    gpuRing?.classList.add('metric-unavailable');
   };
 
   const poll = async () => {
@@ -455,18 +460,22 @@ function startSystemMetrics() {
       const metrics = await invoke('get_system_metrics');
       const ram = Number(metrics?.ram_percent);
       const cpu = Number(metrics?.cpu_percent);
+      const gpu = Number(metrics?.gpu_percent);
 
-      if (!Number.isFinite(ram) || !Number.isFinite(cpu)) {
+      if (!Number.isFinite(ram) || !Number.isFinite(cpu) || !Number.isFinite(gpu)) {
         setUnavailable();
         return;
       }
 
       ramRing?.classList.remove('metric-unavailable');
       cpuRing?.classList.remove('metric-unavailable');
+      gpuRing?.classList.remove('metric-unavailable');
       setMetricRing(ramRing, ram);
       setMetricRing(cpuRing, cpu);
+      setMetricRing(gpuRing, gpu);
       if (ramValue) ramValue.textContent = `${Math.round(ram)}%`;
       if (cpuValue) cpuValue.textContent = `${Math.round(cpu)}%`;
+      if (gpuValue) gpuValue.textContent = `${Math.round(gpu)}%`;
     } catch (error) {
       console.warn('System metrics unavailable:', error);
       setUnavailable();

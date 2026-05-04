@@ -1257,87 +1257,96 @@ input:checked + .ios-slider:before {
   flex-direction: column;
 }
 
-/* --- Aura Creator Grid --- */
-.creator-card {
+/* --- About Card (Minimal) --- */
+.about-card {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
+  align-items: center;
+  padding: 25px 20px !important;
 }
 
-.creator-card h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
+.about-heading {
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.5px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
   margin: 0;
 }
 
-.creator-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+.about-links {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 5px;
 }
 
-.creator-grid-item {
+.about-link {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--panel-border);
-  border-radius: 12px;
-  padding: 12px 5px;
+  gap: 8px;
   text-decoration: none;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
 }
 
-.creator-grid-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--accent);
+.about-link i {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.5px;
+}
+
+.about-link span {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.about-link:hover {
+  color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-.grid-icon-box {
-  width: 36px;
-  height: 36px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
+.about-tech {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.tech-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
+  gap: 6px;
+  font-size: 0.75rem;
 }
 
-.grid-icon-box i {
-  width: 20px;
-  height: 20px;
+.tech-label {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
-.creator-grid-item span {
-  font-size: 0.7rem;
-  color: var(--text-secondary);
+.tech-value {
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 600;
 }
 
-.version-info {
-  margin-top: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  border-top: 1px solid var(--panel-border);
-  padding-top: 20px;
-}
-
-.version-info span {
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 0.8rem;
-}
-
-.version-info small {
-  color: var(--text-secondary);
+.about-footer {
+  margin-top: 15px;
   font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.about-footer .heart {
+  color: var(--danger);
 }
 
 .demo-experience-sidebar {
@@ -1353,11 +1362,25 @@ input:checked + .ios-slider:before {
   margin-bottom: 10px;
 }
 
-.metric-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.metric-container {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-top: 10px;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.metric-row.top-row {
+  justify-content: space-evenly;
+}
+
+.metric-row.bottom-row {
+  margin-top: -5px; /* Pull it slightly up for a tighter triangle look */
 }
 
 .metric-item {
