@@ -921,26 +921,34 @@ input[type="range"] {
 
 .theme-picker {
   display: flex;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .theme-circle {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: transform 0.2s;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  opacity: 0.4;
+  filter: grayscale(0.8);
 }
 
 .theme-circle:hover {
-  transform: scale(1.2);
+  opacity: 0.8;
+  filter: grayscale(0.2);
+  transform: scale(1.15);
 }
 
 .theme-circle.active {
+  opacity: 1;
+  filter: grayscale(0);
+  transform: scale(1.4);
+  box-shadow: 0 0 15px var(--accent-glow);
   border-color: white;
-  transform: scale(1.2);
+  z-index: 2;
 }
 
 .bg-blue {
@@ -1264,68 +1272,68 @@ input:checked+.ios-slider:before {
 .about-card {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
-  padding: 25px 20px !important;
+  padding: 20px 15px !important;
 }
 
 .about-heading {
-  font-size: 0.8rem !important;
+  font-size: 0.75rem !important;
   font-weight: 800 !important;
   letter-spacing: 1.5px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   text-transform: uppercase;
   margin: 0;
+}
+
+.glow-text {
+  text-shadow: 0 0 10px var(--accent-glow), 0 0 20px var(--accent-glow);
 }
 
 .about-links {
   display: flex;
   justify-content: center;
   gap: 30px;
-  margin-top: 5px;
+  margin-top: 0px;
 }
 
 .about-link {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
   text-decoration: none;
   color: var(--text-secondary);
   transition: all 0.2s ease;
 }
 
-.about-link i {
-  width: 24px;
-  height: 24px;
+.about-link i,
+.about-link svg {
+  width: 20px;
+  height: 20px;
   stroke-width: 1.5px;
-}
-
-.about-link span {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 1px;
 }
 
 .about-link:hover {
   color: var(--accent);
   transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px var(--accent-glow));
 }
 
 .about-tech {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 12px;
   width: 100%;
-  margin-top: 10px;
-  flex-wrap: wrap;
+  margin-top: 5px;
+  flex-wrap: nowrap;
 }
 
 .tech-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
+  gap: 4px;
+  font-size: 0.65rem;
+  white-space: nowrap;
 }
 
 .tech-label {
@@ -1340,8 +1348,8 @@ input:checked+.ios-slider:before {
 }
 
 .about-footer {
-  margin-top: 15px;
-  font-size: 0.7rem;
+  margin-top: 10px;
+  font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.4);
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -1365,6 +1373,13 @@ input:checked+.ios-slider:before {
   margin-bottom: 10px;
 }
 
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
 .metric-container {
   display: flex;
   flex-direction: column;
@@ -1384,7 +1399,6 @@ input:checked+.ios-slider:before {
 
 .metric-row.bottom-row {
   margin-top: -5px;
-  /* Pull it slightly up for a tighter triangle look */
 }
 
 .metric-item {
@@ -1497,24 +1511,44 @@ input:checked+.ios-slider:before {
   color: var(--text-secondary);
 }
 
-/* Sidebar Footer (System Ready) */
+/* Sidebar Footer (Aura Status Card) */
 .sidebar-status-footer {
   margin-top: auto;
   border-top: 1px solid var(--panel-border);
   padding-top: 15px;
 }
 
+.sidebar-status-card {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 15px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
 .sidebar-progress {
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .sidebar-technical-log {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--text-secondary);
-  opacity: 0.8;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: 0.2px;
+}
+
+#aura-status-val {
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow);
 }
 
 .btn-compact {
@@ -1539,4 +1573,35 @@ input:checked+.ios-slider:before {
   100% {
     background-position: -20% 0;
   }
+}
+
+/* About Card Tech Badges */
+.about-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.tech-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+}
+
+.tech-label {
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.tech-value {
+  color: var(--accent);
+  font-weight: 700;
 }

@@ -3,9 +3,20 @@
 use std::process::{Command, Stdio};
 use std::io::{BufRead, BufReader};
 use regex::Regex;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tauri::{Emitter, Window};
 use sysinfo::System;
+
+#[cfg(target_os = "windows")]
+use wmi::{COMLibrary, WMIConnection};
+
+#[cfg(target_os = "windows")]
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+struct GpuEngine {
+    name: String,
+    utilization_percentage: u32,
+}
 
 #[derive(Clone, Serialize)]
 struct ProgressPayload {
@@ -153,12 +164,33 @@ static GPU_USAGE: AtomicU32 = AtomicU32::new(0);
 #[cfg(target_os = "windows")]
 fn start_gpu_monitor() {
     std::thread::spawn(move || {
-        // Without adding heavy WMI/COM dependencies or polling powershell (which ruins performance),
-        // fetching accurate Intel UHD GPU usage natively in Rust is non-trivial.
-        // For now, we set a placeholder 0.0 or simulated value.
-        // The user wanted the UI layout ("cool ekdam"), which is complete.
+        let com_con = match COMLibrary::new() {
+            Ok(c) => c,
+            Err(_) => {
+                // Silently fail if COM is unavailable
+                return;
+            }
+        };
+
+        let wmi_con = match WMIConnection::new(com_con.into()) {
+            Ok(w) => w,
+            Err(_) => return,
+        };
+
         loop {
-            GPU_USAGE.store(0.0f32.to_bits(), Ordering::Relaxed);
+            // Querying Windows Performance Counters for GPU Engine (3D)
+            let query = "SELECT Name, UtilizationPercentage FROM Win32_PerfFormattedData_GPUPerformanceCounters_GPUEngine WHERE Name LIKE '%engtype_3D%'";
+            if let Ok(results) = wmi_con.raw_query::<GpuEngine>(query) {
+                // Sum up the utilization across all running 3D processes
+                let total_utilization: u32 = results.iter().map(|e| e.utilization_percentage).sum();
+                
+                // Cap at 100% just in case
+                let final_percentage = if total_utilization > 100 { 100.0 } else { total_utilization as f32 };
+                GPU_USAGE.store(final_percentage.to_bits(), Ordering::Relaxed);
+            } else {
+                GPU_USAGE.store(f32::NAN.to_bits(), Ordering::Relaxed);
+            }
+
             std::thread::sleep(std::time::Duration::from_secs(2));
         }
     });
@@ -186,7 +218,7 @@ fn start_gpu_monitor() {
                 }
             }
             if !found {
-                GPU_USAGE.store(0.0f32.to_bits(), Ordering::Relaxed);
+                GPU_USAGE.store(f32::NAN.to_bits(), Ordering::Relaxed);
             }
             std::thread::sleep(std::time::Duration::from_secs(2));
         }
