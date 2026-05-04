@@ -416,14 +416,22 @@
       <!-- Card 2: System Metrics -->
       <div class="metrics-card glass-panel">
         <h3>System Metrics</h3>
-        <div class="metric-grid">
-          <div class="metric-item">
-            <div class="metric-ring" id="ram-ring"><span id="ram-value">--%</span></div>
-            <small>RAM</small>
+        <div class="metric-container">
+          <div class="metric-row top-row">
+            <div class="metric-item">
+              <div class="metric-ring" id="ram-ring"><span id="ram-value">--%</span></div>
+              <small>RAM</small>
+            </div>
+            <div class="metric-item">
+              <div class="metric-ring" id="cpu-ring"><span id="cpu-value">--%</span></div>
+              <small>CPU</small>
+            </div>
           </div>
-          <div class="metric-item">
-            <div class="metric-ring" id="cpu-ring"><span id="cpu-value">--%</span></div>
-            <small>CPU</small>
+          <div class="metric-row bottom-row">
+            <div class="metric-item">
+              <div class="metric-ring" id="gpu-ring"><span id="gpu-value">--%</span></div>
+              <small>GPU</small>
+            </div>
           </div>
         </div>
       </div>

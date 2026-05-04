@@ -1353,11 +1353,25 @@ input:checked + .ios-slider:before {
   margin-bottom: 10px;
 }
 
-.metric-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.metric-container {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-top: 10px;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.metric-row.top-row {
+  justify-content: space-evenly;
+}
+
+.metric-row.bottom-row {
+  margin-top: -5px; /* Pull it slightly up for a tighter triangle look */
 }
 
 .metric-item {
