@@ -13,8 +13,8 @@
   --success: #10b981;
   --btn-text: #ffffff;
 
-  --sidebar-width: 260px;
-  --font-family: 'Inter', sans-serif;
+  --sidebar-width: 270px; /* Slightly wider for better spacing */
+  --font-family: 'Poppins', sans-serif;
 }
 
 /* Mesh Gradient Background */
@@ -125,8 +125,9 @@ body {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--panel-border);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px; /* More rounded */
+  padding: 24px; /* More padding */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Sidebar */
@@ -136,7 +137,7 @@ body {
   border-right: 1px solid var(--panel-border);
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 24px 20px; /* More breathing room */
   position: relative;
 }
 
@@ -196,9 +197,10 @@ body {
 }
 
 .brand h2 {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.2px;
+  color: var(--text-primary);
 }
 
 .brand .version {
@@ -282,7 +284,7 @@ body {
 nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   flex-grow: 1;
   overflow-y: auto;
   margin: 10px 0;
@@ -305,15 +307,15 @@ nav {
   border: none;
   color: var(--text-secondary);
   text-align: left;
-  padding: 12px 16px;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  padding: 14px 18px; /* Slightly taller */
+  border-radius: 12px;
+  font-size: 0.92rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .nav-btn i {
@@ -438,11 +440,12 @@ input:checked+.slider:before {
 
 .file-picker label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
-  margin-bottom: 5px;
-  font-weight: 700;
+  margin-bottom: 6px;
+  font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
 
 .input-group {
@@ -454,8 +457,8 @@ input[type="text"],
 input[type="number"],
 select {
   width: 100%;
-  padding: 10px 14px;
-  border-radius: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.2);
   color: var(--text-primary);
@@ -485,14 +488,15 @@ input[readonly] {
 
 /* Buttons */
 .btn {
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 12px 20px;
+  border-radius: 12px;
   border: none;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
+  letter-spacing: 0.2px;
 }
 
 .btn.primary {
@@ -734,13 +738,13 @@ input[readonly] {
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 .tool-header {
@@ -749,11 +753,17 @@ input[readonly] {
   padding-bottom: 10px;
 }
 
-
+.tool-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--accent);
+}
 
 .tool-header p {
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 400;
 }
 
 .control-group {
@@ -766,12 +776,12 @@ input[readonly] {
 
 .control-group label {
   display: block;
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .slider-container {
@@ -791,10 +801,12 @@ input[type="range"] {
 }
 
 .subtext {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 400;
   color: var(--text-secondary);
   display: block;
-  margin-top: 5px;
+  margin-top: 6px;
+  opacity: 0.8;
 }
 
 .checkbox-group {
@@ -880,10 +892,11 @@ input[type="range"] {
 }
 
 .progress-label {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
-  text-align: right;
+  text-align: center;
   font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 /* Theme Picker UI */
@@ -1156,6 +1169,8 @@ input[type="range"] {
   height: 18px;
 }
 
+
+
 .settings-list {
   display: flex;
   flex-direction: column;
@@ -1370,14 +1385,14 @@ input:checked+.ios-slider:before {
 }
 
 .metrics-card {
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .metric-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 16px;
+  margin-top: 15px;
 }
 
 .metric-container {
@@ -1520,9 +1535,9 @@ input:checked+.ios-slider:before {
 
 .sidebar-status-card {
   background: rgba(255, 255, 255, 0.03);
-  padding: 15px;
+  padding: 16px 20px;
   width: 100%;
-  border-radius: 12px;
+  border-radius: 16px;
   border: 1px solid var(--panel-border);
   display: flex;
   flex-direction: column;
