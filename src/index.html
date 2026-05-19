@@ -177,6 +177,10 @@
                 <span>Start</span>
                 <span id="split-slider-value">00:00:00</span>
               </div>
+              <div class="manual-time-group" style="margin-top: 15px;">
+                <label style="margin-right: 10px;">Exact Split Time</label>
+                <input type="text" id="split-time-input" class="time-input" value="00:00:00" placeholder="HH:MM:SS" style="max-width: 120px;">
+              </div>
             </div>
             <button id="run-split-btn" class="btn action">Split Video</button>
           </section>
@@ -196,6 +200,16 @@
               <div class="timeline-labels">
                 <span id="trim-label-start">00:00:00</span>
                 <span id="trim-label-end">End</span>
+              </div>
+              <div class="manual-time-group dual" style="margin-top: 15px; display: flex; justify-content: space-between;">
+                <div class="time-input-wrapper" style="width: 48%;">
+                  <label>Start Time</label>
+                  <input type="text" id="trim-time-start" class="time-input" value="00:00:00" placeholder="HH:MM:SS">
+                </div>
+                <div class="time-input-wrapper" style="width: 48%;">
+                  <label>End Time</label>
+                  <input type="text" id="trim-time-end" class="time-input" value="00:00:00" placeholder="HH:MM:SS">
+                </div>
               </div>
             </div>
             <button id="run-trim-btn" class="btn action">Trim Video</button>

@@ -368,18 +368,32 @@ document.getElementById('browse-input-btn').addEventListener('click', async () =
       setPersonaEmotion('face_happy.png', `Mil gayi file! Ab shuru karein? ${filename}`);
 
       // Get Duration (Needed for Sliders)
-      videoDuration = await invoke('get_video_duration', { file_path: file });
+      videoDuration = await invoke('get_video_duration', { filePath: file });
 
       // Initialize Timeline Sliders
       const splitSlider = document.getElementById('split-slider');
+      const splitTimeInput = document.getElementById('split-time-input');
+      const runSplitBtn = document.getElementById('run-split-btn');
       if (splitSlider) {
         splitSlider.max = Math.floor(videoDuration);
         splitSlider.value = 0;
         document.getElementById('split-slider-value').textContent = "00:00:00";
+        if (splitTimeInput) {
+          splitTimeInput.value = "00:00:00";
+          splitTimeInput.classList.remove('invalid-input');
+        }
+        if (runSplitBtn) {
+          runSplitBtn.disabled = false;
+          runSplitBtn.style.opacity = '1';
+          runSplitBtn.style.pointerEvents = 'auto';
+        }
       }
 
       const trimStart = document.getElementById('trim-slider-start');
       const trimEnd = document.getElementById('trim-slider-end');
+      const trimTimeStart = document.getElementById('trim-time-start');
+      const trimTimeEnd = document.getElementById('trim-time-end');
+      const runTrimBtn = document.getElementById('run-trim-btn');
       if (trimStart && trimEnd) {
         trimStart.max = Math.floor(videoDuration);
         trimEnd.max = Math.floor(videoDuration);
@@ -387,6 +401,17 @@ document.getElementById('browse-input-btn').addEventListener('click', async () =
         trimEnd.value = Math.floor(videoDuration);
         document.getElementById('trim-label-start').textContent = "00:00:00";
         document.getElementById('trim-label-end').textContent = formatTime(Math.floor(videoDuration));
+        if (trimTimeStart && trimTimeEnd) {
+          trimTimeStart.value = "00:00:00";
+          trimTimeEnd.value = formatTime(Math.floor(videoDuration));
+          trimTimeStart.classList.remove('invalid-input');
+          trimTimeEnd.classList.remove('invalid-input');
+        }
+        if (runTrimBtn) {
+          runTrimBtn.disabled = false;
+          runTrimBtn.style.opacity = '1';
+          runTrimBtn.style.pointerEvents = 'auto';
+        }
       }
     }
   } catch (e) {
@@ -544,28 +569,241 @@ function formatTime(seconds) {
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-// Slider listeners
-document.getElementById('split-slider')?.addEventListener('input', (e) => {
-  document.getElementById('split-slider-value').textContent = formatTime(e.target.value);
-});
-
-document.getElementById('trim-slider-start')?.addEventListener('input', (e) => {
-  const start = parseInt(e.target.value);
-  const end = parseInt(document.getElementById('trim-slider-end').value);
-  if (start >= end) {
-    e.target.value = end - 1;
+function timeToSeconds(timeStr) {
+  const parts = timeStr.split(':');
+  if (parts.length === 3) {
+    return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
   }
-  document.getElementById('trim-label-start').textContent = formatTime(e.target.value);
-});
+  return 0;
+}
 
-document.getElementById('trim-slider-end')?.addEventListener('input', (e) => {
-  const end = parseInt(e.target.value);
-  const start = parseInt(document.getElementById('trim-slider-start').value);
-  if (end <= start) {
-    e.target.value = start + 1;
-  }
-  document.getElementById('trim-label-end').textContent = formatTime(e.target.value);
-});
+function isValidTimeFormat(timeStr) {
+  const regex = /^(\d{2}):([0-5]\d):([0-5]\d)$/;
+  return regex.test(timeStr);
+}
+
+// Slider & Input listeners
+const splitSliderEl = document.getElementById('split-slider');
+const splitTimeInputEl = document.getElementById('split-time-input');
+const splitSliderValueEl = document.getElementById('split-slider-value');
+
+if (splitSliderEl && splitTimeInputEl) {
+  splitSliderEl.addEventListener('input', (e) => {
+    const formattedTime = formatTime(e.target.value);
+    splitSliderValueEl.textContent = formattedTime;
+    splitTimeInputEl.value = formattedTime;
+    splitTimeInputEl.classList.remove('invalid-input');
+    const runSplitBtn = document.getElementById('run-split-btn');
+    if (runSplitBtn) {
+      runSplitBtn.disabled = false;
+      runSplitBtn.style.opacity = '1';
+      runSplitBtn.style.pointerEvents = 'auto';
+    }
+  });
+
+  splitTimeInputEl.addEventListener('input', () => {
+    const val = splitTimeInputEl.value.trim();
+    if (isValidTimeFormat(val)) {
+      const seconds = timeToSeconds(val);
+      if (seconds >= 0 && seconds <= parseInt(splitSliderEl.max)) {
+        splitSliderEl.value = seconds;
+        splitSliderValueEl.textContent = val;
+        splitTimeInputEl.classList.remove('invalid-input');
+        const runSplitBtn = document.getElementById('run-split-btn');
+        if (runSplitBtn) {
+          runSplitBtn.disabled = false;
+          runSplitBtn.style.opacity = '1';
+          runSplitBtn.style.pointerEvents = 'auto';
+        }
+        return;
+      }
+    }
+    
+    if (val.length >= 8) {
+      splitTimeInputEl.classList.add('invalid-input');
+      const runSplitBtn = document.getElementById('run-split-btn');
+      if (runSplitBtn) {
+        runSplitBtn.disabled = true;
+        runSplitBtn.style.opacity = '0.5';
+        runSplitBtn.style.pointerEvents = 'none';
+      }
+    }
+  });
+
+  splitTimeInputEl.addEventListener('blur', () => {
+    const val = splitTimeInputEl.value.trim();
+    if (!isValidTimeFormat(val) || timeToSeconds(val) > parseInt(splitSliderEl.max)) {
+      splitTimeInputEl.value = formatTime(splitSliderEl.value);
+      splitTimeInputEl.classList.remove('invalid-input');
+      const runSplitBtn = document.getElementById('run-split-btn');
+      if (runSplitBtn) {
+        runSplitBtn.disabled = false;
+        runSplitBtn.style.opacity = '1';
+        runSplitBtn.style.pointerEvents = 'auto';
+      }
+    }
+  });
+}
+
+const trimSliderStartEl = document.getElementById('trim-slider-start');
+const trimSliderEndEl = document.getElementById('trim-slider-end');
+const trimTimeStartEl = document.getElementById('trim-time-start');
+const trimTimeEndEl = document.getElementById('trim-time-end');
+const trimLabelStartEl = document.getElementById('trim-label-start');
+const trimLabelEndEl = document.getElementById('trim-label-end');
+
+if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
+  trimSliderStartEl.addEventListener('input', (e) => {
+    let start = parseInt(e.target.value);
+    let end = parseInt(trimSliderEndEl.value);
+    if (start >= end) {
+      start = end - 1;
+      e.target.value = start;
+    }
+    const formattedStart = formatTime(start);
+    trimLabelStartEl.textContent = formattedStart;
+    trimTimeStartEl.value = formattedStart;
+    trimTimeStartEl.classList.remove('invalid-input');
+    
+    if (!trimTimeEndEl.classList.contains('invalid-input')) {
+      const runTrimBtn = document.getElementById('run-trim-btn');
+      if (runTrimBtn) {
+        runTrimBtn.disabled = false;
+        runTrimBtn.style.opacity = '1';
+        runTrimBtn.style.pointerEvents = 'auto';
+      }
+    }
+  });
+
+  trimSliderEndEl.addEventListener('input', (e) => {
+    let end = parseInt(e.target.value);
+    let start = parseInt(trimSliderStartEl.value);
+    if (end <= start) {
+      end = start + 1;
+      e.target.value = end;
+    }
+    const formattedEnd = formatTime(end);
+    trimLabelEndEl.textContent = formattedEnd;
+    trimTimeEndEl.value = formattedEnd;
+    trimTimeEndEl.classList.remove('invalid-input');
+    
+    if (!trimTimeStartEl.classList.contains('invalid-input')) {
+      const runTrimBtn = document.getElementById('run-trim-btn');
+      if (runTrimBtn) {
+        runTrimBtn.disabled = false;
+        runTrimBtn.style.opacity = '1';
+        runTrimBtn.style.pointerEvents = 'auto';
+      }
+    }
+  });
+
+  trimTimeStartEl.addEventListener('input', () => {
+    const val = trimTimeStartEl.value.trim();
+    const endVal = trimTimeEndEl.value.trim();
+    
+    if (isValidTimeFormat(val) && isValidTimeFormat(endVal)) {
+      const startSecs = timeToSeconds(val);
+      const endSecs = timeToSeconds(endVal);
+      if (startSecs >= 0 && startSecs < endSecs) {
+        trimSliderStartEl.value = startSecs;
+        trimLabelStartEl.textContent = val;
+        trimTimeStartEl.classList.remove('invalid-input');
+        
+        if (!trimTimeEndEl.classList.contains('invalid-input')) {
+          const runTrimBtn = document.getElementById('run-trim-btn');
+          if (runTrimBtn) {
+            runTrimBtn.disabled = false;
+            runTrimBtn.style.opacity = '1';
+            runTrimBtn.style.pointerEvents = 'auto';
+          }
+        }
+        return;
+      }
+    }
+    
+    if (val.length >= 8) {
+      trimTimeStartEl.classList.add('invalid-input');
+      const runTrimBtn = document.getElementById('run-trim-btn');
+      if (runTrimBtn) {
+        runTrimBtn.disabled = true;
+        runTrimBtn.style.opacity = '0.5';
+        runTrimBtn.style.pointerEvents = 'none';
+      }
+    }
+  });
+
+  trimTimeStartEl.addEventListener('blur', () => {
+    const val = trimTimeStartEl.value.trim();
+    const endSecs = parseInt(trimSliderEndEl.value);
+    if (!isValidTimeFormat(val) || timeToSeconds(val) >= endSecs || timeToSeconds(val) < 0) {
+      trimTimeStartEl.value = formatTime(trimSliderStartEl.value);
+      trimTimeStartEl.classList.remove('invalid-input');
+      
+      if (!trimTimeEndEl.classList.contains('invalid-input')) {
+        const runTrimBtn = document.getElementById('run-trim-btn');
+        if (runTrimBtn) {
+          runTrimBtn.disabled = false;
+          runTrimBtn.style.opacity = '1';
+          runTrimBtn.style.pointerEvents = 'auto';
+        }
+      }
+    }
+  });
+
+  trimTimeEndEl.addEventListener('input', () => {
+    const val = trimTimeEndEl.value.trim();
+    const startVal = trimTimeStartEl.value.trim();
+    
+    if (isValidTimeFormat(val) && isValidTimeFormat(startVal)) {
+      const endSecs = timeToSeconds(val);
+      const startSecs = timeToSeconds(startVal);
+      if (endSecs > startSecs && endSecs <= parseInt(trimSliderEndEl.max)) {
+        trimSliderEndEl.value = endSecs;
+        trimLabelEndEl.textContent = val;
+        trimTimeEndEl.classList.remove('invalid-input');
+        
+        if (!trimTimeStartEl.classList.contains('invalid-input')) {
+          const runTrimBtn = document.getElementById('run-trim-btn');
+          if (runTrimBtn) {
+            runTrimBtn.disabled = false;
+            runTrimBtn.style.opacity = '1';
+            runTrimBtn.style.pointerEvents = 'auto';
+          }
+        }
+        return;
+      }
+    }
+    
+    if (val.length >= 8) {
+      trimTimeEndEl.classList.add('invalid-input');
+      const runTrimBtn = document.getElementById('run-trim-btn');
+      if (runTrimBtn) {
+        runTrimBtn.disabled = true;
+        runTrimBtn.style.opacity = '0.5';
+        runTrimBtn.style.pointerEvents = 'none';
+      }
+    }
+  });
+
+  trimTimeEndEl.addEventListener('blur', () => {
+    const val = trimTimeEndEl.value.trim();
+    const startSecs = parseInt(trimSliderStartEl.value);
+    const maxSecs = parseInt(trimSliderEndEl.max);
+    if (!isValidTimeFormat(val) || timeToSeconds(val) <= startSecs || timeToSeconds(val) > maxSecs) {
+      trimTimeEndEl.value = formatTime(trimSliderEndEl.value);
+      trimTimeEndEl.classList.remove('invalid-input');
+      
+      if (!trimTimeStartEl.classList.contains('invalid-input')) {
+        const runTrimBtn = document.getElementById('run-trim-btn');
+        if (runTrimBtn) {
+          runTrimBtn.disabled = false;
+          runTrimBtn.style.opacity = '1';
+          runTrimBtn.style.pointerEvents = 'auto';
+        }
+      }
+    }
+  });
+}
 
 // --- Compressor Tool ---
 const crfSlider = document.getElementById('crf-slider');
@@ -724,8 +962,7 @@ async function executeFFmpegTask(taskName, args) {
 
 // --- Split Tool ---
 document.getElementById('run-split-btn').addEventListener('click', () => {
-  const startSeconds = document.getElementById('split-slider').value;
-  const start = formatTime(startSeconds);
+  const start = document.getElementById('split-time-input').value || document.getElementById('split-slider-value').textContent;
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/split_${filename}`;
 
@@ -737,10 +974,8 @@ document.getElementById('run-split-btn').addEventListener('click', () => {
 
 // --- Trim Tool ---
 document.getElementById('run-trim-btn').addEventListener('click', () => {
-  const startSeconds = document.getElementById('trim-slider-start').value;
-  const endSeconds = document.getElementById('trim-slider-end').value;
-  const start = formatTime(startSeconds);
-  const end = formatTime(endSeconds);
+  const start = document.getElementById('trim-time-start').value || document.getElementById('trim-label-start').textContent;
+  const end = document.getElementById('trim-time-end').value || document.getElementById('trim-label-end').textContent;
   const filename = globalInputPath.split(/[\/\\]/).pop();
   const output = `${globalOutputPath}/trimmed_${filename}`;
 

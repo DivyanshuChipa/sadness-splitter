@@ -1620,3 +1620,38 @@ input:checked+.ios-slider:before {
   color: var(--accent);
   font-weight: 700;
 }
+
+/* Manual Time Inputs */
+.manual-time-group label, .time-input-wrapper label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.time-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 0.9rem;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.time-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.time-input.invalid-input {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3) !important;
+  color: var(--danger) !important;
+}
