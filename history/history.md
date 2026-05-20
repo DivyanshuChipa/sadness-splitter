@@ -48,6 +48,9 @@
 
 ### 📝 Change Log (Git-Style)
 
+- **feat(persona)**: [2026-05-20] Added **Hover-to-Anger** mascot interaction — 5 hover streak (with 2s timeout reset) triggers anger mode independently from the existing click system.
+- **feat(ui)**: [2026-05-20] Made **About Sadness Splitter** card collapsible by default with smooth chevron expand/collapse animation, saving vertical space in right panel.
+- **feat(persona)**: [2026-05-20] Synced **Mascot Glow** with speech bubble auto-glow — both now glow together with accent drop-shadow and fade out simultaneously after 4 seconds.
 - **fix(engine)**: [2026-05-20] Fixed **FFmpeg Progress Tracking** (now splits on carriage return `\r` and uses a more robust regex for varying millisecond formats) so progress updates smoothly instead of jumping from 0% to 100%.
 - **fix(engine)**: [2026-05-20] Bound and rendered **FFmpeg Version** (created a new `get_ffmpeg_version` Tauri command and connected it to `#ffmpeg-version-text` DOM) so the engine status card no longer gets stuck on "checking...".
 - **feat(persona)**: [2026-05-20] Added **Interactive Video Preview Suggestion Flow** with pulsing CSS glow, dynamic consent updates, and anti-spam protection (max 2 per run).

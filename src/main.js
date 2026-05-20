@@ -36,6 +36,8 @@ let isIdle = false;
 let flashTimer = null;
 let isFlashing = false;
 let autoGlowTimer = null;
+let hoverCount = 0;
+let hoverResetTimer = null;
 
 const toolReactions = {
   'compress': { face: 'face_confident.png', msg: "File too heavy? Let’s shrink it down! 💪" },
@@ -184,6 +186,29 @@ if (reactiveFace) {
           updateStatus("Ready to process emotional baggage.");
         }
       }, 3000);
+    }
+  });
+
+  // Hover-to-Anger (5 hovers = anger — independent of click system)
+  reactiveFace.addEventListener('mouseenter', () => {
+    if (hoverCount >= 5) return;
+    clearTimeout(hoverResetTimer);
+    hoverCount++;
+
+    if (hoverCount === 5) {
+      hoverCount = 0;
+      reactiveFace.src = `emotive-ani-character/face_angry.png`;
+      updateStatus("STOP STARING AT ME! Mind your own business! 😤🌋");
+      const isEmotional = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
+      if (isEmotional) flashRedYellow();
+      setTimeout(() => {
+        const currentPercent = parseFloat(progressFill.style.width) || 0;
+        updatePersonaFace(currentPercent);
+        updateStatus("Ready to process emotional baggage.");
+      }, 4000);
+    } else {
+      // Reset hover streak if user goes away for 2s
+      hoverResetTimer = setTimeout(() => { hoverCount = 0; }, 2000);
     }
   });
 
@@ -399,6 +424,24 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   startSystemMetrics();
+
+  // About Card Collapsible Toggle
+  const aboutCardToggle = document.getElementById('about-card-toggle');
+  const aboutCardEl = document.getElementById('about-card');
+  const aboutBodyEl = document.getElementById('about-body');
+  if (aboutCardToggle && aboutCardEl && aboutBodyEl) {
+    aboutCardToggle.addEventListener('click', () => {
+      const isExpanded = aboutCardEl.classList.contains('expanded');
+      if (isExpanded) {
+        aboutBodyEl.style.display = 'none';
+        aboutCardEl.classList.remove('expanded');
+      } else {
+        aboutBodyEl.style.display = 'flex';
+        aboutCardEl.classList.add('expanded');
+        lucide.createIcons();
+      }
+    });
+  }
 });
 
 // Demo mode logic is now handled in tour.js via the dialog.
@@ -427,11 +470,13 @@ function updateStatus(msg) {
     void container.offsetWidth; // Trigger reflow
     container.classList.add('speech-update');
 
-    // Auto-glow for 4 seconds
+    // Auto-glow for 4 seconds (mascot + speech bubble synced)
     container.classList.add('speech-auto-glow');
+    if (reactiveFace) reactiveFace.classList.add('mascot-glow');
     clearTimeout(autoGlowTimer);
     autoGlowTimer = setTimeout(() => {
       container.classList.remove('speech-auto-glow');
+      if (reactiveFace) reactiveFace.classList.remove('mascot-glow');
     }, 4000);
   }
 }
