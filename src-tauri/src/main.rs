@@ -68,13 +68,14 @@ fn process_video(window: Window, args: Vec<String>, total_duration: f64) {
         let stderr = child.stderr.take().expect("Failed to open stderr");
         let reader = BufReader::new(stderr);
         
-        // Regex to parse `time=HH:MM:SS.ms`
-        let re = Regex::new(r"time=(\d{2}):(\d{2}):(\d{2}\.\d{2})").unwrap();
+        // Regex to parse `time=HH:MM:SS.ms` or similar (supports flexible decimal places)
+        let re = Regex::new(r"time=(\d{2}):(\d{2}):(\d{2}(?:\.\d+)?)").unwrap();
 
         let mut last_percentage: i32 = 0;
 
-        for line in reader.lines() {
-            if let Ok(l) = line {
+        for segment in reader.split(b'\r') {
+            if let Ok(bytes) = segment {
+                let l = String::from_utf8_lossy(&bytes);
                 if let Some(caps) = re.captures(&l) {
                     let h: f64 = caps[1].parse().unwrap_or(0.0);
                     let m: f64 = caps[2].parse().unwrap_or(0.0);
@@ -270,12 +271,36 @@ fn check_ffmpeg() -> bool {
         .unwrap_or(false)
 }
 
+#[tauri::command]
+fn get_ffmpeg_version() -> String {
+    let output = Command::new("ffmpeg")
+        .arg("-version")
+        .output();
+    
+    match output {
+        Ok(out) => {
+            let stdout_str = String::from_utf8_lossy(&out.stdout);
+            if let Some(first_line) = stdout_str.lines().next() {
+                let re = Regex::new(r"ffmpeg version (\S+)").unwrap();
+                if let Some(caps) = re.captures(first_line) {
+                    caps[1].to_string()
+                } else {
+                    first_line.trim().to_string()
+                }
+            } else {
+                "Unknown".to_string()
+            }
+        }
+        Err(_) => "Not Found".to_string(),
+    }
+}
+
 fn main() {
     start_gpu_monitor();
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder, generate_thumbnail, check_ffmpeg, get_system_metrics])
+        .invoke_handler(tauri::generate_handler![get_video_duration, process_video, list_videos_in_folder, generate_thumbnail, check_ffmpeg, get_ffmpeg_version, get_system_metrics])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

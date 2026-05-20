@@ -76,7 +76,7 @@
 .btn-small {
   padding: 6px 12px;
   background: var(--accent);
-  color: white;
+  color: var(--btn-text);
   border: none;
   border-radius: 6px;
   font-size: 0.75rem;
@@ -107,7 +107,7 @@
 
 .icon-btn-small {
   background: var(--accent);
-  color: white;
+  color: var(--btn-text);
   border: none;
   width: 32px;
   height: 32px;

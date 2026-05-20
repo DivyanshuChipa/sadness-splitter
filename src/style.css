@@ -1768,3 +1768,26 @@ input:checked+.ios-slider:before {
   0%, 100% { opacity: 0.4; transform: scale(1); }
   50% { opacity: 0.8; transform: scale(1.05); }
 }
+
+/* Custom Pulse Glow Animation for Modes & Preview Highlighting */
+.preview-pulse-highlight {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  animation: glow-pulse 1.5s infinite ease-in-out;
+  border: 1.5px solid var(--accent) !important;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  transition: all 0.3s ease;
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.7);
+    border-color: var(--accent);
+    background: rgba(59, 130, 246, 0.08);
+  }
+}

@@ -48,6 +48,10 @@
 
 ### 📝 Change Log (Git-Style)
 
+- **fix(engine)**: [2026-05-20] Fixed **FFmpeg Progress Tracking** (now splits on carriage return `\r` and uses a more robust regex for varying millisecond formats) so progress updates smoothly instead of jumping from 0% to 100%.
+- **fix(engine)**: [2026-05-20] Bound and rendered **FFmpeg Version** (created a new `get_ffmpeg_version` Tauri command and connected it to `#ffmpeg-version-text` DOM) so the engine status card no longer gets stuck on "checking...".
+- **feat(persona)**: [2026-05-20] Added **Interactive Video Preview Suggestion Flow** with pulsing CSS glow, dynamic consent updates, and anti-spam protection (max 2 per run).
+- **feat(ui)**: [2026-05-20] Relocated **Guide** button directly inside Compress header and cleaned up unused `#custom-modal` and JS handlers.
 - **feat(ui)**: [2026-04-30] Polished Right Panel with a new **Hero Feature Card** and colorized Tech Stack icons.
 - **fix(ui)**: [2026-04-30] Fixed Modal buttons (Tour, Emotional Mode, Skip) and consolidated event listeners.
 - **feat(ui)**: [2026-04-30] Refined 3-column layout: Moved **Guided Tour** to Right Panel, restored **System Log** to main footer.

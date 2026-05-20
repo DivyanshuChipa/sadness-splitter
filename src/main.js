@@ -14,6 +14,9 @@ let isDemoMode = false; // Controlled by tour/emotional mode choices
 let globalInputPath = "";
 let globalOutputPath = "";
 let videoDuration = 0;
+let previewPromptCount = 0;
+let isWaitingForPreviewConsent = false;
+let previewConsentTimer = null;
 
 // Emotional Stages
 const emotionalStages = [
@@ -96,6 +99,15 @@ function setPersonaEmotion(face, message) {
   }
 
   if (message) updateStatus(message);
+}
+
+function clearPreviewConsentState() {
+  isWaitingForPreviewConsent = false;
+  clearTimeout(previewConsentTimer);
+  const previewSettingsItem = document.getElementById('preview-settings-item');
+  if (previewSettingsItem) {
+    previewSettingsItem.classList.remove('preview-pulse-highlight');
+  }
 }
 
 function flashRedYellow() {
@@ -238,6 +250,40 @@ navBtns.forEach(btn => {
       setPersonaEmotion(reaction.face, reaction.msg);
     }
 
+    // Interactive Video Preview Suggestion Flow
+    const previewToggleInput = document.getElementById('preview-toggle-input');
+    const previewSettingsItem = document.getElementById('preview-settings-item');
+    if ((targetId === 'trim' || targetId === 'split') && previewToggleInput && !previewToggleInput.checked && previewPromptCount < 2) {
+      // Clear previous timer/highlight if any
+      clearPreviewConsentState();
+
+      previewPromptCount++;
+      isWaitingForPreviewConsent = true;
+
+      // Small natural delay for suggestion to appear after initial tab reaction
+      setTimeout(() => {
+        if (isWaitingForPreviewConsent) {
+          setPersonaEmotion('face_curious.png', "Hey! You want to trim/split? It's much better to preview what you are cutting! Let's turn on Video Preview? 😉");
+          if (previewSettingsItem) {
+            previewSettingsItem.classList.add('preview-pulse-highlight');
+          }
+
+          // Timeout to clear highlight and reset state if ignored
+          previewConsentTimer = setTimeout(() => {
+            if (isWaitingForPreviewConsent) {
+              clearPreviewConsentState();
+              setPersonaEmotion('face_neutral.png', "Ok, as you wish. 💛");
+            }
+          }, 12000); // 12 seconds
+        }
+      }, 900);
+    } else {
+      // If clicking away to another tool, dismiss the suggest highlights cleanly
+      if (targetId !== 'trim' && targetId !== 'split') {
+        clearPreviewConsentState();
+      }
+    }
+
     // Refresh icons just in case (though usually not needed)
     lucide.createIcons();
   });
@@ -247,6 +293,7 @@ navBtns.forEach(btn => {
 async function checkEngineStatus() {
   const ffmpegDot = document.getElementById('ffmpeg-dot');
   const ffmpegStatus = document.getElementById('ffmpeg-status-text');
+  const ffmpegVersion = document.getElementById('ffmpeg-version-text');
   const ffmpegFix = document.getElementById('ffmpeg-fix-link');
 
   try {
@@ -255,16 +302,26 @@ async function checkEngineStatus() {
       ffmpegDot.className = 'dot green';
       ffmpegStatus.textContent = 'FFmpeg Engine: Active';
       ffmpegFix.style.display = 'none';
+      try {
+        const version = await invoke('get_ffmpeg_version');
+        if (ffmpegVersion) {
+          ffmpegVersion.textContent = `Version: ${version}`;
+        }
+      } catch (verErr) {
+        if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Unknown';
+      }
     } else {
       ffmpegDot.className = 'dot red';
       ffmpegStatus.textContent = 'FFmpeg: Not Found';
       ffmpegFix.style.display = 'block';
+      if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Not Found';
       updateStatus("Aura noticed FFmpeg is missing! Please install it. 🔴");
     }
   } catch (e) {
     ffmpegDot.className = 'dot red';
     ffmpegStatus.textContent = 'FFmpeg: Error';
     ffmpegFix.style.display = 'block';
+    if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Error';
   }
 }
 
@@ -315,6 +372,15 @@ window.addEventListener('DOMContentLoaded', () => {
       if (e.target.checked) {
         livePreviewCard.style.display = 'flex';
         localStorage.setItem('show-video-preview', 'true');
+
+        // Dynamic reaction if they complied with Aura's suggest flow
+        if (isWaitingForPreviewConsent) {
+          clearPreviewConsentState();
+          setTimeout(() => {
+            setPersonaEmotion('face_exicited.png', "Yay! Now you can see exactly where you are cutting! 🎬✨");
+          }, 300);
+        }
+
         // Re-initialize Lucide Icons just in case
         if (window.lucide) window.lucide.createIcons();
       } else {
