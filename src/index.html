@@ -326,6 +326,16 @@
               <label>FPS (Higher = Smoother)</label>
               <input type="number" id="gif-fps" value="15">
             </div>
+            <div class="control-group dual-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+              <div style="flex: 1;">
+                <label>Start Time (HH:MM:SS)</label>
+                <input type="text" id="gif-start" class="time-input" value="00:00:00" placeholder="00:00:00">
+              </div>
+              <div style="flex: 1;">
+                <label>Duration (Seconds)</label>
+                <input type="number" id="gif-duration" value="6" min="1">
+              </div>
+            </div>
             <button id="run-gif-btn" class="btn action">Generate Elite GIF</button>
           </section>
 

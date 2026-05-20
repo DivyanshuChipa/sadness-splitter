@@ -48,6 +48,16 @@
 
 ### 📝 Change Log (Git-Style)
 
+- **feat(persona)**: [2026-05-20] Added **Contextual Tool Success Cheerleading** — Aura now responds with 13+ tailored cheerleading dialogues and expressions upon successful completion of specific tools.
+- **feat(persona)**: [2026-05-20] Implemented **High CPU/RAM Load Warning** — Aura panics and switches to a red theme with 30s cooldown protection if system resource usage spikes above 85%.
+- **feat(persona)**: [2026-05-20] Added **Manual Theme circles mascot reactions** — Aura reacts with tailored expressions and text lines whenever the user changes themes using the sidebar picker.
+- **feat(persona)**: [2026-05-20] Implemented **Late-Night Sleepy Easter Egg** — automatically displays sleepy dialogue and custom expressions when launching the application between 11 PM and 6 AM.
+- **feat(elite)**: [2026-05-20] Added **GIF Maker Trim Mechanism** — integrated Start Time (HH:MM:SS) and Duration (seconds) inputs into the GIF generator using fast-seeking FFmpeg parameters (`-ss` and `-t` before `-i`) for fast seek over long video files, with custom duration progress tracking.
+- **feat(ui)**: [2026-05-20] Implemented **Smooth Real-time Preview Rotation** — added CSS transition transform effects on `#preview-video` player and hooked up automated tab changes and `#rotate-select` changes for live feedback.
+- **feat(fix)**: [2026-05-20] Fixed **Contact Sheet Incomplete Grid** — replaced the frame-skipping static `thumbnail` filter with a mathematically-calculated dynamic `select` interval filter based on `videoDuration` and grid layout dimensions to ensure 100% complete PNG layouts for videos of any length.
+- **feat(persona)**: [2026-05-20] Added **System Metrics Hover Spam Protection** — capped mascot reactions to 2 hovers max per session.
+- **feat(ui)**: [2026-05-20] Styled **System Metrics Heading** — centered, capitalized, and glowing to match the About heading style.
+- **feat(persona)**: [2026-05-20] Implemented **FFmpeg Absence crying reaction** — if FFmpeg is missing, mascot uses sad `face_depression.png` face, status changes to "Not Active", and displays a crying speech bubble plea to download the installer.
 - **feat(persona)**: [2026-05-20] Added **Hover-to-Anger** mascot interaction — 5 hover streak (with 2s timeout reset) triggers anger mode independently from the existing click system.
 - **feat(ui)**: [2026-05-20] Made **About Sadness Splitter** card collapsible by default with smooth chevron expand/collapse animation, saving vertical space in right panel.
 - **feat(persona)**: [2026-05-20] Synced **Mascot Glow** with speech bubble auto-glow — both now glow together with accent drop-shadow and fade out simultaneously after 4 seconds.

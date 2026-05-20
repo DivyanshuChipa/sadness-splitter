@@ -38,6 +38,7 @@ let isFlashing = false;
 let autoGlowTimer = null;
 let hoverCount = 0;
 let hoverResetTimer = null;
+let metricsHoverCount = 0;
 
 const toolReactions = {
   'compress': { face: 'face_confident.png', msg: "File too heavy? Let’s shrink it down! 💪" },
@@ -226,9 +227,12 @@ if (reactiveFace) {
   const metricsCard = document.querySelector('.metrics-card');
   if (metricsCard) {
     metricsCard.addEventListener('mouseenter', () => {
-      setPersonaEmotion('face_embrrasment.png', "Oh, you like my performance stats? 👉👈");
-      if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
-        setTheme('theme-pink');
+      if (metricsHoverCount < 2) {
+        metricsHoverCount++;
+        setPersonaEmotion('face_embrrasment.png', "Oh, you like my performance stats? 👉👈");
+        if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
+          setTheme('theme-pink');
+        }
       }
     });
   }
@@ -309,6 +313,9 @@ navBtns.forEach(btn => {
       }
     }
 
+    // Update video preview rotation
+    updatePreviewRotation();
+
     // Refresh icons just in case (though usually not needed)
     lucide.createIcons();
   });
@@ -335,18 +342,33 @@ async function checkEngineStatus() {
       } catch (verErr) {
         if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Unknown';
       }
+
+      // Sleepy Easter egg for late night/early morning hours
+      const currentHour = new Date().getHours();
+      if (currentHour >= 23 || currentHour < 6) {
+        setTimeout(() => {
+          setPersonaEmotion('face_sleepy.png', "Yawn... Raat kaafi ho gayi hai, Sadness Split karte karte so mat jana! 🥱💤");
+        }, 1500);
+      }
     } else {
       ffmpegDot.className = 'dot red';
-      ffmpegStatus.textContent = 'FFmpeg: Not Found';
+      ffmpegStatus.textContent = 'FFmpeg: Not Active';
       ffmpegFix.style.display = 'block';
       if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Not Found';
-      updateStatus("Aura noticed FFmpeg is missing! Please install it. 🔴");
+      setPersonaEmotion('face_depression.png', "Oh no... Please install FFmpeg! Without it, I am nothing... 😭");
+      if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
+        setTheme('theme-blue');
+      }
     }
   } catch (e) {
     ffmpegDot.className = 'dot red';
-    ffmpegStatus.textContent = 'FFmpeg: Error';
+    ffmpegStatus.textContent = 'FFmpeg: Not Active';
     ffmpegFix.style.display = 'block';
     if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Error';
+    setPersonaEmotion('face_depression.png', "Oh no... Please install FFmpeg! Without it, I am nothing... 😭");
+    if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
+      setTheme('theme-blue');
+    }
   }
 }
 
@@ -604,6 +626,8 @@ function updateEmotionalToggleUI(isActive) {
   input.checked = isActive;
 }
 
+let lastCpuWarningTime = 0;
+
 function startSystemMetrics() {
   const ramRing = document.getElementById('ram-ring');
   const cpuRing = document.getElementById('cpu-ring');
@@ -626,6 +650,19 @@ function startSystemMetrics() {
       const ram = Number(metrics?.ram_percent);
       const cpu = Number(metrics?.cpu_percent);
       const gpu = Number(metrics?.gpu_percent);
+
+      // High CPU / RAM Panic warning with 30-second cooldown
+      if (Number.isFinite(ram) && Number.isFinite(cpu)) {
+        const now = Date.now();
+        if ((cpu > 85 || ram > 85) && (now - lastCpuWarningTime > 30000)) {
+          lastCpuWarningTime = now;
+          setPersonaEmotion('face_shocked.png', "Oye! System statistics are sweating! 🥵 Mere dimaag me fire lag gayi hai! 🔥");
+          const isEmotional = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
+          if (isEmotional) {
+            setTheme('theme-red');
+          }
+        }
+      }
 
       if (Number.isFinite(ram)) {
         ramRing?.classList.remove('metric-unavailable');
@@ -677,15 +714,40 @@ listen('progress', (event) => {
 
 listen('finished', (event) => {
   progressFill.classList.remove('indeterminate');
+  const activeTab = document.querySelector('.nav-btn.active')?.dataset.target;
+  
+  const successReactions = {
+    'compress': { face: 'face_confident.png', msg: "Boom! Heavy baggage successfully compressed into a compact file! 😎" },
+    'split': { face: 'face_smug.png', msg: "Cut clean! Your memories have been successfully split! ✂️" },
+    'trim': { face: 'face_determined.png', msg: "Trim complete! All unnecessary clutter has been cut away! 🧼" },
+    'rotate': { face: 'face_laughing.png', msg: "Perspective rotated successfully! Looks amazing from this side! 🔄" },
+    'audio': { face: 'face_curious.png', msg: "Audio successfully extracted! Aura is vibing to these beats! 🎧🎶" },
+    'convert': { face: 'face_smug.png', msg: "Conversion success! Brand new format, same emotions! ✨" },
+    'subtitle': { face: 'face_confident.png', msg: "Subtitles burned in! Every single word now carries weight! ✍️" },
+    'speed': { face: 'face_exicited.png', msg: "Speed Warp applied! Time dilation is complete! ⚡" },
+    'gif': { face: 'face_laughing.png', msg: "Elite loop generated! Go share this loop and spread the laughter! 😂" },
+    'merger': { face: 'face_love.png', msg: "Videos merged! Your timelines are beautifully unified! 💖" },
+    'stabilize': { face: 'face_exicited.png', msg: "Anti-shake complete! Smooth footage achieved, no more shaky memories! 🧘✨" },
+    'contact': { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
+    'batch': { face: 'face_confident.png', msg: "Batch processing completed! Aura worked overtime, but we crushed it! 🏆" }
+  };
+
   if (event.payload.success) {
     displayedProgress = Math.max(displayedProgress, 99);
     setProgressSmooth(100);
-    updateStatus(emotionalStages[4].msg);
-    updatePersonaFace(100);
+    
+    const reaction = successReactions[activeTab];
+    if (reaction) {
+      setPersonaEmotion(reaction.face, reaction.msg);
+    } else {
+      updateStatus(emotionalStages[4].msg);
+      updatePersonaFace(100);
+    }
   } else {
-    updateStatus("Error processing emotional baggage. FFmpeg failed.");
-    updatePersonaFace(40); // Anger face for failure
+    const errorMsg = "Error processing emotional baggage. FFmpeg failed.";
+    setPersonaEmotion('face_anger.png', errorMsg);
   }
+  
   setTimeout(() => {
     progressContainer.style.display = 'none';
     progressFill.classList.remove('indeterminate');
@@ -1069,7 +1131,7 @@ document.getElementById('clear-batch-list-btn').addEventListener('click', () => 
 });
 
 // --- HELPER: Execute FFmpeg Task ---
-async function executeFFmpegTask(taskName, args) {
+async function executeFFmpegTask(taskName, args, customDuration = null) {
   if (!globalInputPath || !globalOutputPath) {
     alert("Please select input video and output folder.");
     return;
@@ -1080,13 +1142,15 @@ async function executeFFmpegTask(taskName, args) {
     return;
   }
 
+  const durationToUse = (customDuration !== null) ? customDuration : videoDuration;
+
   progressContainer.style.display = 'block';
   displayedProgress = 0;
-  setProgressMode(videoDuration);
+  setProgressMode(durationToUse);
   updateStatus(`Initiating ${taskName.toLowerCase()}...`);
 
   try {
-    await invoke('process_video', { args, totalDuration: videoDuration });
+    await invoke('process_video', { args, totalDuration: durationToUse });
   } catch (e) {
     console.error(`Error in ${taskName}:`, e);
     updateStatus(`${taskName} failed.`);
@@ -1241,14 +1305,17 @@ document.getElementById('run-batch-btn').addEventListener('click', async () => {
 document.getElementById('run-gif-btn').addEventListener('click', () => {
   const width = document.getElementById('gif-width').value || "480";
   const fps = document.getElementById('gif-fps').value || "15";
+  const start = document.getElementById('gif-start').value || "00:00:00";
+  const duration = parseInt(document.getElementById('gif-duration').value) || 6;
   const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
   const output = `${globalOutputPath}/${filename}_elite.gif`;
 
   // High Quality GIF filter chain
   const filter = `fps=${fps},scale=${width}:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`;
 
-  const args = ["-i", globalInputPath, "-vf", filter, "-y", output];
-  executeFFmpegTask("GIF Creation", args);
+  // Fast input-seeking using -ss and -t before -i
+  const args = ["-ss", start, "-t", duration.toString(), "-i", globalInputPath, "-vf", filter, "-y", output];
+  executeFFmpegTask("GIF Creation", args, duration);
 });
 
 // --- Video Merger Tool ---
@@ -1308,8 +1375,17 @@ document.getElementById('run-contact-btn').addEventListener('click', () => {
   const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
   const output = `${globalOutputPath}/${filename}_contact_sheet.png`;
 
-  // Filter for grid of thumbnails
-  const filter = `thumbnail,scale=${width}:-1,tile=${grid}`;
+  const [cols, rows] = grid.split('x').map(Number);
+  const numFrames = cols * rows;
+
+  let filter;
+  if (videoDuration && videoDuration > 0) {
+    // Select frames at regular intervals based on total duration to fill the grid completely
+    const interval = videoDuration / (numFrames + 1);
+    filter = `select='isnan(prev_selected_t)+gte(t-prev_selected_t,${interval})',scale=${width}:-1,tile=${grid}`;
+  } else {
+    filter = `thumbnail,scale=${width}:-1,tile=${grid}`;
+  }
 
   const args = ["-i", globalInputPath, "-vf", filter, "-frames:v", "1", "-y", output];
   executeFFmpegTask("Contact Sheet", args);
@@ -1323,10 +1399,27 @@ const body = document.body;
 const savedTheme = localStorage.getItem('app-theme') || 'theme-blue';
 setTheme(savedTheme);
 
+const themeReactions = {
+  'theme-pink': { face: 'face_love.png', msg: "Aww, is pink matching my vibe today? 👉👈" },
+  'theme-red': { face: 'face_anger.png', msg: "Why so red? Angry ho kya? 😡" },
+  'theme-green': { face: 'face_smug.png', msg: "Green looks fresh, ready to crush some bitrates! 🍃" },
+  'theme-gold': { face: 'face_acceptance.png', msg: "Golden premium vibes! Standard high quality only! ✨" },
+  'theme-white': { face: 'face_bored.png', msg: "White? So blank... add some colors to your life! 🥱" },
+  'theme-blue': { face: 'face_confident.png', msg: "Classic blue. Back to focus and coding! 💻" },
+  'theme-purple': { face: 'face_thinking.png', msg: "Purple elegance. Let's think of some cool cuts! 🔮" },
+  'theme-yellow': { face: 'face_exicited.png', msg: "A sunny theme! Exciting times ahead! ☀️" }
+};
+
 themeCircles.forEach(circle => {
   circle.addEventListener('click', () => {
     const theme = circle.dataset.theme;
     setTheme(theme);
+    
+    // Mascot reacts to manual theme pick
+    const reaction = themeReactions[theme];
+    if (reaction) {
+      setPersonaEmotion(reaction.face, reaction.msg);
+    }
   });
 });
 
@@ -1409,6 +1502,28 @@ function initPreviewPlayer(filePath) {
   // Reinitialize Lucide Icons for buttons inside the preview card
   if (window.lucide) {
     window.lucide.createIcons();
+  }
+}
+
+// Update the physical rotation of the video preview player
+function updatePreviewRotation() {
+  const previewVideo = document.getElementById('preview-video');
+  if (!previewVideo) return;
+
+  const activeTab = document.querySelector('.nav-btn.active')?.dataset.target;
+  if (activeTab === 'rotate') {
+    const type = document.getElementById('rotate-select').value;
+    if (type === "90 Clockwise") {
+      previewVideo.style.transform = "rotate(90deg) scale(0.75)";
+    } else if (type === "90 Counter") {
+      previewVideo.style.transform = "rotate(-90deg) scale(0.75)";
+    } else if (type === "180 Flip") {
+      previewVideo.style.transform = "rotate(180deg)";
+    } else {
+      previewVideo.style.transform = "none";
+    }
+  } else {
+    previewVideo.style.transform = "none";
   }
 }
 
@@ -1559,6 +1674,14 @@ window.addEventListener('DOMContentLoaded', () => {
         previewPlayBtn.innerHTML = '<i data-lucide="pause"></i> Pause';
         if (window.lucide) window.lucide.createIcons();
       }
+    });
+  }
+
+  // 5. Rotate select change control
+  const rotateSelect = document.getElementById('rotate-select');
+  if (rotateSelect) {
+    rotateSelect.addEventListener('change', () => {
+      updatePreviewRotation();
     });
   }
 });

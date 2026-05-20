@@ -1441,6 +1441,18 @@ input:checked+.ios-slider:before {
   margin-bottom: 20px;
 }
 
+.metrics-card h3 {
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.5px;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0 0 14px 0;
+  transition: color 0.2s ease;
+  text-shadow: 0 0 10px var(--accent-glow), 0 0 20px var(--accent-glow);
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1736,6 +1748,7 @@ input:checked+.ios-slider:before {
   object-fit: contain;
   border-radius: 12px;
   background: #000;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .preview-placeholder, .preview-warning {
