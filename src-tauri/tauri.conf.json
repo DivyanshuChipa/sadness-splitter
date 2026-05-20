@@ -19,10 +19,10 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost; media-src 'self' asset: https://asset.localhost; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'",
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost http://asset.localhost; media-src 'self' asset: https://asset.localhost http://asset.localhost; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'",
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": ["**", "**/*"]
       }
     }
   }

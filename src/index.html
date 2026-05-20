@@ -109,9 +109,14 @@
 
           <!-- COMPRESS TOOL -->
           <section id="compress" class="tool-view active glass-panel">
-            <div class="tool-header">
-              <h3>Compress (CRF Control)</h3>
-              <p>Reduce the weight of your emotional baggage.</p>
+            <div class="tool-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;">
+              <div>
+                <h3>Compress (CRF Control)</h3>
+                <p>Reduce the weight of your emotional baggage.</p>
+              </div>
+              <button id="restart-tour-btn" class="btn secondary" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; flex-shrink: 0; margin-top: 5px;">
+                <i data-lucide="help-circle" style="width: 14px; height: 14px;"></i> Guide
+              </button>
             </div>
 
             <div class="control-group">
@@ -403,20 +408,45 @@
     <!-- Right Info Panel (Desktop Only) -->
     <aside class="right-panel">
 
-      <!-- Card 1: Help & Emotional Mode -->
+      <!-- Card 0: Live Video Preview -->
+      <div class="settings-card glass-panel preview-card" id="live-preview-card">
+        <div class="settings-header">
+          <h3>Live Video Preview</h3>
+          <i data-lucide="video"></i>
+        </div>
+        <div class="preview-container">
+          <!-- Video Player -->
+          <video id="preview-video" style="display: none;" playsinline></video>
+          
+          <!-- Placeholder (When no video is loaded) -->
+          <div id="preview-placeholder" class="preview-placeholder">
+            <div class="placeholder-icon"><i data-lucide="video-off"></i></div>
+            <span>No video loaded</span>
+            <small>Load an MP4/MOV/WebM video to see real-time preview.</small>
+          </div>
+
+          <!-- Fallback Warning (For MKV/AVI/unsupported containers) -->
+          <div id="preview-compat-warning" class="preview-warning" style="display: none;">
+            <div class="warning-icon"><i data-lucide="alert-triangle"></i></div>
+            <span>Preview Restricted</span>
+            <small>Direct browser preview is not supported for AVI/MKV, but Split & Trim will still work perfectly!</small>
+          </div>
+        </div>
+
+        <!-- Custom Controls -->
+        <div id="preview-controls" class="preview-controls" style="display: none;">
+          <button id="preview-play-btn" class="btn-small secondary"><i data-lucide="play"></i> Play</button>
+          <button id="preview-trim-play-btn" class="btn-small primary" style="display: none;"><i data-lucide="play-circle"></i> Play Trim Selection</button>
+        </div>
+      </div>
+
+      <!-- Card 1: Modes & Preview -->
       <div class="settings-card glass-panel">
         <div class="settings-header">
-          <h3>Help & Emotional Mode</h3>
-          <i data-lucide="help-circle"></i>
+          <h3>Modes & Preview</h3>
+          <i data-lucide="sliders"></i>
         </div>
         <div class="settings-list">
-          <button id="restart-tour-btn" class="settings-item">
-            <div class="settings-item-left">
-              <i data-lucide="help-circle"></i>
-              <span>Help</span>
-            </div>
-            <i data-lucide="chevron-right" class="settings-chevron"></i>
-          </button>
           <div class="settings-item">
             <div class="settings-item-left">
               <i data-lucide="heart" style="color: #ec4899;"></i>
@@ -424,6 +454,16 @@
             </div>
             <label class="ios-toggle">
               <input type="checkbox" id="emotional-toggle-input">
+              <span class="ios-slider"></span>
+            </label>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-left">
+              <i data-lucide="video" style="color: var(--accent);"></i>
+              <span>Video Preview</span>
+            </div>
+            <label class="ios-toggle">
+              <input type="checkbox" id="preview-toggle-input" checked>
               <span class="ios-slider"></span>
             </label>
           </div>
@@ -521,27 +561,6 @@
 
   </div> <!-- End App Container -->
 
-  <!-- CUSTOM DIALOG MODAL -->
-  <div id="custom-modal" class="modal-overlay" style="display: none;">
-    <div class="modal-content glass-panel">
-      <div class="modal-header">
-        <div class="modal-icon">💡</div>
-        <h3>Help Center</h3>
-      </div>
-      <p>In which tool do you need help today?</p>
-      <div class="modal-actions" style="flex-direction: column; gap: 10px;">
-        <button id="start-tour-btn" class="btn secondary" style="width:100%"><i data-lucide="zap"></i> Video Compress
-          Guide</button>
-        <button class="btn secondary" style="width:100%"
-          onclick="document.getElementById('custom-modal').style.display='none';"><i data-lucide="package"></i> Batch
-          Processor Guide</button>
-        <button class="btn secondary" style="width:100%"
-          onclick="document.getElementById('custom-modal').style.display='none';"><i data-lucide="more-horizontal"></i>
-          More Help...</button>
-      </div>
-      <button id="close-modal-btn" class="modal-close">Close</button>
-    </div>
-  </div>
 
   <!-- TOUR TOOLTIP -->
   <div id="tour-tooltip" class="tour-tooltip glass-panel" style="display: none;">

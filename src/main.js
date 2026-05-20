@@ -226,6 +226,12 @@ navBtns.forEach(btn => {
     targetView.classList.add('active');
     targetView.style.display = 'block';
 
+    // Update Play Trim Selection visibility in Live Preview
+    const previewTrimPlayBtn = document.getElementById('preview-trim-play-btn');
+    if (previewTrimPlayBtn) {
+      previewTrimPlayBtn.style.display = (targetId === 'trim') ? 'flex' : 'none';
+    }
+
     // Aura Reacts to Tab Change
     const reaction = toolReactions[targetId];
     if (reaction) {
@@ -267,30 +273,12 @@ window.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   checkEngineStatus();
 
-  const openModal = () => {
-    const modal = document.getElementById('custom-modal');
-    if (modal) modal.style.display = 'flex';
-  };
-
   const restartTourBtn = document.getElementById('restart-tour-btn');
   if (restartTourBtn) {
-    restartTourBtn.addEventListener('click', openModal);
-  }
-
-  // Modal Action Buttons
-  const startTourBtn = document.getElementById('start-tour-btn');
-  const closeModalBtn = document.getElementById('close-modal-btn');
-
-  if (startTourBtn) {
-    startTourBtn.addEventListener('click', () => {
-      document.getElementById('custom-modal').style.display = 'none';
-      if (typeof window.startTour === 'function') window.startTour();
-    });
-  }
-
-  if (closeModalBtn) {
-    closeModalBtn.addEventListener('click', () => {
-      document.getElementById('custom-modal').style.display = 'none';
+    restartTourBtn.addEventListener('click', () => {
+      if (typeof window.startTour === 'function') {
+        window.startTour();
+      }
     });
   }
 
@@ -310,6 +298,37 @@ window.addEventListener('DOMContentLoaded', () => {
       const isActive = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
       if (isActive) window.stopEmotionalMode?.();
       else window.startEmotionalMode?.();
+    });
+  }
+
+  // Live Video Preview Toggle Logic
+  const previewToggleInput = document.getElementById('preview-toggle-input');
+  const livePreviewCard = document.getElementById('live-preview-card');
+
+  if (previewToggleInput && livePreviewCard) {
+    // Load saved preference, default to true (show) if not set
+    const showPreview = localStorage.getItem('show-video-preview') !== 'false';
+    previewToggleInput.checked = showPreview;
+    livePreviewCard.style.display = showPreview ? 'flex' : 'none';
+
+    previewToggleInput.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        livePreviewCard.style.display = 'flex';
+        localStorage.setItem('show-video-preview', 'true');
+        // Re-initialize Lucide Icons just in case
+        if (window.lucide) window.lucide.createIcons();
+      } else {
+        livePreviewCard.style.display = 'none';
+        localStorage.setItem('show-video-preview', 'false');
+
+        // Safely pause video playback to conserve system resources
+        if (typeof stopTrimRangePlayback === 'function') {
+          stopTrimRangePlayback();
+        } else {
+          const previewVideo = document.getElementById('preview-video');
+          if (previewVideo) previewVideo.pause();
+        }
+      }
     });
   }
 
@@ -413,6 +432,9 @@ document.getElementById('browse-input-btn').addEventListener('click', async () =
           runTrimBtn.style.pointerEvents = 'auto';
         }
       }
+
+      // Initialize Live Video Preview Player
+      initPreviewPlayer(file);
     }
   } catch (e) {
     console.error("Dialog error:", e);
@@ -1210,4 +1232,223 @@ function setTheme(themeName) {
 
   localStorage.setItem('app-theme', themeName);
 }
+
+// ==========================================
+// --- Live Video Preview Logic ---
+// ==========================================
+let isPlayingTrimRange = false;
+let trimRangeCheckInterval = null;
+
+function initPreviewPlayer(filePath) {
+  const previewVideo = document.getElementById('preview-video');
+  const previewPlaceholder = document.getElementById('preview-placeholder');
+  const previewCompatWarning = document.getElementById('preview-compat-warning');
+  const previewControls = document.getElementById('preview-controls');
+  const previewPlayBtn = document.getElementById('preview-play-btn');
+  const previewTrimPlayBtn = document.getElementById('preview-trim-play-btn');
+
+  if (!previewVideo) return;
+
+  // Stop any active playback loops
+  stopTrimRangePlayback();
+
+  // Reset controls
+  if (previewPlayBtn) {
+    previewPlayBtn.innerHTML = '<i data-lucide="play"></i> Play';
+  }
+
+  const extension = filePath.split('.').pop().toLowerCase();
+  const isSupported = ['mp4', 'mov', 'webm'].includes(extension);
+
+  if (isSupported) {
+    // Get Tauri asset URL
+    let assetUrl = filePath;
+    if (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.convertFileSrc === 'function') {
+      assetUrl = window.__TAURI__.core.convertFileSrc(filePath);
+    } else {
+      assetUrl = `https://asset.localhost/${filePath}`;
+    }
+
+    previewVideo.src = assetUrl;
+    previewVideo.style.display = 'block';
+    previewPlaceholder.style.display = 'none';
+    previewCompatWarning.style.display = 'none';
+    previewControls.style.display = 'flex';
+    previewVideo.load();
+
+    // Set correct "Play Trim Selection" visibility depending on current active tab
+    const activeTab = document.querySelector('.nav-btn.active')?.dataset.target;
+    if (previewTrimPlayBtn) {
+      previewTrimPlayBtn.style.display = (activeTab === 'trim') ? 'flex' : 'none';
+    }
+
+    // React to video load metadata
+    previewVideo.onloadedmetadata = () => {
+      previewVideo.currentTime = 0;
+    };
+  } else {
+    // Fallback for unsupported containers
+    previewVideo.style.display = 'none';
+    previewPlaceholder.style.display = 'none';
+    previewCompatWarning.style.display = 'flex';
+    previewControls.style.display = 'none';
+    previewVideo.src = '';
+  }
+  
+  // Reinitialize Lucide Icons for buttons inside the preview card
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+// Seek helper
+function seekPreviewTo(seconds) {
+  const previewVideo = document.getElementById('preview-video');
+  if (previewVideo && previewVideo.src && !isNaN(seconds)) {
+    previewVideo.currentTime = seconds;
+  }
+}
+
+// Stop trim playback helper
+function stopTrimRangePlayback() {
+  const previewVideo = document.getElementById('preview-video');
+  const previewTrimPlayBtn = document.getElementById('preview-trim-play-btn');
+  isPlayingTrimRange = false;
+  clearInterval(trimRangeCheckInterval);
+  if (previewVideo) {
+    previewVideo.pause();
+  }
+  if (previewTrimPlayBtn) {
+    previewTrimPlayBtn.innerHTML = '<i data-lucide="play-circle"></i> Play Trim Selection';
+    if (window.lucide) window.lucide.createIcons();
+  }
+}
+
+// Hook up events on DOM load
+window.addEventListener('DOMContentLoaded', () => {
+  const previewVideo = document.getElementById('preview-video');
+  const previewPlayBtn = document.getElementById('preview-play-btn');
+  const previewTrimPlayBtn = document.getElementById('preview-trim-play-btn');
+
+  // Sliders and manual inputs
+  const splitSlider = document.getElementById('split-slider');
+  const splitTimeInput = document.getElementById('split-time-input');
+
+  const trimSliderStart = document.getElementById('trim-slider-start');
+  const trimSliderEnd = document.getElementById('trim-slider-end');
+  const trimTimeStart = document.getElementById('trim-time-start');
+  const trimTimeEnd = document.getElementById('trim-time-end');
+
+  // 1. Split timeline hooks
+  if (splitSlider) {
+    splitSlider.addEventListener('input', (e) => {
+      stopTrimRangePlayback();
+      seekPreviewTo(parseFloat(e.target.value));
+    });
+  }
+  if (splitTimeInput) {
+    splitTimeInput.addEventListener('input', () => {
+      const val = splitTimeInput.value.trim();
+      if (isValidTimeFormat(val)) {
+        stopTrimRangePlayback();
+        seekPreviewTo(timeToSeconds(val));
+      }
+    });
+  }
+
+  // 2. Trim timeline hooks
+  if (trimSliderStart) {
+    trimSliderStart.addEventListener('input', (e) => {
+      stopTrimRangePlayback();
+      seekPreviewTo(parseFloat(e.target.value));
+    });
+  }
+  if (trimTimeStart) {
+    trimTimeStart.addEventListener('input', () => {
+      const val = trimTimeStart.value.trim();
+      if (isValidTimeFormat(val)) {
+        stopTrimRangePlayback();
+        seekPreviewTo(timeToSeconds(val));
+      }
+    });
+  }
+
+  if (trimSliderEnd) {
+    trimSliderEnd.addEventListener('input', (e) => {
+      stopTrimRangePlayback();
+      seekPreviewTo(parseFloat(e.target.value));
+    });
+  }
+  if (trimTimeEnd) {
+    trimTimeEnd.addEventListener('input', () => {
+      const val = trimTimeEnd.value.trim();
+      if (isValidTimeFormat(val)) {
+        stopTrimRangePlayback();
+        seekPreviewTo(timeToSeconds(val));
+      }
+    });
+  }
+
+  // 3. Play / Pause Control
+  if (previewPlayBtn) {
+    previewPlayBtn.addEventListener('click', () => {
+      if (!previewVideo || !previewVideo.src) return;
+      stopTrimRangePlayback();
+
+      if (previewVideo.paused) {
+        previewVideo.play();
+        previewPlayBtn.innerHTML = '<i data-lucide="pause"></i> Pause';
+      } else {
+        previewVideo.pause();
+        previewPlayBtn.innerHTML = '<i data-lucide="play"></i> Play';
+      }
+      if (window.lucide) window.lucide.createIcons();
+    });
+  }
+
+  // 4. Play Trim Range Control
+  if (previewTrimPlayBtn) {
+    previewTrimPlayBtn.addEventListener('click', () => {
+      if (!previewVideo || !previewVideo.src) return;
+
+      const startVal = parseInt(trimSliderStart.value) || 0;
+      const endVal = parseInt(trimSliderEnd.value) || Math.floor(videoDuration);
+
+      if (isPlayingTrimRange) {
+        stopTrimRangePlayback();
+      } else {
+        isPlayingTrimRange = true;
+        previewTrimPlayBtn.innerHTML = '<i data-lucide="pause-circle"></i> Pause Selection';
+        if (window.lucide) window.lucide.createIcons();
+
+        // Seek to start and play
+        previewVideo.currentTime = startVal;
+        previewVideo.play();
+
+        // Monitor time range to pause at the end bounds
+        trimRangeCheckInterval = setInterval(() => {
+          if (previewVideo.currentTime >= endVal || previewVideo.currentTime < startVal) {
+            stopTrimRangePlayback();
+          }
+        }, 100);
+      }
+    });
+  }
+
+  // Monitor simple video pause to update play/pause button state
+  if (previewVideo) {
+    previewVideo.addEventListener('pause', () => {
+      if (!isPlayingTrimRange && previewPlayBtn) {
+        previewPlayBtn.innerHTML = '<i data-lucide="play"></i> Play';
+        if (window.lucide) window.lucide.createIcons();
+      }
+    });
+    previewVideo.addEventListener('play', () => {
+      if (!isPlayingTrimRange && previewPlayBtn) {
+        previewPlayBtn.innerHTML = '<i data-lucide="pause"></i> Pause';
+        if (window.lucide) window.lucide.createIcons();
+      }
+    });
+  }
+});
 
