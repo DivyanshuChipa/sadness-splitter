@@ -73,10 +73,15 @@
             </div>
             <div class="progress-label" id="progress-label">Emotional Level: 0%</div>
           </div>
-          <div id="technical-log" class="sidebar-technical-log">
-            <span class="dot" id="system-ready-dot"
-              style="background: var(--success); box-shadow: 0 0 5px var(--success);"></span>
-            Aura Status: <span id="aura-status-val">Ready</span>
+          <div id="technical-log" class="sidebar-technical-log" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="dot" id="system-ready-dot"
+                style="background: var(--success); box-shadow: 0 0 5px var(--success);"></span>
+              Aura Status: <span id="aura-status-val">Ready</span>
+            </div>
+            <button id="settings-trigger-btn" class="settings-gear-btn" title="Control Panel" style="background: none; border: none; padding: 4px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: color 0.3s, transform 0.3s;">
+              <i data-lucide="settings" style="width: 15px; height: 15px;"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -576,6 +581,201 @@
 
   </div> <!-- End App Container -->
 
+
+  <!-- SETTINGS MODAL -->
+  <div id="settings-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content settings-modal-content glass-panel" style="width: 90%; max-width: 750px; text-align: left; padding: 25px !important; display: flex; flex-direction: column; gap: 15px; border-radius: 16px;">
+      <div class="settings-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px; margin-bottom: 5px;">
+        <h2 style="font-size: 1.25rem; font-weight: 600; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="settings" style="width: 20px; height: 20px; color: var(--accent);"></i> Control Panel
+        </h2>
+        <button id="settings-close-btn" class="close-btn" title="Close" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: background 0.2s, color 0.2s;">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+      
+      <div class="settings-modal-body" style="display: grid; grid-template-columns: 200px 1fr; gap: 20px; min-height: 380px;">
+        <!-- Left Side Tab Nav -->
+        <aside class="settings-tabs" style="display: flex; flex-direction: column; gap: 8px; border-right: 1px solid rgba(255, 255, 255, 0.08); padding-right: 15px;">
+          <button class="settings-tab-btn active" data-tab="general" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s;">
+            <i data-lucide="sliders" style="width: 16px; height: 16px;"></i> General
+          </button>
+          <button class="settings-tab-btn" data-tab="themes" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s;">
+            <i data-lucide="palette" style="width: 16px; height: 16px;"></i> Themes Hub
+          </button>
+          <button class="settings-tab-btn" data-tab="engine" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s;">
+            <i data-lucide="cpu" style="width: 16px; height: 16px;"></i> Engine Config
+          </button>
+        </aside>
+        
+        <!-- Right Side Panel Contents -->
+        <div class="settings-panels" style="display: flex; flex-direction: column; overflow-y: auto; max-height: 400px; padding-right: 5px;">
+          
+          <!-- GENERAL TAB PANEL -->
+          <div id="settings-general-panel" class="settings-panel-view active">
+            <h3 style="font-size: 1.05rem; font-weight: 600; margin: 0 0 4px 0; color: var(--text-primary);">General Settings</h3>
+            <p class="panel-subtext" style="font-size: 0.75rem; color: var(--text-secondary); margin: 0 0 20px 0;">Manage overall interface options and output behavior.</p>
+            
+            <div class="settings-form-group" style="display: flex; flex-direction: column; gap: 15px;">
+              
+              <!-- Default Output Directory -->
+              <div class="settings-form-row" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                <div class="settings-info-col" style="flex: 1; padding-right: 15px;">
+                  <span class="settings-option-title" style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Default Output Directory</span>
+                  <span class="settings-option-desc" style="display: block; font-size: 0.7rem; color: var(--text-secondary);">Your custom output folder path where splits and clips are stored.</span>
+                </div>
+                <div class="settings-control-col" style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                  <span id="settings-default-dir-display" class="settings-path-display" style="font-size: 0.75rem; font-family: monospace; background: rgba(0, 0, 0, 0.2); padding: 4px 8px; border-radius: 6px; color: var(--accent); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(255, 255, 255, 0.05);">No default path set</span>
+                  <button id="settings-change-dir-btn" class="btn-small secondary" style="padding: 4px 8px; font-size: 0.7rem; border-radius: 6px; display: flex; align-items: center; gap: 4px;"><i data-lucide="folder" style="width: 12px; height: 12px;"></i> Browse</button>
+                </div>
+              </div>
+              
+              <!-- Auto Clear Logs Toggle -->
+              <div class="settings-form-row" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                <div class="settings-info-col" style="flex: 1; padding-right: 15px;">
+                  <span class="settings-option-title" style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Auto-Clear Technical Logs</span>
+                  <span class="settings-option-desc" style="display: block; font-size: 0.7rem; color: var(--text-secondary);">Reset status logs upon task completion.</span>
+                </div>
+                <div class="settings-control-col">
+                  <label class="ios-toggle">
+                    <input type="checkbox" id="settings-autoclear-toggle">
+                    <span class="ios-slider"></span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Developer Debug Mode Toggle -->
+              <div class="settings-form-row" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                <div class="settings-info-col" style="flex: 1; padding-right: 15px;">
+                  <span class="settings-option-title" style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Developer / Debug Mode</span>
+                  <span class="settings-option-desc" style="display: block; font-size: 0.7rem; color: var(--text-secondary);">Log raw FFmpeg execution arguments to system technical terminal.</span>
+                </div>
+                <div class="settings-control-col">
+                  <label class="ios-toggle">
+                    <input type="checkbox" id="settings-debug-toggle">
+                    <span class="ios-slider"></span>
+                  </label>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <!-- THEMES & NOSTALGIA TAB PANEL -->
+          <div id="settings-themes-panel" class="settings-panel-view" style="display: none;">
+            <h3 style="font-size: 1.05rem; font-weight: 600; margin: 0 0 4px 0; color: var(--text-primary);">Themes & Nostalgia Hub</h3>
+            <p class="panel-subtext" style="font-size: 0.75rem; color: var(--text-secondary); margin: 0 0 20px 0;">Revive nostalgia! Switch presets and toggle mascot interactions.</p>
+            
+            <div class="settings-form-group" style="display: flex; flex-direction: column; gap: 15px;">
+              
+              <!-- Aura Mascot emotes toggle -->
+              <div class="settings-form-row" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                <div class="settings-info-col" style="flex: 1; padding-right: 15px;">
+                  <span class="settings-option-title" style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Aura Mascot Interactive Speeches</span>
+                  <span class="settings-option-desc" style="display: block; font-size: 0.7rem; color: var(--text-secondary);">Disable reactive emojis, bubble talks and expressions to reduce distractions.</span>
+                </div>
+                <div class="settings-control-col">
+                  <label class="ios-toggle">
+                    <input type="checkbox" id="settings-aura-toggle" checked>
+                    <span class="ios-slider"></span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Themes Grid -->
+              <div class="theme-presets-title" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px;">Premium Visual Preset Cards</div>
+              <div class="theme-preset-cards-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 4px;">
+                
+                <!-- Windows 98 Card -->
+                <div class="theme-preview-card theme-card-win98" data-preset="theme-win98" style="background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; border-radius: 4px; padding: 10px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative;">
+                  <div class="card-mock-window" style="font-family: 'MS Sans Serif', 'Courier New', monospace; color: #000;">
+                    <div class="mock-titlebar" style="background: #000080; color: #fff; padding: 2px 6px; font-size: 0.65rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-radius: 2px;">
+                      <span>Sadness.exe</span>
+                      <div class="mock-window-buttons" style="display: flex; gap: 2px;"><span style="background: #c0c0c0; border: 1px solid #fff; padding: 0 2px; font-size: 0.5rem; line-height: 1;">X</span></div>
+                    </div>
+                    <div class="mock-body" style="padding: 10px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                      <div class="mock-circle-ring" style="width: 32px; height: 32px; border-radius: 50%; border: 3px double #000; background: #000;"></div>
+                      <span class="mock-text" style="font-size: 0.7rem; font-weight: bold;">Windows 98</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Windows XP Card -->
+                <div class="theme-preview-card theme-card-winxp" data-preset="theme-winxp" style="background: linear-gradient(180deg, #7abcff 0%, #2577df 100%); border: 2px solid #0053e1; border-radius: 8px; padding: 10px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative;">
+                  <div class="card-mock-window" style="font-family: 'Tahoma', sans-serif; color: #fff;">
+                    <div class="mock-titlebar" style="background: linear-gradient(to right, #0053e1 0%, #3a82fc 100%); color: #fff; padding: 3px 8px; font-size: 0.65rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-radius: 5px 5px 0 0;">
+                      <span>Sadness Splitter</span>
+                      <div class="mock-window-buttons XP" style="display: flex; gap: 2px;"><span style="background: #e04300; width: 10px; height: 10px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; border: 1px solid #fff;">x</span></div>
+                    </div>
+                    <div class="mock-body" style="padding: 10px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; background: #ece9d8; color: #000; border-radius: 0 0 4px 4px; border: 1px solid #0053e1; border-top: none;">
+                      <div class="mock-circle-ring" style="width: 32px; height: 32px; border-radius: 50%; border: 3px solid #003399; background: #000;"></div>
+                      <span class="mock-text" style="font-size: 0.7rem; font-weight: bold;">Windows XP</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Synthwave Card -->
+                <div class="theme-preview-card theme-card-synth" data-preset="theme-synth" style="background: linear-gradient(135deg, #2b083d 0%, #0c0211 100%); border: 2px solid #ff007f; border-radius: 8px; padding: 10px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; box-shadow: 0 0 10px rgba(255, 0, 127, 0.25);">
+                  <div class="card-mock-window" style="font-family: 'Poppins', sans-serif; color: #ff007f; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);">
+                    <div class="mock-titlebar" style="background: rgba(255, 0, 127, 0.1); border-bottom: 1px solid #ff007f; padding: 3px 8px; font-size: 0.65rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                      <span style="color: #00ffff; text-shadow: 0 0 5px #00ffff;">S A D N E S S . S Y N T H</span>
+                      <div class="mock-window-buttons" style="display: flex; gap: 2px;"><span style="color: #00ffff;">•</span></div>
+                    </div>
+                    <div class="mock-body" style="padding: 10px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                      <div class="mock-circle-ring" style="width: 32px; height: 32px; border-radius: 50%; border: 3px solid #ff007f; background: #000; box-shadow: 0 0 8px #ff007f;"></div>
+                      <span class="mock-text" style="font-size: 0.7rem; font-weight: bold; color: #ff007f;">Synthwave Preset</span>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+            
+          </div>
+          
+          <!-- ENGINE CONFIG TAB PANEL -->
+          <div id="settings-engine-panel" class="settings-panel-view" style="display: none;">
+            <h3 style="font-size: 1.05rem; font-weight: 600; margin: 0 0 4px 0; color: var(--text-primary);">Engine Configuration</h3>
+            <p class="panel-subtext" style="font-size: 0.75rem; color: var(--text-secondary); margin: 0 0 20px 0;">Configure backend FFmpeg binaries and execute connection checks.</p>
+            
+            <div class="settings-form-group" style="display: flex; flex-direction: column; gap: 15px;">
+              
+              <!-- Custom FFmpeg Executable Path -->
+              <div class="settings-ffmpeg-path-wrapper" style="padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                <label class="settings-input-label" style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Custom FFmpeg Binary Path</label>
+                <span class="settings-option-desc" style="display: block; font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 8px;">Point the engine directly to your local `ffmpeg.exe` to override default paths.</span>
+                <div class="input-group" style="display: flex; gap: 8px;">
+                  <input type="text" id="settings-ffmpeg-path" readonly placeholder="No custom executable set (using system default)" style="flex: 1; font-size: 0.75rem; font-family: monospace; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 8px 12px; color: var(--text-primary);">
+                  <button id="settings-browse-ffmpeg-btn" class="btn secondary" style="padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; flex-shrink: 0;">Browse File</button>
+                  <button id="settings-clear-ffmpeg-btn" class="btn danger" title="Reset custom path" style="padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; flex-shrink: 0;"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i></button>
+                </div>
+              </div>
+              
+              <!-- Engine Check Details Area -->
+              <div class="settings-engine-status-area" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; margin-top: 5px; gap: 15px; flex-wrap: wrap;">
+                <div class="engine-check-details" style="flex: 1; min-width: 200px;">
+                  <div class="status-indicator" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">
+                    <span class="dot" id="settings-ffmpeg-dot" style="width: 8px; height: 8px; border-radius: 50%; display: inline-block;"></span>
+                    <span id="settings-ffmpeg-status-text">Status: Checking...</span>
+                  </div>
+                  <small id="settings-ffmpeg-version" style="display: block; color: var(--text-secondary); font-size: 0.7rem; margin-top: 4px;">Version: checking...</small>
+                </div>
+                <button id="settings-force-check-btn" class="btn action" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 500;">
+                  <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i> Force Re-check Engine
+                </button>
+              </div>
+              
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      
+      <div class="settings-modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 15px; margin-top: 5px;">
+        <button id="settings-save-btn" class="btn primary" style="padding: 8px 20px; font-size: 0.85rem; border-radius: 8px; font-weight: 600;">Apply & Save Settings</button>
+      </div>
+    </div>
+  </div>
 
   <!-- TOUR TOOLTIP -->
   <div id="tour-tooltip" class="tour-tooltip glass-panel" style="display: none;">

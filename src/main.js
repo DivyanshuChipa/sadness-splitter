@@ -80,6 +80,10 @@ const emoteThemeMap = {
 
 function updatePersonaFace(percent) {
   if (pokeCount > 5) return; // Don't override if angry
+  if (localStorage.getItem('settings-aura-silenced') === 'true') {
+    if (reactiveFace) reactiveFace.src = 'emotive-ani-character/face_neutral.png';
+    return;
+  }
 
   const stage = emotionalStages.find(s => percent >= s.min && percent <= s.max);
   if (stage && reactiveFace) {
@@ -93,6 +97,10 @@ function updatePersonaFace(percent) {
 }
 
 function setPersonaEmotion(face, message) {
+  if (localStorage.getItem('settings-aura-silenced') === 'true') {
+    if (reactiveFace) reactiveFace.src = 'emotive-ani-character/face_neutral.png';
+    return;
+  }
   if (pokeCount > 5) return;
   if (reactiveFace) reactiveFace.src = `emotive-ani-character/${face}`;
 
@@ -328,19 +336,37 @@ async function checkEngineStatus() {
   const ffmpegVersion = document.getElementById('ffmpeg-version-text');
   const ffmpegFix = document.getElementById('ffmpeg-fix-link');
 
+  const settingsFfmpegDot = document.getElementById('settings-ffmpeg-dot');
+  const settingsFfmpegStatus = document.getElementById('settings-ffmpeg-status-text');
+  const settingsFfmpegVersion = document.getElementById('settings-ffmpeg-version');
+
+  const customPath = localStorage.getItem('ffmpeg-custom-path') || null;
+
   try {
-    const isReady = await invoke('check_ffmpeg');
+    const isReady = await invoke('check_ffmpeg', { customFfmpegPath: customPath });
     if (isReady) {
-      ffmpegDot.className = 'dot green';
-      ffmpegStatus.textContent = 'FFmpeg Engine: Active';
-      ffmpegFix.style.display = 'none';
+      if (ffmpegDot) ffmpegDot.className = 'dot green';
+      if (ffmpegStatus) ffmpegStatus.textContent = 'FFmpeg Engine: Active';
+      if (ffmpegFix) ffmpegFix.style.display = 'none';
+
+      if (settingsFfmpegDot) {
+        settingsFfmpegDot.className = 'dot green';
+        settingsFfmpegDot.style.background = 'var(--success)';
+        settingsFfmpegDot.style.boxShadow = '0 0 5px var(--success)';
+      }
+      if (settingsFfmpegStatus) settingsFfmpegStatus.textContent = 'Status: Active';
+
       try {
-        const version = await invoke('get_ffmpeg_version');
+        const version = await invoke('get_ffmpeg_version', { customFfmpegPath: customPath });
         if (ffmpegVersion) {
           ffmpegVersion.textContent = `Version: ${version}`;
         }
+        if (settingsFfmpegVersion) {
+          settingsFfmpegVersion.textContent = `Version: ${version}`;
+        }
       } catch (verErr) {
         if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Unknown';
+        if (settingsFfmpegVersion) settingsFfmpegVersion.textContent = 'Version: Unknown';
       }
 
       // Sleepy Easter egg for late night/early morning hours
@@ -351,20 +377,38 @@ async function checkEngineStatus() {
         }, 1500);
       }
     } else {
-      ffmpegDot.className = 'dot red';
-      ffmpegStatus.textContent = 'FFmpeg: Not Active';
-      ffmpegFix.style.display = 'block';
+      if (ffmpegDot) ffmpegDot.className = 'dot red';
+      if (ffmpegStatus) ffmpegStatus.textContent = 'FFmpeg: Not Active';
+      if (ffmpegFix) ffmpegFix.style.display = 'block';
+
+      if (settingsFfmpegDot) {
+        settingsFfmpegDot.className = 'dot red';
+        settingsFfmpegDot.style.background = 'var(--danger)';
+        settingsFfmpegDot.style.boxShadow = '0 0 5px var(--danger)';
+      }
+      if (settingsFfmpegStatus) settingsFfmpegStatus.textContent = 'Status: Not Active';
+
       if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Not Found';
+      if (settingsFfmpegVersion) settingsFfmpegVersion.textContent = 'Version: Not Found';
       setPersonaEmotion('face_depression.png', "Oh no... Please install FFmpeg! Without it, I am nothing... 😭");
       if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
         setTheme('theme-blue');
       }
     }
   } catch (e) {
-    ffmpegDot.className = 'dot red';
-    ffmpegStatus.textContent = 'FFmpeg: Not Active';
-    ffmpegFix.style.display = 'block';
+    if (ffmpegDot) ffmpegDot.className = 'dot red';
+    if (ffmpegStatus) ffmpegStatus.textContent = 'FFmpeg: Not Active';
+    if (ffmpegFix) ffmpegFix.style.display = 'block';
+
+    if (settingsFfmpegDot) {
+      settingsFfmpegDot.className = 'dot red';
+      settingsFfmpegDot.style.background = 'var(--danger)';
+      settingsFfmpegDot.style.boxShadow = '0 0 5px var(--danger)';
+    }
+    if (settingsFfmpegStatus) settingsFfmpegStatus.textContent = 'Status: Error';
+
     if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Error';
+    if (settingsFfmpegVersion) settingsFfmpegVersion.textContent = 'Version: Error';
     setPersonaEmotion('face_depression.png', "Oh no... Please install FFmpeg! Without it, I am nothing... 😭");
     if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
       setTheme('theme-blue');
@@ -375,6 +419,7 @@ async function checkEngineStatus() {
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
+  initSettingsModal();
   checkEngineStatus();
 
   const restartTourBtn = document.getElementById('restart-tour-btn');
@@ -520,7 +565,7 @@ document.getElementById('browse-input-btn').addEventListener('click', async () =
       setPersonaEmotion('face_happy.png', `Mil gayi file! Ab shuru karein? ${filename}`);
 
       // Get Duration (Needed for Sliders)
-      videoDuration = await invoke('get_video_duration', { filePath: file });
+      videoDuration = await invoke('get_video_duration', { filePath: file, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
 
       // Initialize Timeline Sliders
       const splitSlider = document.getElementById('split-slider');
@@ -753,6 +798,16 @@ listen('finished', (event) => {
     progressFill.classList.remove('indeterminate');
     if (event.payload.success) {
       setTimeout(() => updatePersonaFace(0), 10000); // Back to neutral after some time
+    }
+
+    // Auto-Clear Technical Logs logic
+    if (localStorage.getItem('settings-autoclear-logs') === 'true') {
+      setTimeout(() => {
+        updateStatus("Ready to process emotional baggage.");
+        const auraStatusVal = document.getElementById('aura-status-val');
+        if (auraStatusVal) auraStatusVal.textContent = "Ready";
+        updatePersonaFace(0);
+      }, 3000); // Wait 3s after progress panel vanishes
     }
   }, 5000);
 });
@@ -1063,7 +1118,12 @@ document.getElementById('run-compress-btn').addEventListener('click', () => {
   setProgressMode(videoDuration);
   updateStatus("Beginning the process of emotional containment...");
 
-  invoke('process_video', { args, totalDuration: videoDuration });
+  if (localStorage.getItem('settings-debug-mode') === 'true') {
+    console.log("[DEBUG] FFmpeg executable path:", localStorage.getItem('ffmpeg-custom-path') || "ffmpeg");
+    console.log("[DEBUG] FFmpeg arguments:", args);
+  }
+
+  invoke('process_video', { args, totalDuration: videoDuration, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
 });
 
 // --- Batch Processor Tool ---
@@ -1149,8 +1209,14 @@ async function executeFFmpegTask(taskName, args, customDuration = null) {
   setProgressMode(durationToUse);
   updateStatus(`Initiating ${taskName.toLowerCase()}...`);
 
+  if (localStorage.getItem('settings-debug-mode') === 'true') {
+    console.log(`[DEBUG] Task Name: ${taskName}`);
+    console.log("[DEBUG] FFmpeg executable path:", localStorage.getItem('ffmpeg-custom-path') || "ffmpeg");
+    console.log("[DEBUG] FFmpeg arguments:", args);
+  }
+
   try {
-    await invoke('process_video', { args, totalDuration: durationToUse });
+    await invoke('process_video', { args, totalDuration: durationToUse, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
   } catch (e) {
     console.error(`Error in ${taskName}:`, e);
     updateStatus(`${taskName} failed.`);
@@ -1286,9 +1352,15 @@ document.getElementById('run-batch-btn').addEventListener('click', async () => {
 
     const args = ["-i", input, "-vcodec", "libx264", "-crf", crf.toString(), "-preset", "medium", "-y", output];
 
+    if (localStorage.getItem('settings-debug-mode') === 'true') {
+      console.log(`[DEBUG] Batch file ${i + 1}/${batchList.length}: ${filename}`);
+      console.log("[DEBUG] FFmpeg executable path:", localStorage.getItem('ffmpeg-custom-path') || "ffmpeg");
+      console.log("[DEBUG] FFmpeg arguments:", args);
+    }
+
     // We run them one by one for now to avoid CPU overload
-    const duration = await invoke('get_video_duration', { filePath: input });
-    await invoke('process_video', { args, totalDuration: duration });
+    const duration = await invoke('get_video_duration', { filePath: input, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
+    await invoke('process_video', { args, totalDuration: duration, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
 
     // Wait for the 'finished' event before moving to next (simplified loop)
     await new Promise(resolve => {
@@ -1357,7 +1429,10 @@ document.getElementById('run-stabilize-btn').addEventListener('click', async () 
 
   try {
     // Run Pass 1
-    await invoke('process_video', { args: args1 });
+    if (localStorage.getItem('settings-debug-mode') === 'true') {
+      console.log("[DEBUG] Stabilizer Pass 1 arguments:", args1);
+    }
+    await invoke('process_video', { args: args1, totalDuration: 0.0, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
 
     // Pass 2: Apply stabilization
     updateStatus("Pass 2: Smoothing memories... ✨");
@@ -1393,11 +1468,8 @@ document.getElementById('run-contact-btn').addEventListener('click', () => {
 
 // --- Theme Switcher Logic ---
 const themeCircles = document.querySelectorAll('.theme-circle');
+const retroBtns = document.querySelectorAll('.retro-theme-btn');
 const body = document.body;
-
-// Load saved theme
-const savedTheme = localStorage.getItem('app-theme') || 'theme-blue';
-setTheme(savedTheme);
 
 const themeReactions = {
   'theme-pink': { face: 'face_love.png', msg: "Aww, is pink matching my vibe today? 👉👈" },
@@ -1408,6 +1480,12 @@ const themeReactions = {
   'theme-blue': { face: 'face_confident.png', msg: "Classic blue. Back to focus and coding! 💻" },
   'theme-purple': { face: 'face_thinking.png', msg: "Purple elegance. Let's think of some cool cuts! 🔮" },
   'theme-yellow': { face: 'face_exicited.png', msg: "A sunny theme! Exciting times ahead! ☀️" }
+};
+
+const retroReactions = {
+  'theme-win98': { face: 'face_bored.png', msg: "Windows 98 Classic! Sab kuch retro gray ho gaya... feel safe? 📺" },
+  'theme-winxp': { face: 'face_exicited.png', msg: "Luna theme activated! Let's split video in XP style! 🌳" },
+  'theme-synth': { face: 'face_smug.png', msg: "Retro sunset vibing... Let's warp time with neon! 🌆💜" }
 };
 
 themeCircles.forEach(circle => {
@@ -1423,19 +1501,52 @@ themeCircles.forEach(circle => {
   });
 });
 
+retroBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const theme = btn.dataset.retro;
+    setTheme(theme);
+    
+    // Mascot reacts to retro preset pick
+    const reaction = retroReactions[theme];
+    if (reaction) {
+      setPersonaEmotion(reaction.face, reaction.msg);
+    }
+  });
+});
+
 function setTheme(themeName) {
-  // Remove existing themes
-  body.classList.remove('theme-blue', 'theme-red', 'theme-green', 'theme-purple', 'theme-gold', 'theme-pink', 'theme-white', 'theme-yellow');
+  // Remove existing themes (standard & retro)
+  body.classList.remove(
+    'theme-blue', 'theme-red', 'theme-green', 'theme-purple', 'theme-gold', 'theme-pink', 'theme-white', 'theme-yellow',
+    'theme-win98', 'theme-winxp', 'theme-synth'
+  );
   body.classList.add(themeName);
 
-  // Update active state in UI
+  // Update active state in UI for circles
   themeCircles.forEach(c => {
     if (c.dataset.theme === themeName) c.classList.add('active');
     else c.classList.remove('active');
   });
 
+  // Update active state in UI for retro buttons
+  retroBtns.forEach(btn => {
+    if (btn.dataset.retro === themeName) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+
+  // Update active state in UI for settings visual cards
+  const themeCards = document.querySelectorAll('.theme-preview-card');
+  themeCards.forEach(card => {
+    if (card.dataset.preset === themeName) card.classList.add('active');
+    else card.classList.remove('active');
+  });
+
   localStorage.setItem('app-theme', themeName);
 }
+
+// Load saved theme
+const savedTheme = localStorage.getItem('app-theme') || 'theme-blue';
+setTheme(savedTheme);
 
 // ==========================================
 // --- Live Video Preview Logic ---
@@ -1684,5 +1795,248 @@ window.addEventListener('DOMContentLoaded', () => {
       updatePreviewRotation();
     });
   }
+
 });
+
+// --- Control Panel / Settings Modal Logic ---
+function initSettingsModal() {
+  const triggerBtn = document.getElementById('settings-trigger-btn');
+  const closeBtn = document.getElementById('settings-close-btn');
+  const saveBtn = document.getElementById('settings-save-btn');
+  const modal = document.getElementById('settings-modal');
+  
+  // Tab Navigation Elements
+  const tabBtns = document.querySelectorAll('.settings-tab-btn');
+  const panels = document.querySelectorAll('.settings-panel-view');
+  
+  // General Tab Controls
+  const dirDisplay = document.getElementById('settings-default-dir-display');
+  const changeDirBtn = document.getElementById('settings-change-dir-btn');
+  const autoclearToggle = document.getElementById('settings-autoclear-toggle');
+  const debugToggle = document.getElementById('settings-debug-toggle');
+  
+  // Themes & Nostalgia Controls
+  const auraToggle = document.getElementById('settings-aura-toggle');
+  const previewCards = document.querySelectorAll('.theme-preview-card');
+  
+  // Engine Controls
+  const ffmpegPathInput = document.getElementById('settings-ffmpeg-path');
+  const browseFfmpegBtn = document.getElementById('settings-browse-ffmpeg-btn');
+  const clearFfmpegBtn = document.getElementById('settings-clear-ffmpeg-btn');
+  const forceCheckBtn = document.getElementById('settings-force-check-btn');
+
+  // Load Saved Values
+  const savedDir = localStorage.getItem('settings-default-dir') || "";
+  if (dirDisplay) {
+    dirDisplay.textContent = savedDir ? savedDir.split(/[\/\\]/).pop() || savedDir : "No default path set";
+    dirDisplay.title = savedDir;
+  }
+  
+  // Auto load output path if not manually set
+  if (savedDir && !globalOutputPath) {
+    globalOutputPath = savedDir;
+    const outInput = document.getElementById('global-output-path');
+    if (outInput) outInput.value = savedDir;
+  }
+
+  if (autoclearToggle) {
+    autoclearToggle.checked = localStorage.getItem('settings-autoclear-logs') === 'true';
+  }
+
+  if (debugToggle) {
+    debugToggle.checked = localStorage.getItem('settings-debug-mode') === 'true';
+  }
+
+  if (auraToggle) {
+    // aura-toggle is interactive speeches active. If silenced is true, checked should be false.
+    auraToggle.checked = localStorage.getItem('settings-aura-silenced') !== 'true';
+  }
+
+  const customFfmpegPath = localStorage.getItem('ffmpeg-custom-path') || "";
+  if (ffmpegPathInput) {
+    ffmpegPathInput.value = customFfmpegPath;
+  }
+
+  // Aura silence on start check
+  const auraSpeechContainer = document.getElementById('aura-speech-container');
+  if (localStorage.getItem('settings-aura-silenced') === 'true') {
+    if (auraSpeechContainer) auraSpeechContainer.style.display = 'none';
+    if (reactiveFace) reactiveFace.src = 'emotive-ani-character/face_neutral.png';
+  } else {
+    if (auraSpeechContainer) auraSpeechContainer.style.display = 'block';
+  }
+
+  // --- TRIGGERS ---
+  
+  // Open Modal
+  if (triggerBtn) {
+    triggerBtn.addEventListener('click', () => {
+      if (modal) {
+        modal.style.display = 'flex';
+        // Force refresh tab contents visual cards active highlight
+        const currentTheme = localStorage.getItem('app-theme') || 'theme-blue';
+        setTheme(currentTheme);
+        
+        // Check engine status when opened
+        checkEngineStatus();
+      }
+    });
+  }
+
+  // Close Modal Helper
+  const closeModal = () => {
+    if (modal) modal.style.display = 'none';
+  };
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeModal);
+  }
+
+  // Escape Key Close
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+      closeModal();
+    }
+  });
+
+  // Tab Switcher
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      panels.forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none';
+      });
+
+      btn.classList.add('active');
+      const targetPanelId = `settings-${btn.dataset.tab}-panel`;
+      const targetPanel = document.getElementById(targetPanelId);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+        targetPanel.style.display = 'block';
+      }
+    });
+  });
+
+  // --- ACTIONS ---
+
+  // Browse Output Directory
+  if (changeDirBtn) {
+    changeDirBtn.addEventListener('click', async () => {
+      try {
+        const folder = await tauriDialog.open({ directory: true });
+        if (folder) {
+          localStorage.setItem('settings-default-dir', folder);
+          if (dirDisplay) {
+            dirDisplay.textContent = folder.split(/[\/\\]/).pop() || folder;
+            dirDisplay.title = folder;
+          }
+          // also update active output path
+          globalOutputPath = folder;
+          const outInput = document.getElementById('global-output-path');
+          if (outInput) outInput.value = folder;
+          updateStatus(`Default output directory set: ${folder}`);
+        }
+      } catch (err) {
+        console.error("Browse dir error:", err);
+      }
+    });
+  }
+
+  // Browse Custom FFmpeg Path
+  if (browseFfmpegBtn) {
+    browseFfmpegBtn.addEventListener('click', async () => {
+      try {
+        const file = await tauriDialog.open({
+          filters: [{ name: 'Executable', extensions: ['exe'] }]
+        });
+        if (file) {
+          localStorage.setItem('ffmpeg-custom-path', file);
+          if (ffmpegPathInput) ffmpegPathInput.value = file;
+          updateStatus(`Custom FFmpeg path selected.`);
+          
+          // Re-verify instantly
+          checkEngineStatus();
+        }
+      } catch (err) {
+        console.error("FFmpeg browse error:", err);
+      }
+    });
+  }
+
+  // Clear Custom FFmpeg Path
+  if (clearFfmpegBtn) {
+    clearFfmpegBtn.addEventListener('click', () => {
+      localStorage.removeItem('ffmpeg-custom-path');
+      if (ffmpegPathInput) ffmpegPathInput.value = "";
+      updateStatus("Custom FFmpeg path reset.");
+      
+      // Re-verify instantly
+      checkEngineStatus();
+    });
+  }
+
+  // Visual Theme Cards Preset Selectors
+  previewCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const preset = card.dataset.preset;
+      setTheme(preset);
+
+      // Mascot reacts to visual preset pick (shares same XP/Synth/98 messages!)
+      const reaction = retroReactions[preset];
+      if (reaction) {
+        setPersonaEmotion(reaction.face, reaction.msg);
+      }
+    });
+  });
+
+  // Force Re-check Engine
+  if (forceCheckBtn) {
+    forceCheckBtn.addEventListener('click', async () => {
+      updateStatus("Forcing engine verification scan...");
+      // Add spin rotation to icon for aesthetic feedback
+      const icon = forceCheckBtn.querySelector('i');
+      if (icon) {
+        icon.style.transition = "transform 1s ease";
+        icon.style.transform = "rotate(360deg)";
+        setTimeout(() => { icon.style.transform = "none"; }, 1000);
+      }
+      
+      await checkEngineStatus();
+    });
+  }
+
+  // Apply & Save settings button
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      // Save General values
+      if (autoclearToggle) {
+        localStorage.setItem('settings-autoclear-logs', autoclearToggle.checked ? 'true' : 'false');
+      }
+      if (debugToggle) {
+        localStorage.setItem('settings-debug-mode', debugToggle.checked ? 'true' : 'false');
+      }
+
+      // Save Aura Silence values
+      if (auraToggle) {
+        const isSilenced = !auraToggle.checked;
+        localStorage.setItem('settings-aura-silenced', isSilenced ? 'true' : 'false');
+        
+        // Trigger UI changes instantly
+        const auraSpeechContainer = document.getElementById('aura-speech-container');
+        if (isSilenced) {
+          if (auraSpeechContainer) auraSpeechContainer.style.display = 'none';
+          if (reactiveFace) reactiveFace.src = 'emotive-ani-character/face_neutral.png';
+        } else {
+          if (auraSpeechContainer) auraSpeechContainer.style.display = 'block';
+        }
+      }
+
+      closeModal();
+      updateStatus("Settings applied successfully!");
+      setPersonaEmotion('face_confident.png', "Settings and variables successfully updated! Let's go! 🚀");
+    });
+  }
+}
+
 

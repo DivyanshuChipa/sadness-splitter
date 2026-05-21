@@ -28,9 +28,30 @@ struct FinishedPayload {
     success: bool,
 }
 
+fn get_command_path(name: &str, custom_ffmpeg_path: &Option<String>) -> String {
+    if let Some(ref path) = custom_ffmpeg_path {
+        if !path.trim().is_empty() {
+            if name == "ffprobe" {
+                let p = std::path::Path::new(path);
+                if let Some(parent) = p.parent() {
+                    let exe_name = p.file_name().and_then(|f| f.to_str()).unwrap_or("ffmpeg.exe");
+                    let ffprobe_exe = exe_name.replace("ffmpeg", "ffprobe").replace("FFMPEG", "FFPROBE");
+                    let resolved = parent.join(ffprobe_exe);
+                    if resolved.exists() {
+                        return resolved.to_string_lossy().to_string();
+                    }
+                }
+            }
+            return path.clone();
+        }
+    }
+    name.to_string()
+}
+
 #[tauri::command]
-fn get_video_duration(file_path: String) -> f64 {
-    let output = Command::new("ffprobe")
+fn get_video_duration(file_path: String, custom_ffmpeg_path: Option<String>) -> f64 {
+    let cmd = get_command_path("ffprobe", &custom_ffmpeg_path);
+    let output = Command::new(cmd)
         .args([
             "-v", "error",
             "-show_entries", "format=duration",
@@ -49,9 +70,10 @@ fn get_video_duration(file_path: String) -> f64 {
 }
 
 #[tauri::command]
-fn process_video(window: Window, args: Vec<String>, total_duration: f64) {
+fn process_video(window: Window, args: Vec<String>, total_duration: f64, custom_ffmpeg_path: Option<String>) {
     std::thread::spawn(move || {
-        let mut child = match Command::new("ffmpeg")
+        let cmd = get_command_path("ffmpeg", &custom_ffmpeg_path);
+        let mut child = match Command::new(cmd)
             .args(&args)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -109,13 +131,14 @@ fn process_video(window: Window, args: Vec<String>, total_duration: f64) {
 }
 
 #[tauri::command]
-fn generate_thumbnail(file_path: String) -> String {
+fn generate_thumbnail(file_path: String, custom_ffmpeg_path: Option<String>) -> String {
     let temp_dir = std::env::temp_dir();
     let thumb_path = temp_dir.join("sadness_thumb.jpg");
     let thumb_str = thumb_path.to_str().unwrap_or("");
+    let cmd = get_command_path("ffmpeg", &custom_ffmpeg_path);
 
     // ffmpeg -i input -ss 00:00:01 -vframes 1 -q:v 2 output.jpg
-    let _ = Command::new("ffmpeg")
+    let _ = Command::new(cmd)
         .args([
             "-i", &file_path,
             "-ss", "00:00:01",
@@ -261,8 +284,9 @@ fn get_system_metrics() -> Result<SystemMetricsPayload, String> {
 }
 
 #[tauri::command]
-fn check_ffmpeg() -> bool {
-    Command::new("ffmpeg")
+fn check_ffmpeg(custom_ffmpeg_path: Option<String>) -> bool {
+    let cmd = get_command_path("ffmpeg", &custom_ffmpeg_path);
+    Command::new(cmd)
         .arg("-version")
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -272,8 +296,9 @@ fn check_ffmpeg() -> bool {
 }
 
 #[tauri::command]
-fn get_ffmpeg_version() -> String {
-    let output = Command::new("ffmpeg")
+fn get_ffmpeg_version(custom_ffmpeg_path: Option<String>) -> String {
+    let cmd = get_command_path("ffmpeg", &custom_ffmpeg_path);
+    let output = Command::new(cmd)
         .arg("-version")
         .output();
     
