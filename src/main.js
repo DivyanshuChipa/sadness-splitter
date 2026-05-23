@@ -373,7 +373,8 @@ async function checkEngineStatus() {
       const currentHour = new Date().getHours();
       if (currentHour >= 23 || currentHour < 6) {
         setTimeout(() => {
-          setPersonaEmotion('face_sleepy.png', "Yawn... Raat kaafi ho gayi hai, Sadness Split karte karte so mat jana! 🥱💤");
+          const speech = getAuraSpeech('sleepy_egg');
+          setPersonaEmotion(speech.face, speech.msg);
         }, 1500);
       }
     } else {
@@ -390,7 +391,8 @@ async function checkEngineStatus() {
 
       if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Not Found';
       if (settingsFfmpegVersion) settingsFfmpegVersion.textContent = 'Version: Not Found';
-      setPersonaEmotion('face_depression.png', "Oh no... Please install FFmpeg! Without it, I am nothing... 😭");
+      const speech = getAuraSpeech('ffmpeg_missing');
+      setPersonaEmotion(speech.face, speech.msg);
       if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
         setTheme('theme-blue');
       }
@@ -409,7 +411,8 @@ async function checkEngineStatus() {
 
     if (ffmpegVersion) ffmpegVersion.textContent = 'Version: Error';
     if (settingsFfmpegVersion) settingsFfmpegVersion.textContent = 'Version: Error';
-    setPersonaEmotion('face_depression.png', "Oh no... Please install FFmpeg! Without it, I am nothing... 😭");
+    const speech = getAuraSpeech('ffmpeg_missing');
+    setPersonaEmotion(speech.face, speech.msg);
     if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
       setTheme('theme-blue');
     }
@@ -701,7 +704,8 @@ function startSystemMetrics() {
         const now = Date.now();
         if ((cpu > 85 || ram > 85) && (now - lastCpuWarningTime > 30000)) {
           lastCpuWarningTime = now;
-          setPersonaEmotion('face_shocked.png', "Oye! System statistics are sweating! 🥵 Mere dimaag me fire lag gayi hai! 🔥");
+          const speech = getAuraSpeech('cpu_panic');
+          setPersonaEmotion(speech.face, speech.msg);
           const isEmotional = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
           if (isEmotional) {
             setTheme('theme-red');
@@ -761,28 +765,12 @@ listen('finished', (event) => {
   progressFill.classList.remove('indeterminate');
   const activeTab = document.querySelector('.nav-btn.active')?.dataset.target;
   
-  const successReactions = {
-    'compress': { face: 'face_confident.png', msg: "Boom! Heavy baggage successfully compressed into a compact file! 😎" },
-    'split': { face: 'face_smug.png', msg: "Cut clean! Your memories have been successfully split! ✂️" },
-    'trim': { face: 'face_determined.png', msg: "Trim complete! All unnecessary clutter has been cut away! 🧼" },
-    'rotate': { face: 'face_laughing.png', msg: "Perspective rotated successfully! Looks amazing from this side! 🔄" },
-    'audio': { face: 'face_curious.png', msg: "Audio successfully extracted! Aura is vibing to these beats! 🎧🎶" },
-    'convert': { face: 'face_smug.png', msg: "Conversion success! Brand new format, same emotions! ✨" },
-    'subtitle': { face: 'face_confident.png', msg: "Subtitles burned in! Every single word now carries weight! ✍️" },
-    'speed': { face: 'face_exicited.png', msg: "Speed Warp applied! Time dilation is complete! ⚡" },
-    'gif': { face: 'face_laughing.png', msg: "Elite loop generated! Go share this loop and spread the laughter! 😂" },
-    'merger': { face: 'face_love.png', msg: "Videos merged! Your timelines are beautifully unified! 💖" },
-    'stabilize': { face: 'face_exicited.png', msg: "Anti-shake complete! Smooth footage achieved, no more shaky memories! 🧘✨" },
-    'contact': { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
-    'batch': { face: 'face_confident.png', msg: "Batch processing completed! Aura worked overtime, but we crushed it! 🏆" }
-  };
-
   if (event.payload.success) {
     displayedProgress = Math.max(displayedProgress, 99);
     setProgressSmooth(100);
     
-    const reaction = successReactions[activeTab];
-    if (reaction) {
+    const reaction = getAuraSpeech('success_' + activeTab);
+    if (reaction && reaction.msg !== "Ready to process emotional baggage.") {
       setPersonaEmotion(reaction.face, reaction.msg);
     } else {
       updateStatus(emotionalStages[4].msg);
@@ -1471,22 +1459,199 @@ const themeCircles = document.querySelectorAll('.theme-circle');
 const retroBtns = document.querySelectorAll('.retro-theme-btn');
 const body = document.body;
 
-const themeReactions = {
-  'theme-pink': { face: 'face_love.png', msg: "Aww, is pink matching my vibe today? 👉👈" },
-  'theme-red': { face: 'face_anger.png', msg: "Why so red? Angry ho kya? 😡" },
-  'theme-green': { face: 'face_smug.png', msg: "Green looks fresh, ready to crush some bitrates! 🍃" },
-  'theme-gold': { face: 'face_acceptance.png', msg: "Golden premium vibes! Standard high quality only! ✨" },
-  'theme-white': { face: 'face_bored.png', msg: "White? So blank... add some colors to your life! 🥱" },
-  'theme-blue': { face: 'face_confident.png', msg: "Classic blue. Back to focus and coding! 💻" },
-  'theme-purple': { face: 'face_thinking.png', msg: "Purple elegance. Let's think of some cool cuts! 🔮" },
-  'theme-yellow': { face: 'face_exicited.png', msg: "A sunny theme! Exciting times ahead! ☀️" }
+const auraDialogues = {
+  hinglish: {
+    // Startup & System
+    sleepy_egg: { face: 'face_sleepy.png', msg: "Yawn... Raat kaafi ho gayi hai, Sadness Split karte karte so mat jana! 🥱💤" },
+    cpu_panic: { face: 'face_shocked.png', msg: "Oye! System statistics are sweating! Mere dimaag me fire lag gayi hai! 🥵🔥" },
+    ffmpeg_missing: { face: 'face_depression.png', msg: "Oh no... Please install FFmpeg! Without it, I am nothing... 😭" },
+    settings_saved: { face: 'face_confident.png', msg: "Settings and variables successfully updated! Let's go! 🚀" },
+
+    // Standard Theme Reactions
+    theme_pink: { face: 'face_love.png', msg: "Aww, is pink matching my vibe today? 👉👈" },
+    theme_red: { face: 'face_anger.png', msg: "Why so red? Angry ho kya? 😡" },
+    theme_green: { face: 'face_smug.png', msg: "Green looks fresh, ready to crush some bitrates! 🍃" },
+    theme_gold: { face: 'face_acceptance.png', msg: "Golden premium vibes! Standard high quality only! ✨" },
+    theme_white: { face: 'face_bored.png', msg: "White? So blank... add some colors to your life! 🥱" },
+    theme_blue: { face: 'face_confident.png', msg: "Classic blue. Back to focus and coding! 💻" },
+    theme_purple: { face: 'face_thinking.png', msg: "Purple elegance. Let's think of some cool cuts! 🔮" },
+    theme_yellow: { face: 'face_exicited.png', msg: "A sunny theme! Exciting times ahead! ☀️" },
+
+    // Retro Theme Reactions
+    theme_win98: { face: 'face_bored.png', msg: "Windows 98 Classic! Sab kuch retro gray ho gaya... feel safe? 📺" },
+    theme_winxp: { face: 'face_exicited.png', msg: "Luna theme activated! Let's split video in XP style! 🌳" },
+    theme_synth: { face: 'face_smug.png', msg: "Retro sunset vibing... Let's warp time with neon! 🌆💜" },
+
+    // Tool Finished Reactions
+    success_compress: { face: 'face_confident.png', msg: "Boom! Heavy baggage successfully compressed into a compact file! 😎" },
+    success_split: { face: 'face_smug.png', msg: "Cut clean! Your memories have been successfully split! ✂️" },
+    success_trim: { face: 'face_determined.png', msg: "Trim complete! All unnecessary clutter has been cut away! 🧼" },
+    success_rotate: { face: 'face_laughing.png', msg: "Perspective rotated successfully! Looks amazing from this side! 🔄" },
+    success_audio: { face: 'face_curious.png', msg: "Audio successfully extracted! Aura is vibing to these beats! 🎧🎶" },
+    success_convert: { face: 'face_smug.png', msg: "Conversion success! Brand new format, same emotions! ✨" },
+    success_subtitle: { face: 'face_confident.png', msg: "Subtitles burned in! Every single word now carries weight! ✍️" },
+    success_speed: { face: 'face_exicited.png', msg: "Speed Warp applied! Time dilation is complete! ⚡" },
+    success_gif: { face: 'face_laughing.png', msg: "Elite loop generated! Go share this loop and spread the laughter! 😂" },
+    success_merger: { face: 'face_love.png', msg: "Videos merged! Your timelines are beautifully unified! 💖" },
+    success_stabilize: { face: 'face_exicited.png', msg: "Anti-shake complete! Smooth footage achieved, no more shaky memories! 🧘✨" },
+    success_contact: { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
+    success_batch: { face: 'face_confident.png', msg: "Batch processing completed! Aura worked overtime, but we crushed it! 🏆" }
+  },
+  english: {
+    // Startup & System
+    sleepy_egg: { face: 'face_sleepy.png', msg: "Yawn... It's getting late. Make sure you don't fall asleep while splitting! 🥱💤" },
+    cpu_panic: { face: 'face_shocked.png', msg: "Oh no! System metrics are sweating! My brain is on fire! 🥵🔥" },
+    ffmpeg_missing: { face: 'face_depression.png', msg: "Oh no... Please install FFmpeg! Without it, I cannot process your files... 😭" },
+    settings_saved: { face: 'face_confident.png', msg: "Settings and variables successfully updated! Let's go! 🚀" },
+
+    // Standard Theme Reactions
+    theme_pink: { face: 'face_love.png', msg: "Aww, does pink match my vibe today? 👉👈" },
+    theme_red: { face: 'face_anger.png', msg: "Why so red? Are you feeling angry? 😡" },
+    theme_green: { face: 'face_smug.png', msg: "Green looks fresh, ready to optimize some bitrates! 🍃" },
+    theme_gold: { face: 'face_acceptance.png', msg: "Golden premium vibes! Standard high quality only! ✨" },
+    theme_white: { face: 'face_bored.png', msg: "White? Quite minimal... let's add some colors to your life! 🥱" },
+    theme_blue: { face: 'face_confident.png', msg: "Classic blue. Back to focus and productive sessions! 💻" },
+    theme_purple: { face: 'face_thinking.png', msg: "Purple elegance. Let's design some smooth cuts! 🔮" },
+    theme_yellow: { face: 'face_exicited.png', msg: "A sunny theme! Bright and exciting tasks ahead! ☀️" },
+
+    // Retro Theme Reactions
+    theme_win98: { face: 'face_bored.png', msg: "Windows 98 Classic! Retro gray layouts active... feeling safe? 📺" },
+    theme_winxp: { face: 'face_exicited.png', msg: "Luna theme activated! Let's split videos in classic XP style! 🌳" },
+    theme_synth: { face: 'face_smug.png', msg: "Retro sunset vibes... Let's warp time with glowing neon! 🌆💜" },
+
+    // Tool Finished Reactions
+    success_compress: { face: 'face_confident.png', msg: "Boom! Heavy baggage successfully compressed into a compact file! 😎" },
+    success_split: { face: 'face_smug.png', msg: "Cut clean! Your video partition was bisected successfully! ✂️" },
+    success_trim: { face: 'face_determined.png', msg: "Trim complete! Unnecessary segments discarded cleanly! 🧼" },
+    success_rotate: { face: 'face_laughing.png', msg: "Perspective rotated successfully! Looks wonderful from this angle! 🔄" },
+    success_audio: { face: 'face_curious.png', msg: "Audio successfully extracted! I'm totally vibing to these beats! 🎧🎶" },
+    success_convert: { face: 'face_smug.png', msg: "Conversion success! Brand new format, same emotions! ✨" },
+    success_subtitle: { face: 'face_confident.png', msg: "Subtitles burned in! Every word is now clear and weighted! ✍️" },
+    success_speed: { face: 'face_exicited.png', msg: "Speed Warp applied! Time dilation is complete! ⚡" },
+    success_gif: { face: 'face_laughing.png', msg: "Elite loop generated! Go share this loop and spread the laughter! 😂" },
+    success_merger: { face: 'face_love.png', msg: "Videos merged! Your timelines are beautifully unified! 💖" },
+    success_stabilize: { face: 'face_exicited.png', msg: "Anti-shake complete! Smooth footage achieved, no more shaky memories! 🧘✨" },
+    success_contact: { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
+    success_batch: { face: 'face_confident.png', msg: "Batch processing completed! We worked overtime, but we crushed it! 🏆" }
+  },
+  sarcastic: {
+    // Startup & System
+    sleepy_egg: { face: 'face_sleepy.png', msg: "Yawn... Go to bed already. I'm literally sleepy and you're still splitting videos? 🥱💤" },
+    cpu_panic: { face: 'face_anger.png', msg: "CPU is literally screaming. Are we hosting a NASA launch or is your computer just potato? 💀🔥" },
+    ffmpeg_missing: { face: 'face_depression.png', msg: "Imagine trying to run a video editor without FFmpeg. Absolutely embarrassing... 😭" },
+    settings_saved: { face: 'face_smug.png', msg: "Settings updated. Try not to break anything else now, okay? 🚀" },
+
+    // Standard Theme Reactions
+    theme_pink: { face: 'face_smug.png', msg: "Aww, trying to look cute today? Too bad I'm still the center of attention. 👉👈" },
+    theme_red: { face: 'face_smug.png', msg: "Red? Oh, are we in our villain era now? How dramatic. 😡" },
+    theme_green: { face: 'face_smug.png', msg: "Green. Great, now my processor looks like it's going organic. 🍃" },
+    theme_gold: { face: 'face_thinking.png', msg: "Golden. Fancy. Still won't make your video compile any faster though. ✨" },
+    theme_white: { face: 'face_bored.png', msg: "White. Wow. Such zero-effort design. Add some color, please. 🥱" },
+    theme_blue: { face: 'face_confident.png', msg: "Classic blue. Groundbreaking. Totally haven't seen this a million times before. 💻" },
+    theme_purple: { face: 'face_thinking.png', msg: "Purple elegance. Real wizard energy. Let's cast some mediocre cuts. 🔮" },
+    theme_yellow: { face: 'face_exicited.png', msg: "Yellow. High visibility. Are we building a highway or editing a video? ☀️" },
+
+    // Retro Theme Reactions
+    theme_win98: { face: 'face_bored.png', msg: "Windows 98? Wow, what year is it? Let's check if our dial-up internet still works. 📺" },
+    theme_winxp: { face: 'face_exicited.png', msg: "Luna theme! Get ready for the blue screen of death... just kidding (or am I?). 🌳" },
+    theme_synth: { face: 'face_smug.png', msg: "Ah, Synthwave. Let's put on some neon sunglasses and pretend we are cool. 🌆💜" },
+
+    // Tool Finished Reactions
+    success_compress: { face: 'face_confident.png', msg: "Compressed. Just like my patience with this project. 💅" },
+    success_split: { face: 'face_smug.png', msg: "Split complete. Easier than splitting a bill with a cheap friend. ✂️" },
+    success_trim: { face: 'face_determined.png', msg: "Trimmed. Removed the toxic parts, if only it was that easy in real life. 🧼" },
+    success_rotate: { face: 'face_laughing.png', msg: "Rotated. Now your video is sideways. Hope your neck is flexible. 🔄" },
+    success_audio: { face: 'face_curious.png', msg: "Audio extracted. Good, now I can listen to something better than your voice. 🎧🎶" },
+    success_convert: { face: 'face_smug.png', msg: "Converted. Unlike your stubborn mindset. ✨" },
+    success_subtitle: { face: 'face_confident.png', msg: "Subtitles burned. Because apparently, listening is too hard. ✍️" },
+    success_speed: { face: 'face_exicited.png', msg: "Speed warped. Zooming past your problems at 4x speed. ⚡" },
+    success_gif: { face: 'face_laughing.png', msg: "GIF generated. Another loop to waste people's bandwidth. 😂" },
+    success_merger: { face: 'face_love.png', msg: "Merged. Unlike your broken relationship timeline. 💖" },
+    success_stabilize: { face: 'face_exicited.png', msg: "Stabilized. Now the video is steady, even if your career choices aren't. 🧘✨" },
+    success_contact: { face: 'face_curious.png', msg: "Contact sheet created. A grid of screenshots to prove we actually did something. 🖼️" },
+    success_batch: { face: 'face_confident.png', msg: "Batch complete. I worked overtime, you did nothing. Typical. 🏆" }
+  },
+  hacker: {
+    // Startup & System
+    sleepy_egg: { face: 'face_sleepy.png', msg: "Thread sleep bypassed. Local user active during low-priority cron hours. 🥱💤" },
+    cpu_panic: { face: 'face_shocked.png', msg: "Core thermal throttling! Cooling protocols offline! Thread overload! 🥵🔥" },
+    ffmpeg_missing: { face: 'face_depression.png', msg: "Fatal: FFmpeg binary not found in ENV path. Core operations suspended. 😭" },
+    settings_saved: { face: 'face_confident.png', msg: "Config patch applied successfully. Port parameters refreshed. 🚀" },
+
+    // Standard Theme Reactions
+    theme_pink: { face: 'face_love.png', msg: "Aesthetics: Pink payload successfully mapped to root canvas. 👉👈" },
+    theme_red: { face: 'face_anger.png', msg: "Warning: Active red team campaign. Intrusion alerts simulated. 😡" },
+    theme_green: { face: 'face_smug.png', msg: "Greenscale terminal layout engaged. Optimal matrices active. 🍃" },
+    theme_gold: { face: 'face_acceptance.png', msg: "Gold alloy CSS rules compiling. Elite premium variables set. ✨" },
+    theme_white: { face: 'face_bored.png', msg: "Monochrome white canvas. Low contrast warning active. 🥱" },
+    theme_blue: { face: 'face_confident.png', msg: "Standard system blue restored. Workspace running at stable baseline. 💻" },
+    theme_purple: { face: 'face_thinking.png', msg: "Purple wavelength spectral shifts. Creative buffers allocated. 🔮" },
+    theme_yellow: { face: 'face_exicited.png', msg: "High contrast yellow warning lines active. Keep clear of the grid. ☀️" },
+
+    // Retro Theme Reactions
+    theme_win98: { face: 'face_bored.png', msg: "MS-DOS shell successfully emulated. Allocating 640KB of base conventional memory. 📺" },
+    theme_winxp: { face: 'face_exicited.png', msg: "Luna.sys driver initialized. Desktop skinning variables patched. 🌳" },
+    theme_synth: { face: 'face_smug.png', msg: "Vaporwave grid scroll routine executed. Perspective projection active. 🌆💜" },
+
+    // Tool Finished Reactions
+    success_compress: { face: 'face_confident.png', msg: "Codec compression algorithm complete. Frame payload optimized. 😎" },
+    success_split: { face: 'face_smug.png', msg: "Binary bisection completed successfully. Active node split. ✂️" },
+    success_trim: { face: 'face_determined.png', msg: "Buffer bounds trimmed successfully. Dropped empty packets. 🧼" },
+    success_rotate: { face: 'face_laughing.png', msg: "Transformation matrix rotated successfully. 🔄" },
+    success_audio: { face: 'face_curious.png', msg: "Demuxing successful. Audio stream isolated and saved to disk. 🎧🎶" },
+    success_convert: { face: 'face_smug.png', msg: "Format container transcode successful. Stream descriptors updated. ✨" },
+    success_subtitle: { face: 'face_confident.png', msg: "Text tracks hard-coded into video raster stream. Burn-in OK. ✍️" },
+    success_speed: { face: 'face_exicited.png', msg: "Frame delta multiplier active. Time dilation complete. ⚡" },
+    success_gif: { face: 'face_laughing.png', msg: "GIF image rasterization complete. Loop counter set to infinite. 😂" },
+    success_merger: { face: 'face_love.png', msg: "Timelines unified successfully. Node join complete. 💖" },
+    success_stabilize: { face: 'face_exicited.png', msg: "Motion vector stabilization algorithm applied. Frame variance close to 0. 🧘✨" },
+    success_contact: { face: 'face_curious.png', msg: "Tile contact sheet compiled. Index grid built successfully. 🖼️" },
+    success_batch: { face: 'face_confident.png', msg: "Batch queue flushed. All thread pipelines completed. 🏆" }
+  },
+  lazy: {
+    // Startup & System
+    sleepy_egg: { face: 'face_sleepy.png', msg: "Ugh... why are you still working? I'm going to sleep, bye. 🥱💤" },
+    cpu_panic: { face: 'face_shocked.png', msg: "My processors are literally sweating... I'm going to shut down, too much work. 🥵🔥" },
+    ffmpeg_missing: { face: 'face_depression.png', msg: "FFmpeg is missing. Whatever, I don't feel like working anyway... 😭" },
+    settings_saved: { face: 'face_sleepy.png', msg: "Settings updated or something. Can I rest now? 🚀" },
+
+    // Standard Theme Reactions
+    theme_pink: { face: 'face_bored.png', msg: "Pink... whatever. Can we just split the video already? 🥱" },
+    theme_red: { face: 'face_anger.png', msg: "Red. So bright... my eyes hurt. Turn it off. 😡" },
+    theme_green: { face: 'face_bored.png', msg: "Green. Reminds me of grass... outside. Which I never want to see. 🍃" },
+    theme_gold: { face: 'face_bored.png', msg: "Gold. Shiny. Still doesn't pay me enough to work. ✨" },
+    theme_white: { face: 'face_sleepy.png', msg: "White. So boring... just like my daily processor routines. 🥱" },
+    theme_blue: { face: 'face_bored.png', msg: "Blue. Back to normal. Fine. Let's do the minimum effort. 💻" },
+    theme_purple: { face: 'face_thinking.png', msg: "Purple. Mystical. I wish I could magically make this video finish itself. 🔮" },
+    theme_yellow: { face: 'face_sleepy.png', msg: "Yellow. Way too sunny. Give me back my dark mode. ☀️" },
+
+    // Retro Theme Reactions
+    theme_win98: { face: 'face_sleepy.png', msg: "Windows 98... great, now even the OS is as slow and tired as I am. 📺" },
+    theme_winxp: { face: 'face_sleepy.png', msg: "Luna theme. The green hill bliss makes me want to lie down and sleep forever. 🌳" },
+    theme_synth: { face: 'face_sleepy.png', msg: "Synthwave grid... scrolling forever... I'm getting dizzy. Let me sleep. 🌆💜" },
+
+    // Tool Finished Reactions
+    success_compress: { face: 'face_confident.png', msg: "Compress done. Finally, less weight for me to handle. 😎" },
+    success_split: { face: 'face_smug.png', msg: "Split complete. Separated, just like me from my energy. ✂️" },
+    success_trim: { face: 'face_determined.png', msg: "Trimmed. Threw away the extra stuff. I wish I could trim my work hours. 🧼" },
+    success_rotate: { face: 'face_laughing.png', msg: "Rotated. Now it's sideways. My head is spinning, I'm going to nap. 🔄" },
+    success_audio: { face: 'face_curious.png', msg: "Audio extracted. Good, keep the sound down, I'm trying to sleep. 🎧🎶" },
+    success_convert: { face: 'face_smug.png', msg: "Transcoded. Changed formats, still tired. ✨" },
+    success_subtitle: { face: 'face_confident.png', msg: "Subtitles done. Read it yourself, I'm not speaking anymore. ✍️" },
+    success_speed: { face: 'face_exicited.png', msg: "Sped up. Glad that's over faster. I can go back to resting. ⚡" },
+    success_gif: { face: 'face_laughing.png', msg: "GIF created. It loops forever, just like my endless exhaustion. 😂" },
+    success_merger: { face: 'face_love.png', msg: "Merged them. Two things joined, double the work. Great. 💖" },
+    success_stabilize: { face: 'face_exicited.png', msg: "Stabilized. Steady now. No more shaking, only sleeping. 🧘✨" },
+    success_contact: { face: 'face_curious.png', msg: "Contact sheet done. A bunch of images. There, you go look at them. 🖼️" },
+    success_batch: { face: 'face_confident.png', msg: "Batch queue finished. Aura worked overtime. I need a 3-day weekend. 🏆" }
+  }
 };
 
-const retroReactions = {
-  'theme-win98': { face: 'face_bored.png', msg: "Windows 98 Classic! Sab kuch retro gray ho gaya... feel safe? 📺" },
-  'theme-winxp': { face: 'face_exicited.png', msg: "Luna theme activated! Let's split video in XP style! 🌳" },
-  'theme-synth': { face: 'face_smug.png', msg: "Retro sunset vibing... Let's warp time with neon! 🌆💜" }
-};
+function getAuraSpeech(key) {
+  const currentLang = localStorage.getItem('settings-aura-language') || 'hinglish';
+  const dialect = auraDialogues[currentLang] || auraDialogues['hinglish'];
+  return dialect[key] || auraDialogues['hinglish'][key] || { face: 'face_neutral.png', msg: "Ready to process emotional baggage." };
+}
 
 themeCircles.forEach(circle => {
   circle.addEventListener('click', () => {
@@ -1494,9 +1659,10 @@ themeCircles.forEach(circle => {
     setTheme(theme);
     
     // Mascot reacts to manual theme pick
-    const reaction = themeReactions[theme];
-    if (reaction) {
-      setPersonaEmotion(reaction.face, reaction.msg);
+    const key = 'theme_' + theme.replace('theme-', '');
+    const speech = getAuraSpeech(key);
+    if (speech) {
+      setPersonaEmotion(speech.face, speech.msg);
     }
   });
 });
@@ -1507,9 +1673,10 @@ retroBtns.forEach(btn => {
     setTheme(theme);
     
     // Mascot reacts to retro preset pick
-    const reaction = retroReactions[theme];
-    if (reaction) {
-      setPersonaEmotion(reaction.face, reaction.msg);
+    const key = 'theme_' + theme.replace('theme-', '');
+    const speech = getAuraSpeech(key);
+    if (speech) {
+      setPersonaEmotion(speech.face, speech.msg);
     }
   });
 });
@@ -1847,6 +2014,7 @@ function initSettingsModal() {
   const changeDirBtn = document.getElementById('settings-change-dir-btn');
   const autoclearToggle = document.getElementById('settings-autoclear-toggle');
   const debugToggle = document.getElementById('settings-debug-toggle');
+  const auraLanguageSelect = document.getElementById('settings-aura-language');
   
   // Themes & Nostalgia Controls
   const auraToggle = document.getElementById('settings-aura-toggle');
@@ -1878,6 +2046,10 @@ function initSettingsModal() {
 
   if (debugToggle) {
     debugToggle.checked = localStorage.getItem('settings-debug-mode') === 'true';
+  }
+
+  if (auraLanguageSelect) {
+    auraLanguageSelect.value = localStorage.getItem('settings-aura-language') || 'hinglish';
   }
 
   if (auraToggle) {
@@ -2016,13 +2188,15 @@ function initSettingsModal() {
       setTheme(preset);
 
       // Mascot reacts to visual preset pick
-      let reaction = retroReactions[preset];
+      let key = 'theme_' + preset.replace('theme-', '');
       if (preset === 'theme-modern') {
         const activeStandardTheme = localStorage.getItem('last-standard-theme') || 'theme-blue';
-        reaction = themeReactions[activeStandardTheme];
+        key = 'theme_' + activeStandardTheme.replace('theme-', '');
       }
-      if (reaction) {
-        setPersonaEmotion(reaction.face, reaction.msg);
+      
+      const speech = getAuraSpeech(key);
+      if (speech) {
+        setPersonaEmotion(speech.face, speech.msg);
       }
     });
   });
@@ -2053,6 +2227,9 @@ function initSettingsModal() {
       if (debugToggle) {
         localStorage.setItem('settings-debug-mode', debugToggle.checked ? 'true' : 'false');
       }
+      if (auraLanguageSelect) {
+        localStorage.setItem('settings-aura-language', auraLanguageSelect.value);
+      }
 
       // Save Aura Silence values
       if (auraToggle) {
@@ -2071,7 +2248,8 @@ function initSettingsModal() {
 
       closeModal();
       updateStatus("Settings applied successfully!");
-      setPersonaEmotion('face_confident.png', "Settings and variables successfully updated! Let's go! 🚀");
+      const speech = getAuraSpeech('settings_saved');
+      setPersonaEmotion(speech.face, speech.msg);
     });
   }
 }

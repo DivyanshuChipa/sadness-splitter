@@ -51,6 +51,48 @@
 
 ---
 
+## How to Run on Linux
+
+If you are setting this up on a fresh Linux machine, clone the repo first:
+
+```bash
+git clone https://github.com/DivyanshuChipa/sadness-splitter.git
+cd sadness-splitter
+```
+
+Install the Linux dependencies needed by Tauri, FFmpeg, and video playback/codec support:
+
+```bash
+sudo apt update
+sudo apt install -y git ffmpeg build-essential curl wget file libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+sudo apt install -y gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav
+```
+
+Install Rust if it is not already installed:
+
+```bash
+curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+source "$HOME/.cargo/env"
+```
+
+Run the app:
+
+```bash
+cd src-tauri
+cargo run
+```
+
+If the project is already cloned on your Linux machine, update it and run:
+
+```bash
+cd sadness-splitter
+git pull
+cd src-tauri
+cargo run
+```
+
+---
+
 ## 📜 Dev Note
 *This app was crafted to be more than just a tool—it's a digital companion for your video processing needs. No internet required, no data sent to clouds, just raw power and beautiful design.*
 
