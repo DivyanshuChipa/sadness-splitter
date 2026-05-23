@@ -48,6 +48,7 @@
 
 ### 📝 Change Log (Git-Style)
 
+- **feat(theme)**: [2026-05-23] Implemented **Visual Preset Coherence & Modern Theme Reversion** — Integrated default "Modern Glass" template preset card into the settings modal grid, allowing users to revert retro styles seamlessly. Synced sidebar coherence by smoothly fading out and hiding the "Aura Mood" color picker picker container whenever a retro theme (Win98, WinXP, Synth) is active, dynamically restoring it upon returning to the glassmorphic Modern layout.
 - **feat(settings)**: [2026-05-21] Implemented **Premium Control Panel & Settings Hub** — Added a beautiful glassmorphic settings modal with dedicated columns for General, Themes & Nostalgia, and Engine. Integrates customizable local settings (Auto-Clear Logs, Developer/Debug Mode, Default Output Directory, Aura Speech bubble silence toggle) and a custom FFmpeg/FFprobe binary path override mapped to backend Rust executors.
 - **feat(theme)**: [2026-05-21] Implemented **Step 1: Vintage Retro Presets** — Added pixel-perfect, custom-designed themes for **Windows 98** (teal background, outset 3D steel gray borders, Tahoma font), **Windows XP** (Luna blue window layout with orange accents), and **Synthwave** (neon pink/cyan borders with a scrolling perspective grid background). Wired up custom Hinglish mascot reactions and active state selectors.
 - **feat(persona)**: [2026-05-20] Added **Contextual Tool Success Cheerleading** — Aura now responds with 13+ tailored cheerleading dialogues and expressions upon successful completion of specific tools.

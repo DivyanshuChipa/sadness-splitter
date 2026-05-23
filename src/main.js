@@ -1515,33 +1515,66 @@ retroBtns.forEach(btn => {
 });
 
 function setTheme(themeName) {
+  let targetTheme = themeName;
+  
+  if (themeName === 'theme-modern') {
+    targetTheme = localStorage.getItem('last-standard-theme') || 'theme-blue';
+  } else if (['theme-blue', 'theme-red', 'theme-green', 'theme-purple', 'theme-gold', 'theme-pink', 'theme-white', 'theme-yellow'].includes(themeName)) {
+    localStorage.setItem('last-standard-theme', themeName);
+  }
+
   // Remove existing themes (standard & retro)
   body.classList.remove(
     'theme-blue', 'theme-red', 'theme-green', 'theme-purple', 'theme-gold', 'theme-pink', 'theme-white', 'theme-yellow',
     'theme-win98', 'theme-winxp', 'theme-synth'
   );
-  body.classList.add(themeName);
+  body.classList.add(targetTheme);
 
   // Update active state in UI for circles
   themeCircles.forEach(c => {
-    if (c.dataset.theme === themeName) c.classList.add('active');
+    if (c.dataset.theme === targetTheme) c.classList.add('active');
     else c.classList.remove('active');
-  });
-
-  // Update active state in UI for retro buttons
-  retroBtns.forEach(btn => {
-    if (btn.dataset.retro === themeName) btn.classList.add('active');
-    else btn.classList.remove('active');
   });
 
   // Update active state in UI for settings visual cards
   const themeCards = document.querySelectorAll('.theme-preview-card');
   themeCards.forEach(card => {
-    if (card.dataset.preset === themeName) card.classList.add('active');
-    else card.classList.remove('active');
+    const isRetro = ['theme-win98', 'theme-winxp', 'theme-synth'].includes(targetTheme);
+    if (card.dataset.preset === 'theme-modern') {
+      if (!isRetro) card.classList.add('active');
+      else card.classList.remove('active');
+    } else {
+      if (card.dataset.preset === targetTheme) card.classList.add('active');
+      else card.classList.remove('active');
+    }
   });
 
-  localStorage.setItem('app-theme', themeName);
+  // Show/Hide Aura Mood picker in sidebar smoothly
+  const auraContainer = document.querySelector('.theme-selector-container');
+  if (auraContainer) {
+    const isRetro = ['theme-win98', 'theme-winxp', 'theme-synth'].includes(targetTheme);
+    if (isRetro) {
+      auraContainer.style.opacity = '0';
+      auraContainer.style.transform = 'translateY(-10px) scale(0.95)';
+      auraContainer.style.pointerEvents = 'none';
+      setTimeout(() => {
+        const currentTheme = localStorage.getItem('app-theme') || 'theme-blue';
+        const currentIsRetro = ['theme-win98', 'theme-winxp', 'theme-synth'].includes(currentTheme);
+        if (currentIsRetro) {
+          auraContainer.style.display = 'none';
+        }
+      }, 300);
+    } else {
+      auraContainer.style.display = 'flex';
+      // Force reflow for transition
+      void auraContainer.offsetWidth;
+      auraContainer.style.opacity = '1';
+      auraContainer.style.transform = 'translateY(0) scale(1)';
+      auraContainer.style.pointerEvents = 'auto';
+    }
+  }
+
+  localStorage.setItem('app-theme', targetTheme);
 }
 
 // Load saved theme
@@ -1982,8 +2015,12 @@ function initSettingsModal() {
       const preset = card.dataset.preset;
       setTheme(preset);
 
-      // Mascot reacts to visual preset pick (shares same XP/Synth/98 messages!)
-      const reaction = retroReactions[preset];
+      // Mascot reacts to visual preset pick
+      let reaction = retroReactions[preset];
+      if (preset === 'theme-modern') {
+        const activeStandardTheme = localStorage.getItem('last-standard-theme') || 'theme-blue';
+        reaction = themeReactions[activeStandardTheme];
+      }
       if (reaction) {
         setPersonaEmotion(reaction.face, reaction.msg);
       }
