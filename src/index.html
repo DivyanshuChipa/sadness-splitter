@@ -13,6 +13,20 @@
 </head>
 
 <body class="aura-blue">
+  <!-- Drag & Drop Fullscreen Glass Overlay -->
+  <div id="drag-drop-overlay" class="drag-drop-overlay" style="display: none;">
+    <div class="drag-drop-content">
+      <div class="drag-drop-glow"></div>
+      <div class="drag-drop-icon"><i data-lucide="upload-cloud"></i></div>
+      <h2>Drop Video File Here</h2>
+      <p>Aura is ready to process your emotional baggage! 📂✨</p>
+      <div class="drag-drop-mascot-speech">
+        <img src="emotive-ani-character/face_surprised.png" alt="Aura dialog">
+        <div class="speech-bubble">Oye! Drag matching video file drop karo na, let's play! 😉</div>
+      </div>
+    </div>
+  </div>
+
   <div class="mesh-gradient"></div>
   <div class="app-container">
 
@@ -421,6 +435,22 @@
           </section>
 
         </div>
+
+        <!-- Console Logs Bento Box -->
+        <div id="techy-console-bento" class="settings-card glass-panel techy-console-card" style="display: none; margin-top: 20px;">
+          <div class="settings-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="dot green-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); transition: background 0.3s, box-shadow 0.3s;"></span>
+              <h3>Console Logs</h3>
+            </div>
+            <span class="subtext monospace" style="font-size: 0.65rem; color: var(--accent); border: 1px solid rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.02); transition: color 0.3s;">Active Log Stream</span>
+          </div>
+          <div class="terminal-container">
+            <div id="techy-console-logs" class="terminal-screen">
+              <div class="terminal-line system">[System] Terminal online. Ready to stream low-level operations.</div>
+            </div>
+          </div>
+        </div>
       </div>
 
 
@@ -487,6 +517,16 @@
             </div>
             <label class="ios-toggle">
               <input type="checkbox" id="preview-toggle-input" checked>
+              <span class="ios-slider"></span>
+            </label>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-left">
+              <i data-lucide="terminal" style="color: var(--accent);"></i>
+              <span>Console Logs</span>
+            </div>
+            <label class="ios-toggle">
+              <input type="checkbox" id="settings-console-toggle">
               <span class="ios-slider"></span>
             </label>
           </div>

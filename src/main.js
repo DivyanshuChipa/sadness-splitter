@@ -141,7 +141,8 @@ function flashRedYellow() {
 function resetIdleTimer() {
   if (isIdle) {
     isIdle = false;
-    setTheme('theme-blue');
+    const activeTheme = localStorage.getItem('app-theme') || 'theme-blue';
+    setTheme(activeTheme);
     setPersonaEmotion('face_exicited.png', "Let's go!");
   }
   clearTimeout(idleTimer);
@@ -235,12 +236,24 @@ if (reactiveFace) {
   const metricsCard = document.querySelector('.metrics-card');
   if (metricsCard) {
     metricsCard.addEventListener('mouseenter', () => {
-      if (metricsHoverCount < 2) {
-        metricsHoverCount++;
+      metricsHoverCount++;
+      const isEmotional = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
+      
+      if (metricsHoverCount <= 2) {
         setPersonaEmotion('face_embrrasment.png', "Oh, you like my performance stats? 👉👈");
-        if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
-          setTheme('theme-pink');
-        }
+        if (isEmotional) setTheme('theme-pink');
+      } else if (metricsHoverCount <= 9) {
+        setPersonaEmotion('face_exicited.png', "Ah! Stop it, that tickles! It's just my CPU and GPU stats! 🙈");
+        if (isEmotional) setTheme('theme-pink');
+      } else if (metricsHoverCount <= 14) {
+        setPersonaEmotion('face_anger.png', "Hey! Don't disturb me, I'm trying to concentrate! 😤");
+        if (isEmotional) setTheme('theme-red');
+      } else if (metricsHoverCount <= 19) {
+        setPersonaEmotion('face_depression.png', "Please don't disturb me, I am crying now... 😭");
+        if (isEmotional) setTheme('theme-blue');
+      } else {
+        setPersonaEmotion('face_bored.png', "Ok, fine, do what you want to do... humph! 🙄");
+        if (isEmotional) setTheme('theme-white');
       }
     });
   }
@@ -512,12 +525,84 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // --- Console Logs Toggle Logic ---
+  const consoleToggleInput = document.getElementById('settings-console-toggle');
+  const consoleBento = document.getElementById('techy-console-bento');
+
+  if (consoleToggleInput && consoleBento) {
+    // Load preference on start
+    const showConsole = localStorage.getItem('settings-techy-console') === 'true';
+    consoleToggleInput.checked = showConsole;
+    consoleBento.style.display = showConsole ? 'block' : 'none';
+
+    consoleToggleInput.addEventListener('change', (e) => {
+      const isChecked = e.target.checked;
+      if (isChecked) {
+        consoleBento.style.display = 'block';
+        localStorage.setItem('settings-techy-console', 'true');
+        logToTechyConsole("Console Logs active. Real-time operations stream online.", "system");
+        
+        // Force reflow and auto-scroll
+        const consoleLogs = document.getElementById('techy-console-logs');
+        if (consoleLogs) consoleLogs.scrollTop = consoleLogs.scrollHeight;
+      } else {
+        consoleBento.style.display = 'none';
+        localStorage.setItem('settings-techy-console', 'false');
+      }
+    });
+  }
+
+  // --- Drag & Drop Fullscreen Glass Overlay Logic ---
+  const dragOverlay = document.getElementById('drag-drop-overlay');
+  
+  if (dragOverlay) {
+    // Listen to Tauri native drag events
+    listen('tauri://drag-enter', () => {
+      dragOverlay.style.display = 'flex';
+      void dragOverlay.offsetWidth; // Force reflow
+      dragOverlay.classList.add('active');
+      setPersonaEmotion('face_surprised.png', "Oye! Drop your video file right here! 📂✨");
+      logToTechyConsole("Native drag-enter event intercepted.", "system");
+    });
+
+    listen('tauri://drag-leave', () => {
+      dragOverlay.classList.remove('active');
+      setTimeout(() => {
+        if (!dragOverlay.classList.contains('active')) {
+          dragOverlay.style.display = 'none';
+        }
+      }, 300);
+      logToTechyConsole("Native drag-leave event intercepted.", "system");
+    });
+
+    listen('tauri://drag-drop', async (event) => {
+      dragOverlay.classList.remove('active');
+      setTimeout(() => {
+        dragOverlay.style.display = 'none';
+      }, 300);
+
+      const paths = event.payload.paths;
+      if (paths && paths.length > 0) {
+        const file = paths[0];
+        const ext = file.split('.').pop().toLowerCase();
+        if (['mp4', 'mkv', 'avi', 'mov', 'webm'].includes(ext)) {
+          logToTechyConsole(`Native file drop success: ${file}`, "system");
+          await loadVideoFile(file);
+        } else {
+          setPersonaEmotion('face_anger.png', "Oye! Sirf video files (.mp4, .mkv, .avi, etc.) support hoty hain! 😡");
+          logToTechyConsole(`Dropped invalid file: ${file}. Unsupported extension.`, "error");
+        }
+      }
+    });
+  }
 });
 
 // Demo mode logic is now handled in tour.js via the dialog.
 
 function updateStatus(msg) {
   statusText.textContent = msg;
+  logToTechyConsole(msg, "info");
 
   // Sync with sidebar status card
   const auraStatusVal = document.getElementById('aura-status-val');
@@ -551,6 +636,73 @@ function updateStatus(msg) {
   }
 }
 
+async function loadVideoFile(file) {
+  try {
+    globalInputPath = file;
+    document.getElementById('global-input-path').value = file;
+
+    const filename = file.split(/[\/\\]/).pop();
+    updateStatus(`Selected: ${filename}`);
+    setPersonaEmotion('face_happy.png', `Mil gayi file! Ab shuru karein? ${filename}`);
+    logToTechyConsole(`Loaded video file path successfully: ${file}`, "system");
+
+    // Get Duration (Needed for Sliders)
+    videoDuration = await invoke('get_video_duration', { filePath: file, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
+    logToTechyConsole(`Queried video duration: ${videoDuration.toFixed(2)} seconds.`, "info");
+
+    // Initialize Timeline Sliders
+    const splitSlider = document.getElementById('split-slider');
+    const splitTimeInput = document.getElementById('split-time-input');
+    const runSplitBtn = document.getElementById('run-split-btn');
+    if (splitSlider) {
+      splitSlider.max = Math.floor(videoDuration);
+      splitSlider.value = 0;
+      document.getElementById('split-slider-value').textContent = "00:00:00";
+      if (splitTimeInput) {
+        splitTimeInput.value = "00:00:00";
+        splitTimeInput.classList.remove('invalid-input');
+      }
+      if (runSplitBtn) {
+        runSplitBtn.disabled = false;
+        runSplitBtn.style.opacity = '1';
+        runSplitBtn.style.pointerEvents = 'auto';
+      }
+    }
+
+    const trimStart = document.getElementById('trim-slider-start');
+    const trimEnd = document.getElementById('trim-slider-end');
+    const trimTimeStart = document.getElementById('trim-time-start');
+    const trimTimeEnd = document.getElementById('trim-time-end');
+    const runTrimBtn = document.getElementById('run-trim-btn');
+    if (trimStart && trimEnd) {
+      trimStart.max = Math.floor(videoDuration);
+      trimEnd.max = Math.floor(videoDuration);
+      trimStart.value = 0;
+      trimEnd.value = Math.floor(videoDuration);
+      document.getElementById('trim-label-start').textContent = "00:00:00";
+      document.getElementById('trim-label-end').textContent = formatTime(Math.floor(videoDuration));
+      if (trimTimeStart && trimTimeEnd) {
+        trimTimeStart.value = "00:00:00";
+        trimTimeEnd.value = formatTime(Math.floor(videoDuration));
+        trimTimeStart.classList.remove('invalid-input');
+        trimTimeEnd.classList.remove('invalid-input');
+      }
+      if (runTrimBtn) {
+        runTrimBtn.disabled = false;
+        runTrimBtn.style.opacity = '1';
+        runTrimBtn.style.pointerEvents = 'auto';
+      }
+    }
+
+    // Initialize Live Video Preview Player
+    initPreviewPlayer(file);
+  } catch (err) {
+    console.error("Failed to load video file:", err);
+    updateStatus("Failed to query video duration metadata.");
+    logToTechyConsole(`Metadata query failed for path: ${file}. Raw error logged.`, "error");
+  }
+}
+
 // --- Global Setup ---
 // In a real app without bundler, we might need a workaround for dialog if plugin isn't globally exposed easily.
 // For now, we will simulate the paths or use manual input for simplicity if open() fails.
@@ -560,62 +712,7 @@ document.getElementById('browse-input-btn').addEventListener('click', async () =
       filters: [{ name: 'Video', extensions: ['mp4', 'mkv', 'avi', 'mov', 'webm'] }]
     });
     if (file) {
-      globalInputPath = file;
-      document.getElementById('global-input-path').value = file;
-
-      const filename = file.split(/[\/\\]/).pop();
-      updateStatus(`Selected: ${filename}`);
-      setPersonaEmotion('face_happy.png', `Mil gayi file! Ab shuru karein? ${filename}`);
-
-      // Get Duration (Needed for Sliders)
-      videoDuration = await invoke('get_video_duration', { filePath: file, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
-
-      // Initialize Timeline Sliders
-      const splitSlider = document.getElementById('split-slider');
-      const splitTimeInput = document.getElementById('split-time-input');
-      const runSplitBtn = document.getElementById('run-split-btn');
-      if (splitSlider) {
-        splitSlider.max = Math.floor(videoDuration);
-        splitSlider.value = 0;
-        document.getElementById('split-slider-value').textContent = "00:00:00";
-        if (splitTimeInput) {
-          splitTimeInput.value = "00:00:00";
-          splitTimeInput.classList.remove('invalid-input');
-        }
-        if (runSplitBtn) {
-          runSplitBtn.disabled = false;
-          runSplitBtn.style.opacity = '1';
-          runSplitBtn.style.pointerEvents = 'auto';
-        }
-      }
-
-      const trimStart = document.getElementById('trim-slider-start');
-      const trimEnd = document.getElementById('trim-slider-end');
-      const trimTimeStart = document.getElementById('trim-time-start');
-      const trimTimeEnd = document.getElementById('trim-time-end');
-      const runTrimBtn = document.getElementById('run-trim-btn');
-      if (trimStart && trimEnd) {
-        trimStart.max = Math.floor(videoDuration);
-        trimEnd.max = Math.floor(videoDuration);
-        trimStart.value = 0;
-        trimEnd.value = Math.floor(videoDuration);
-        document.getElementById('trim-label-start').textContent = "00:00:00";
-        document.getElementById('trim-label-end').textContent = formatTime(Math.floor(videoDuration));
-        if (trimTimeStart && trimTimeEnd) {
-          trimTimeStart.value = "00:00:00";
-          trimTimeEnd.value = formatTime(Math.floor(videoDuration));
-          trimTimeStart.classList.remove('invalid-input');
-          trimTimeEnd.classList.remove('invalid-input');
-        }
-        if (runTrimBtn) {
-          runTrimBtn.disabled = false;
-          runTrimBtn.style.opacity = '1';
-          runTrimBtn.style.pointerEvents = 'auto';
-        }
-      }
-
-      // Initialize Live Video Preview Player
-      initPreviewPlayer(file);
+      await loadVideoFile(file);
     }
   } catch (e) {
     console.error("Dialog error:", e);
@@ -753,6 +850,7 @@ listen('progress', (event) => {
   const percent = event.payload.percentage;
   progressFill.classList.remove('indeterminate');
   setProgressSmooth(percent);
+  logToTechyConsole(`Progress update: ${percent.toFixed(1)}% complete.`, "info");
 
   const stage = emotionalStages.find(s => percent >= s.min && percent < s.max);
   if (stage) {
@@ -766,6 +864,7 @@ listen('finished', (event) => {
   const activeTab = document.querySelector('.nav-btn.active')?.dataset.target;
   
   if (event.payload.success) {
+    logToTechyConsole(`Task finished successfully. Stream compile return OK.`, "system");
     displayedProgress = Math.max(displayedProgress, 99);
     setProgressSmooth(100);
     
@@ -778,6 +877,7 @@ listen('finished', (event) => {
     }
   } else {
     const errorMsg = "Error processing emotional baggage. FFmpeg failed.";
+    logToTechyConsole(`Compilation error: FFmpeg execution process failed.`, "error");
     setPersonaEmotion('face_anger.png', errorMsg);
   }
   
@@ -1110,6 +1210,7 @@ document.getElementById('run-compress-btn').addEventListener('click', () => {
     console.log("[DEBUG] FFmpeg executable path:", localStorage.getItem('ffmpeg-custom-path') || "ffmpeg");
     console.log("[DEBUG] FFmpeg arguments:", args);
   }
+  logToTechyConsole(`Executing FFmpeg compression command: ffmpeg ${args.join(' ')}`, "command");
 
   invoke('process_video', { args, totalDuration: videoDuration, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
 });
@@ -1202,6 +1303,7 @@ async function executeFFmpegTask(taskName, args, customDuration = null) {
     console.log("[DEBUG] FFmpeg executable path:", localStorage.getItem('ffmpeg-custom-path') || "ffmpeg");
     console.log("[DEBUG] FFmpeg arguments:", args);
   }
+  logToTechyConsole(`Executing FFmpeg task [${taskName}]: ffmpeg ${args.join(' ')}`, "command");
 
   try {
     await invoke('process_video', { args, totalDuration: durationToUse, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
@@ -1651,6 +1753,28 @@ function getAuraSpeech(key) {
   const currentLang = localStorage.getItem('settings-aura-language') || 'hinglish';
   const dialect = auraDialogues[currentLang] || auraDialogues['hinglish'];
   return dialect[key] || auraDialogues['hinglish'][key] || { face: 'face_neutral.png', msg: "Ready to process emotional baggage." };
+}
+
+function logToTechyConsole(message, type = "info") {
+  const consoleLogs = document.getElementById('techy-console-logs');
+  if (!consoleLogs) return;
+
+  const now = new Date();
+  const timestamp = `[${now.toTimeString().split(' ')[0]}]`;
+  
+  const line = document.createElement('div');
+  line.className = `terminal-line ${type}`;
+  line.textContent = `${timestamp} ${message}`;
+  
+  consoleLogs.appendChild(line);
+  
+  // Cap at 100 lines to prevent memory leaks
+  while (consoleLogs.children.length > 100) {
+    consoleLogs.removeChild(consoleLogs.firstChild);
+  }
+  
+  // Auto scroll
+  consoleLogs.scrollTop = consoleLogs.scrollHeight;
 }
 
 themeCircles.forEach(circle => {

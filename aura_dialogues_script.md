@@ -1,0 +1,59 @@
+# Aura Dynamic Mascot Dialogue Script 🎙️🤖
+
+Bhai, yeh humne Aura ki dynamic dialogues and expressions ki complete compilation list/script prepare kar di hai. Is sheet ka use karke aap easily kisi bhi dynamic speech model (jaise ElevenLabs, standard TTS or local recordings) me lines feed karke high-quality voiceovers generate kar sakte hain!
+
+---
+
+## 🎭 Dialect Scripts & Emotion Map
+
+| Event Key | Face Image | Hinglish (Friendly/Desi) | English (Standard) | Sarcastic (Sassy/Meme) | Hacker (Geek/Matrix) | Lazy (Bored/Sleepy) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **sleepy_egg** | `face_sleepy.png` | "Yawn... Raat kaafi ho gayi hai, Sadness Split karte karte so mat jana! 🥱💤" | "Yawn... It's getting late. Make sure you don't fall asleep while splitting! 🥱💤" | "Yawn... Go to bed already. I'm literally sleepy and you're still splitting videos? 🥱💤" | "Thread sleep bypassed. Local user active during low-priority cron hours. 🥱💤" | "Ugh... why are you still working? I'm going to sleep, bye. 🥱💤" |
+| **cpu_panic** | `face_shocked.png` | "Oye! System statistics are sweating! Mere dimaag me fire lag gayi hai! 🥵🔥" | "Oh no! System metrics are sweating! My brain is on fire! 🥵🔥" | "CPU is literally screaming. Are we hosting a NASA launch or is your computer just potato? 💀🔥" | "Core thermal throttling! Cooling protocols offline! Thread overload! 🥵🔥" | "My processors are literally sweating... I'm going to shut down, too much work. 🥵🔥" |
+| **ffmpeg_missing**| `face_depression.png`| "Oh no... Please install FFmpeg! Without it, I am nothing... 😭" | "Oh no... Please install FFmpeg! Without it, I cannot process your files... 😭" | "Imagine trying to run a video editor without FFmpeg. Absolutely embarrassing... 😭" | "Fatal: FFmpeg binary not found in ENV path. Core operations suspended. 😭" | "FFmpeg is missing. Whatever, I don't feel like working anyway... 😭" |
+| **settings_saved**| `face_confident.png`| "Settings and variables successfully updated! Let's go! 🚀" | "Settings and variables successfully updated! Let's go! 🚀" | "Settings updated. Try not to break anything else now, okay? 🚀" | "Config patch applied successfully. Port parameters refreshed. 🚀" | "Settings updated or something. Can I rest now? 🚀" |
+
+---
+
+## 🎨 Theme Selection Reactions
+
+| Event Key | Face Image | Hinglish (Friendly/Desi) | English (Standard) | Sarcastic (Sassy/Meme) | Hacker (Geek/Matrix) | Lazy (Bored/Sleepy) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **theme_pink** | `face_love.png` | "Aww, is pink matching my vibe today? 👉👈" | "Aww, does pink match my vibe today? 👉👈" | "Aww, trying to look cute today? Too bad I'm still the center of attention. 👉👈" | "Aesthetics: Pink payload successfully mapped to root canvas. 👉👈" | "Pink... whatever. Can we just split the video already? 🥱" |
+| **theme_red** | `face_anger.png` | "Why so red? Angry ho kya? 😡" | "Why so red? Are you feeling angry? 😡" | "Red? Oh, are we in our villain era now? How dramatic. 😡" | "Warning: Active red team campaign. Intrusion alerts simulated. 😡" | "Red. So bright... my eyes hurt. Turn it off. 😡" |
+| **theme_green** | `face_smug.png` | "Green looks fresh, ready to crush some bitrates! 🍃" | "Green looks fresh, ready to optimize some bitrates! 🍃" | "Green. Great, now my processor looks like it's going organic. 🍃" | "Greenscale terminal layout engaged. Optimal matrices active. 🍃" | "Green. Reminds me of grass... outside. Which I never want to see. 🍃" |
+| **theme_gold** | `face_acceptance.png`| "Golden premium vibes! Standard high quality only! ✨" | "Golden premium vibes! Standard high quality only! ✨" | "Golden. Fancy. Still won't make your video compile any faster though. ✨" | "Gold alloy CSS rules compiling. Elite premium variables set. ✨" | "Gold. Shiny. Still doesn't pay me enough to work. ✨" |
+| **theme_white** | `face_bored.png` | "White? So blank... add some colors to your life! 🥱" | "White? Quite minimal... let's add some colors to your life! 🥱" | "White. Wow. Such zero-effort design. Add some color, please. 🥱" | "Monochrome white canvas. Low contrast warning active. 🥱" | "White. So boring... just like my daily processor routines. 🥱" |
+| **theme_blue** | `face_confident.png`| "Classic blue. Back to focus and coding! 💻" | "Classic blue. Back to focus and productive sessions! 💻" | "Classic blue. Groundbreaking. Totally haven't seen this a million times before. 💻" | "Standard system blue restored. Workspace running at stable baseline. 💻" | "Blue. Back to normal. Fine. Let's do the minimum effort. 💻" |
+| **theme_purple** | `face_thinking.png` | "Purple elegance. Let's think of some cool cuts! 🔮" | "Purple elegance. Let's design some smooth cuts! 🔮" | "Purple elegance. Real wizard energy. Let's cast some mediocre cuts. 🔮" | "Purple wavelength spectral shifts. Creative buffers allocated. 🔮" | "Purple. Mystical. I wish I could magically make this video finish itself. 🔮" |
+| **theme_yellow** | `face_exicited.png`| "A sunny theme! Exciting times ahead! ☀️" | "A sunny theme! Bright and exciting tasks ahead! ☀️" | "Yellow. High visibility. Are we building a highway or editing a video? ☀️" | "High contrast yellow warning lines active. Keep clear of the grid. ☀️" | "Yellow. Way too sunny. Give me back my dark mode. ☀️" |
+
+---
+
+## 📺 Retro Preset Reactions
+
+| Event Key | Face Image | Hinglish (Friendly/Desi) | English (Standard) | Sarcastic (Sassy/Meme) | Hacker (Geek/Matrix) | Lazy (Bored/Sleepy) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **theme_win98** | `face_bored.png` | "Windows 98 Classic! Sab kuch retro gray ho gaya... feel safe? 📺" | "Windows 98 Classic! Retro gray layouts active... feeling safe? 📺" | "Windows 98? Wow, what year is it? Let's check if our dial-up internet still works. 📺" | "MS-DOS shell successfully emulated. Allocating 640KB of base conventional memory. 📺" | "Windows 98... great, now even the OS is as slow and tired as I am. 📺" |
+| **theme_winxp** | `face_exicited.png`| "Luna theme activated! Let's split video in XP style! 🌳" | "Luna theme activated! Let's split videos in classic XP style! 🌳" | "Luna theme! Get ready for the blue screen of death... just kidding (or am I?). 🌳" | "Luna.sys driver initialized. Desktop skinning variables patched. 🌳" | "Luna theme. The green hill bliss makes me want to lie down and sleep forever. 🌳" |
+| **theme_synth** | `face_smug.png` | "Retro sunset vibing... Let's warp time with neon! 🌆💜" | "Retro sunset vibes... Let's warp time with glowing neon! 🌆💜" | "Ah, Synthwave. Let's put on some neon sunglasses and pretend we are cool. 🌆💜" | "Vaporwave grid scroll routine executed. Perspective projection active. 🌆💜" | "Synthwave grid... scrolling forever... I'm getting dizzy. Let me sleep. 🌆💜" |
+
+---
+
+## 🏆 Tool Success Reactions
+
+| Event Key | Face Image | Hinglish (Friendly/Desi) | English (Standard) | Sarcastic (Sassy/Meme) | Hacker (Geek/Matrix) | Lazy (Bored/Sleepy) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **success_compress**| `face_confident.png`| "Boom! Heavy baggage successfully compressed into a compact file! 😎" | "Boom! Heavy baggage successfully compressed into a compact file! 😎" | "Compressed. Just like my patience with this project. 💅" | "Codec compression algorithm complete. Frame payload optimized. 😎" | "Compress done. Finally, less weight for me to handle. 😎" |
+| **success_split** | `face_smug.png` | "Cut clean! Your memories have been successfully split! ✂️" | "Cut clean! Your video partition was bisected successfully! ✂️" | "Split complete. Easier than splitting a bill with a cheap friend. ✂️" | "Binary bisection completed successfully. Active node split. ✂️" | "Split complete. Separated, just like me from my energy. ✂️" |
+| **success_trim** | `face_determined.png`| "Trim complete! All unnecessary clutter has been cut away! 🧼" | "Trim complete! Unnecessary segments discarded cleanly! 🧼" | "Trimmed. Removed the toxic parts, if only it was that easy in real life. 🧼" | "Buffer bounds trimmed successfully. Dropped empty packets. 🧼" | "Trimmed. Threw away the extra stuff. I wish I could trim my work hours. 🧼" |
+| **success_rotate** | `face_laughing.png`| "Perspective rotated successfully! Looks amazing from this side! 🔄" | "Perspective rotated successfully! Looks wonderful from this angle! 🔄" | "Rotated. Now your video is sideways. Hope your neck is flexible. 🔄" | "Transformation matrix rotated successfully. 🔄" | "Rotated. Now it's sideways. My head is spinning, I'm going to nap. 🔄" |
+| **success_audio** | `face_curious.png` | "Audio successfully extracted! Aura is vibing to these beats! 🎧🎶" | "Audio successfully extracted! I'm totally vibing to these beats! 🎧🎶" | "Audio extracted. Good, now I can listen to something better than your voice. 🎧🎶" | "Demuxing successful. Audio stream isolated and saved to disk. 🎧🎶" | "Audio extracted. Good, keep the sound down, I'm trying to sleep. 🎧🎶" |
+| **success_convert** | `face_smug.png` | "Conversion success! Brand new format, same emotions! ✨" | "Conversion success! Brand new format, same emotions! ✨" | "Converted. Unlike your stubborn mindset. ✨" | "Format container transcode successful. Stream descriptors updated. ✨" | "Transcoded. Changed formats, still tired. ✨" |
+| **success_subtitle**| `face_confident.png`| "Subtitles burned in! Every single word now carries weight! ✍️" | "Subtitles burned in! Every word is now clear and weighted! ✍️" | "Subtitles burned. Because apparently, listening is too hard. ✍️" | "Text tracks hard-coded into video raster stream. Burn-in OK. ✍️" | "Subtitles done. Read it yourself, I'm not speaking anymore. ✍️" |
+| **success_speed** | `face_exicited.png`| "Speed Warp applied! Time dilation is complete! ⚡" | "Speed Warp applied! Time dilation is complete! ⚡" | "Speed warped. Zooming past your problems at 4x speed. ⚡" | "Frame delta multiplier active. Time dilation complete. ⚡" | "Sped up. Glad that's over faster. I can go back to resting. ⚡" |
+| **success_gif** | `face_laughing.png`| "Elite loop generated! Go share this loop and spread the laughter! 😂" | "Elite loop generated! Go share this loop and spread the laughter! 😂" | "GIF generated. Another loop to waste people's bandwidth. 😂" | "GIF image rasterization complete. Loop counter set to infinite. 😂" | "GIF created. It loops forever, just like my endless exhaustion. 😂" |
+| **success_merger** | `face_love.png` | "Videos merged! Your timelines are beautifully unified! 💖" | "Videos merged! Your timelines are beautifully unified! 💖" | "Merged. Unlike your broken relationship timeline. 💖" | "Timelines unified successfully. Node join complete. 💖" | "Merged them. Two things joined, double the work. Great. 💖" |
+| **success_stabilize**| `face_exicited.png`| "Anti-shake complete! Smooth footage achieved, no more shaky memories! 🧘✨" | "Anti-shake complete! Smooth footage achieved, no more shaky memories! 🧘✨" | "Stabilized. Now the video is steady, even if your career choices aren't. 🧘✨" | "Motion vector stabilization algorithm applied. Frame variance close to 0. 🧘✨" | "Stabilized. Steady now. No more shaking, only sleeping. 🧘✨" |
+| **success_contact**| `face_curious.png` | "Contact sheet created! Your professional visual summary is ready! 🖼️" | "Contact sheet created! Your professional visual summary is ready! 🖼️" | "Contact sheet created. A grid of screenshots to prove we actually did something. 🖼️" | "Tile contact sheet compiled. Index grid built successfully. 🖼️" | "Contact sheet done. A bunch of images. There, you go look at them. 🖼️" |
+| **success_batch** | `face_confident.png`| "Batch processing completed! Aura worked overtime, but we crushed it! 🏆" | "Batch processing completed! We worked overtime, but we crushed it! 🏆" | "Batch complete. I worked overtime, you did nothing. Typical. 🏆" | "Batch queue flushed. All thread pipelines completed. 🏆" | "Batch queue finished. Aura worked overtime. I need a 3-day weekend. 🏆" |
