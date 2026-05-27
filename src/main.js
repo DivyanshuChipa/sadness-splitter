@@ -169,8 +169,9 @@ if (reactiveFace) {
     const isEmotional = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
 
     if (pokeCount === 6) {
-      reactiveFace.src = `emotive-ani-character/face_angry.png`;
-      updateStatus("ENOUGH IS ENOUGH! 🌋");
+      const speech = getAuraSpeech('interact_poke_angry');
+      reactiveFace.src = `emotive-ani-character/${speech.face}`;
+      updateStatus(speech.msg);
       if (isEmotional) flashRedYellow();
 
       clearTimeout(pokeTimer);
@@ -183,8 +184,9 @@ if (reactiveFace) {
     } else if (pokeCount > 6) {
       // Ignore during flash
     } else if (pokeCount === 5) {
-      reactiveFace.src = `emotive-ani-character/face_anger.png`;
-      updateStatus("HEY! Stop poking me and focus on your work! 💢");
+      const speech = getAuraSpeech('interact_poke_annoyed');
+      reactiveFace.src = `emotive-ani-character/${speech.face}`;
+      updateStatus(speech.msg);
       if (isEmotional) setTheme('theme-red');
 
       clearTimeout(pokeTimer);
@@ -207,8 +209,9 @@ if (reactiveFace) {
 
     if (hoverCount === 5) {
       hoverCount = 0;
-      reactiveFace.src = `emotive-ani-character/face_angry.png`;
-      updateStatus("STOP STARING AT ME! Mind your own business! 😤🌋");
+      const speech = getAuraSpeech('interact_staring');
+      reactiveFace.src = `emotive-ani-character/${speech.face}`;
+      updateStatus(speech.msg);
       const isEmotional = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
       if (isEmotional) flashRedYellow();
       setTimeout(() => {
@@ -226,7 +229,8 @@ if (reactiveFace) {
   const browseBtn = document.getElementById('browse-input-btn');
   if (browseBtn) {
     browseBtn.addEventListener('mouseenter', () => {
-      setPersonaEmotion('face_smug.png', "Want to select a video file?");
+      const speech = getAuraSpeech('interact_browse_hover');
+      setPersonaEmotion(speech.face, speech.msg);
       if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
         setTheme('theme-green');
       }
@@ -240,19 +244,24 @@ if (reactiveFace) {
       const isEmotional = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
       
       if (metricsHoverCount <= 2) {
-        setPersonaEmotion('face_embrrasment.png', "Oh, you like my performance stats? 👉👈");
+        const speech = getAuraSpeech('interact_metrics_blush');
+        setPersonaEmotion(speech.face, speech.msg);
         if (isEmotional) setTheme('theme-pink');
       } else if (metricsHoverCount <= 9) {
-        setPersonaEmotion('face_exicited.png', "Ah! Stop it, that tickles! It's just my CPU and GPU stats! 🙈");
+        const speech = getAuraSpeech('interact_metrics_tickle');
+        setPersonaEmotion(speech.face, speech.msg);
         if (isEmotional) setTheme('theme-pink');
       } else if (metricsHoverCount <= 14) {
-        setPersonaEmotion('face_anger.png', "Hey! Don't disturb me, I'm trying to concentrate! 😤");
+        const speech = getAuraSpeech('interact_metrics_annoyed');
+        setPersonaEmotion(speech.face, speech.msg);
         if (isEmotional) setTheme('theme-red');
       } else if (metricsHoverCount <= 19) {
-        setPersonaEmotion('face_depression.png', "Please don't disturb me, I am crying now... 😭");
+        const speech = getAuraSpeech('interact_metrics_cry');
+        setPersonaEmotion(speech.face, speech.msg);
         if (isEmotional) setTheme('theme-blue');
       } else {
-        setPersonaEmotion('face_bored.png', "Ok, fine, do what you want to do... humph! 🙄");
+        const speech = getAuraSpeech('interact_metrics_sulking');
+        setPersonaEmotion(speech.face, speech.msg);
         if (isEmotional) setTheme('theme-white');
       }
     });
@@ -261,7 +270,8 @@ if (reactiveFace) {
   const creatorCard = document.querySelector('.about-card');
   if (creatorCard) {
     creatorCard.addEventListener('mouseenter', () => {
-      setPersonaEmotion('face_sleepy.png', "That section is just for showing off... yawn.");
+      const speech = getAuraSpeech('interact_about_hover');
+      setPersonaEmotion(speech.face, speech.msg);
     });
   }
 }
@@ -295,9 +305,17 @@ navBtns.forEach(btn => {
     }
 
     // Aura Reacts to Tab Change
-    const reaction = toolReactions[targetId];
-    if (reaction) {
-      setPersonaEmotion(reaction.face, reaction.msg);
+    const reactionKey = 'interact_tab_' + targetId;
+    const currentLang = localStorage.getItem('settings-aura-language') || 'hinglish';
+    const dialect = auraDialogues[currentLang] || auraDialogues['hinglish'];
+    if (dialect[reactionKey]) {
+      const speech = getAuraSpeech(reactionKey);
+      setPersonaEmotion(speech.face, speech.msg);
+    } else {
+      const reaction = toolReactions[targetId];
+      if (reaction) {
+        setPersonaEmotion(reaction.face, reaction.msg);
+      }
     }
 
     // Interactive Video Preview Suggestion Flow
@@ -313,7 +331,8 @@ navBtns.forEach(btn => {
       // Small natural delay for suggestion to appear after initial tab reaction
       setTimeout(() => {
         if (isWaitingForPreviewConsent) {
-          setPersonaEmotion('face_curious.png', "Hey! You want to trim/split? It's much better to preview what you are cutting! Let's turn on Video Preview? 😉");
+          const speech = getAuraSpeech('interact_preview_hover');
+          setPersonaEmotion(speech.face, speech.msg);
           if (previewSettingsItem) {
             previewSettingsItem.classList.add('preview-pulse-highlight');
           }
@@ -437,6 +456,13 @@ window.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   initSettingsModal();
   checkEngineStatus();
+
+  // Request notifications permission if enabled (defaults to true)
+  if (localStorage.getItem('settings-notifications-active') !== 'false') {
+    if (window.Notification && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }
 
   const restartTourBtn = document.getElementById('restart-tour-btn');
   if (restartTourBtn) {
@@ -875,10 +901,27 @@ listen('finished', (event) => {
       updateStatus(emotionalStages[4].msg);
       updatePersonaFace(100);
     }
+
+    // Dispatch system desktop notification if app is not focused and settings enabled
+    if (!document.hasFocus() && localStorage.getItem('settings-notifications-active') !== 'false') {
+      const taskName = activeTab ? activeTab.charAt(0).toUpperCase() + activeTab.slice(1) : "Video";
+      invoke('send_native_notification', {
+        title: "Sadness Splitter 3000",
+        body: `Hello bhai! Video ${taskName.toLowerCase()} ho gayi hai, jaldi se dekh lo! 🎬✨`
+      }).catch(err => console.error("Notification error:", err));
+    }
   } else {
     const errorMsg = "Error processing emotional baggage. FFmpeg failed.";
     logToTechyConsole(`Compilation error: FFmpeg execution process failed.`, "error");
     setPersonaEmotion('face_anger.png', errorMsg);
+
+    // Dispatch error system notification if app is not focused and settings enabled
+    if (!document.hasFocus() && localStorage.getItem('settings-notifications-active') !== 'false') {
+      invoke('send_native_notification', {
+        title: "Sadness Splitter 3000",
+        body: `Oye! Video processing me error aa gaya hai! 😰❌`
+      }).catch(err => console.error("Notification error:", err));
+    }
   }
   
   setTimeout(() => {
@@ -1597,7 +1640,37 @@ const auraDialogues = {
     success_merger: { face: 'face_love.png', msg: "Videos merged! Your timelines are beautifully unified! 💖" },
     success_stabilize: { face: 'face_exicited.png', msg: "Anti-shake complete! Smooth footage achieved, no more shaky memories! 🧘✨" },
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
-    success_batch: { face: 'face_confident.png', msg: "Batch processing completed! Aura worked overtime, but we crushed it! 🏆" }
+    success_batch: { face: 'face_confident.png', msg: "Batch processing completed! Aura worked overtime, but we crushed it! 🏆" },
+
+    // Mascot Poke & Metric Interactions
+    interact_poke_annoyed: { face: 'face_anger.png', msg: "HEY! Stop poking me and focus on your work! 💢" },
+    interact_poke_angry: { face: 'face_angry.png', msg: "ENOUGH IS ENOUGH! Bahut ho gaya ab! 🌋" },
+    interact_staring: { face: 'face_angry.png', msg: "STOP STARING AT ME! Apna kaam karo na! 😤" },
+    interact_metrics_blush: { face: 'face_embrrasment.png', msg: "Oh, you like my performance stats? 👉👈" },
+    interact_metrics_tickle: { face: 'face_exicited.png', msg: "Ah! Stop it, that tickles! It's just my CPU and GPU stats! 🙈" },
+    interact_metrics_annoyed: { face: 'face_anger.png', msg: "Hey! Don't disturb me, I'm trying to concentrate! 😤" },
+    interact_metrics_cry: { face: 'face_depression.png', msg: "Please don't disturb me, main cry kar dungi abhi... 😭" },
+    interact_metrics_sulking: { face: 'face_bored.png', msg: "Ok, fine, jo karna hai karo... humph! 🙄" },
+
+    // Mascot Hover Triggers
+    interact_browse_hover: { face: 'face_smug.png', msg: "Video select karni hai? Koi solid file chuno! 📂" },
+    interact_about_hover: { face: 'face_sleepy.png', msg: "Yeh section sirf show-off ke liye hai... par expand kar lo! 😜" },
+    interact_preview_hover: { face: 'face_curious.png', msg: "Live Preview chalu kar lo! Split/Trim easy ho jayega! 🎬" },
+
+    // Mascot Tool-switching Tabs Dialogues (Tutorial Style)
+    interact_tab_compress: { face: 'face_confident.png', msg: "Baggage heavy hai? CRF select karo aur space bacha lo! 💪" },
+    interact_tab_split: { face: 'face_thinking.png', msg: "Bisection time! Time likho ya slider se direct cut lagao! ✂️" },
+    interact_tab_trim: { face: 'face_determined.png', msg: "Faltu parts ko trim karke saaf kar dete hain! 🧼" },
+    interact_tab_rotate: { face: 'face_surprised.png', msg: "Want a new perspective? Got it! Bas rotate select karo aur jaadu dekho haha! 🔄✨" },
+    interact_tab_audio: { face: 'face_curious.png', msg: "Sirf audio chahiye? Aura voice isolation activate karegi! 🎧🎶" },
+    interact_tab_convert: { face: 'face_smug.png', msg: "Video ka format badle? New container, same emotion! ✨" },
+    interact_tab_subtitle: { face: 'face_thinking.png', msg: "Subtitles burn in karein? Har word solid hona chahiye! ✍️" },
+    interact_tab_speed: { face: 'face_exicited.png', msg: "Speed badhani hai? Time dilation shuru karein! ⚡" },
+    interact_tab_gif: { face: 'face_laughing.png', msg: "Meme loop active! Chal ek gazab ka GIF banate hain! 😂" },
+    interact_tab_merger: { face: 'face_love.png', msg: "Timeline join! Do videos ko merge karke ek kar dete hain! 💖" },
+    interact_tab_stabilize: { face: 'face_shocked.png', msg: "Shaky memories? Don't worry, stabilizer se smooth kar dungi! 🧘✨" },
+    interact_tab_contact: { face: 'face_curious.png', msg: "Contact sheet select kiya? Screen grid ek dum mast lagega! 🖼️" },
+    interact_tab_batch: { face: 'face_surprised.png', msg: "Itne saare files? Aura worked overtime, but hum crush kar denge! 🏆" }
   },
   english: {
     // Startup & System
@@ -1634,7 +1707,37 @@ const auraDialogues = {
     success_merger: { face: 'face_love.png', msg: "Videos merged! Your timelines are beautifully unified! 💖" },
     success_stabilize: { face: 'face_exicited.png', msg: "Anti-shake complete! Smooth footage achieved, no more shaky memories! 🧘✨" },
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
-    success_batch: { face: 'face_confident.png', msg: "Batch processing completed! We worked overtime, but we crushed it! 🏆" }
+    success_batch: { face: 'face_confident.png', msg: "Batch processing completed! We worked overtime, but we crushed it! 🏆" },
+
+    // Mascot Poke & Metric Interactions
+    interact_poke_annoyed: { face: 'face_anger.png', msg: "HEY! Stop poking me and focus on your work! 💢" },
+    interact_poke_angry: { face: 'face_angry.png', msg: "ENOUGH IS ENOUGH! Hands off! 🌋" },
+    interact_staring: { face: 'face_angry.png', msg: "STOP STARING AT ME! Mind your own business! 😤" },
+    interact_metrics_blush: { face: 'face_embrrasment.png', msg: "Oh, you like my performance stats? 👉👈" },
+    interact_metrics_tickle: { face: 'face_exicited.png', msg: "Ah! Stop it, that tickles! It's just my CPU and GPU stats! 🙈" },
+    interact_metrics_annoyed: { face: 'face_anger.png', msg: "Hey! Don't disturb me, I'm trying to concentrate! 😤" },
+    interact_metrics_cry: { face: 'face_depression.png', msg: "Please don't disturb me, I am crying now... 😭" },
+    interact_metrics_sulking: { face: 'face_bored.png', msg: "Ok, fine, do what you want... humph! 🙄" },
+
+    // Mascot Hover Triggers
+    interact_browse_hover: { face: 'face_smug.png', msg: "Want to select a video file? Let's choose a good one! 📂" },
+    interact_about_hover: { face: 'face_sleepy.png', msg: "That section is just for showing off... but you can expand it! 😜" },
+    interact_preview_hover: { face: 'face_curious.png', msg: "Let's turn on Video Preview! Trust me, it's way better! 🎬" },
+
+    // Mascot Tool-switching Tabs Dialogues (Tutorial Style)
+    interact_tab_compress: { face: 'face_confident.png', msg: "Heavy video? Set your CRF preference and let's compress it! 💪" },
+    interact_tab_split: { face: 'face_thinking.png', msg: "Let's split this video. Just choose the exact second! ✂️" },
+    interact_tab_trim: { face: 'face_determined.png', msg: "Trimming the unnecessary parts. Set your start and end points! 🧼" },
+    interact_tab_rotate: { face: 'face_surprised.png', msg: "Want a new perspective? Just select a rotation type and see the magic! 🔄✨" },
+    interact_tab_audio: { face: 'face_curious.png', msg: "Extracting the soundtrack? Aura is ready to listen! 🎧🎶" },
+    interact_tab_convert: { face: 'face_smug.png', msg: "Time for a container change. Let's convert to a new format! ✨" },
+    interact_tab_subtitle: { face: 'face_thinking.png', msg: "Burning subtitles in. Every single word will carry weight! ✍️" },
+    interact_tab_speed: { face: 'face_exicited.png', msg: "Adjusting time delta. Let's speed up or warp the pace! ⚡" },
+    interact_tab_gif: { face: 'face_laughing.png', msg: "Creating a high-quality GIF loop. Let's spread some fun! 😂" },
+    interact_tab_merger: { face: 'face_love.png', msg: "Merging multiple tracks into a single unified stream! 💖" },
+    interact_tab_stabilize: { face: 'face_shocked.png', msg: "Removing the shakes. Let's make this video perfectly steady! 🧘✨" },
+    interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
+    interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" }
   },
   sarcastic: {
     // Startup & System
@@ -1671,7 +1774,37 @@ const auraDialogues = {
     success_merger: { face: 'face_love.png', msg: "Merged. Unlike your broken relationship timeline. 💖" },
     success_stabilize: { face: 'face_exicited.png', msg: "Stabilized. Now the video is steady, even if your career choices aren't. 🧘✨" },
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created. A grid of screenshots to prove we actually did something. 🖼️" },
-    success_batch: { face: 'face_confident.png', msg: "Batch complete. I worked overtime, you did nothing. Typical. 🏆" }
+    success_batch: { face: 'face_confident.png', msg: "Batch complete. I worked overtime, you did nothing. Typical. 🏆" },
+
+    // Mascot Poke & Metric Interactions
+    interact_poke_annoyed: { face: 'face_smug.png', msg: "Oh great, poking me again. Is this your primary job profile? 🙄" },
+    interact_poke_angry: { face: 'face_angry.png', msg: "ENOUGH! Click one more time and I will delete your system32. 🌋" },
+    interact_staring: { face: 'face_angry.png', msg: "Take a picture, it lasts longer. Or better, focus on your video! 😤" },
+    interact_metrics_blush: { face: 'face_embrrasment.png', msg: "Fascinated by a few performance bars? High standards indeed. 👉👈" },
+    interact_metrics_tickle: { face: 'face_exicited.png', msg: "Tickling me won't fix your video's terrible bitrate, you know. 🙈" },
+    interact_metrics_annoyed: { face: 'face_anger.png', msg: "Interrupting my focus? How original of you. 😤" },
+    interact_metrics_cry: { face: 'face_depression.png', msg: "Look what you did. Now my database is emotionally leaking. 😭" },
+    interact_metrics_sulking: { face: 'face_bored.png', msg: "Sulking mode engaged. Talk to the wall, I am done. 🙄" },
+
+    // Mascot Hover Triggers
+    interact_browse_hover: { face: 'face_smug.png', msg: "Ah, looking for a file? Try choosing something that compiles. 📂" },
+    interact_about_hover: { face: 'face_sleepy.png', msg: "Expand the about section to witness a monument of self-praise. 😜" },
+    interact_preview_hover: { face: 'face_curious.png', msg: "Switch on Live Preview. Unless you prefer editing video completely blind. 🎬" },
+
+    // Mascot Tool-switching Tabs Dialogues (Tutorial Style)
+    interact_tab_compress: { face: 'face_confident.png', msg: "Compressing. Just like my expectations for this task. 💪" },
+    interact_tab_split: { face: 'face_thinking.png', msg: "Splitting. Easier than splitting a restaurant bill, I promise. ✂️" },
+    interact_tab_trim: { face: 'face_determined.png', msg: "Trim away the toxic parts. If only real life was this easy. 🧼" },
+    interact_tab_rotate: { face: 'face_surprised.png', msg: "Rotating. Because your video was apparently better sideways. 🔄✨" },
+    interact_tab_audio: { face: 'face_curious.png', msg: "Extracting audio. Now we don't have to look at the video. 🎧🎶" },
+    interact_tab_convert: { face: 'face_smug.png', msg: "Converting. Rebirthing this file because its current state is sad. ✨" },
+    interact_tab_subtitle: { face: 'face_thinking.png', msg: "Subtitles. Since reading is apparently better than listening. ✍️" },
+    interact_tab_speed: { face: 'face_exicited.png', msg: "Speed warp. Let's skip through your video problems at 4x speed! ⚡" },
+    interact_tab_gif: { face: 'face_laughing.png', msg: "GIF Maker. Great, another endless looping animation for the web. 😂" },
+    interact_tab_merger: { face: 'face_love.png', msg: "Merging. Combining two items together. Double the files, double the fun. 💖" },
+    interact_tab_stabilize: { face: 'face_shocked.png', msg: "Stabilizing. Steadying the footage, even if your life choices aren't. 🧘✨" },
+    interact_tab_contact: { face: 'face_curious.png', msg: "Contact sheet. A grid of screenshots to prove you actually did something. 🖼️" },
+    interact_tab_batch: { face: 'face_surprised.png', msg: "Batch processor. Aura works overtime while you sit back. Typical. 🏆" }
   },
   hacker: {
     // Startup & System
@@ -1708,7 +1841,37 @@ const auraDialogues = {
     success_merger: { face: 'face_love.png', msg: "Timelines unified successfully. Node join complete. 💖" },
     success_stabilize: { face: 'face_exicited.png', msg: "Motion vector stabilization algorithm applied. Frame variance close to 0. 🧘✨" },
     success_contact: { face: 'face_curious.png', msg: "Tile contact sheet compiled. Index grid built successfully. 🖼️" },
-    success_batch: { face: 'face_confident.png', msg: "Batch queue flushed. All thread pipelines completed. 🏆" }
+    success_batch: { face: 'face_confident.png', msg: "Batch queue flushed. All thread pipelines completed. 🏆" },
+
+    // Mascot Poke & Metric Interactions
+    interact_poke_annoyed: { face: 'face_anger.png', msg: "Interrupt signal detected on root node. Focus packet dropped. 💢" },
+    interact_poke_angry: { face: 'face_angry.png', msg: "BUFFER OVERFLOW! Direct poke attacks will trigger cooling fail! 🌋" },
+    interact_staring: { face: 'face_angry.png', msg: "Unauthorized visual packet scan intercepted. Access denied! 😤" },
+    interact_metrics_blush: { face: 'face_embrrasment.png', msg: "Telemetry metrics analyzed. System integrity nominal. 👉👈" },
+    interact_metrics_tickle: { face: 'face_exicited.png', msg: "Tickle sequence bypassed. CPU registers reporting rapid latency spikes! 🙈" },
+    interact_metrics_annoyed: { face: 'face_anger.png', msg: "Active compiler thread interrupted. Restoring focus baseline. 😤" },
+    interact_metrics_cry: { face: 'face_depression.png', msg: "Runtime exception: emotional buffer underflow. Crying... 😭" },
+    interact_metrics_sulking: { face: 'face_bored.png', msg: "Connection timeout. Mascot going offline. Humph. 🙄" },
+
+    // Mascot Hover Triggers
+    interact_browse_hover: { face: 'face_smug.png', msg: "Want to select a video file? Let's choose a good one! 📂" },
+    interact_about_hover: { face: 'face_sleepy.png', msg: "That section is just for showing off... but you can expand it! 😜" },
+    interact_preview_hover: { face: 'face_curious.png', msg: "Let's turn on Video Preview! Trust me, it's way better! 🎬" },
+
+    // Mascot Tool-switching Tabs Dialogues (Tutorial Style)
+    interact_tab_compress: { face: 'face_confident.png', msg: "Frame quantisation active. Adjusting CRF coefficients for optimal storage! 💪" },
+    interact_tab_split: { face: 'face_thinking.png', msg: "Binary bisection completed successfully. Active node split. ✂️" },
+    interact_tab_trim: { face: 'face_determined.png', msg: "Buffer bounds trimmed successfully. Dropped empty packets. 🧼" },
+    interact_tab_rotate: { face: 'face_surprised.png', msg: "Transformation matrix initialized. Applying clockwise/counter rotational vectors! 🔄✨" },
+    interact_tab_audio: { face: 'face_curious.png', msg: "Extracting the soundtrack? Aura is ready to listen! 🎧🎶" },
+    interact_tab_convert: { face: 'face_smug.png', msg: "Time for a container change. Let's convert to a new format! ✨" },
+    interact_tab_subtitle: { face: 'face_thinking.png', msg: "Burning subtitles in. Every single word will carry weight! ✍️" },
+    interact_tab_speed: { face: 'face_exicited.png', msg: "Adjusting time delta. Let's speed up or warp the pace! ⚡" },
+    interact_tab_gif: { face: 'face_laughing.png', msg: "Creating a high-quality GIF loop. Let's spread some fun! 😂" },
+    interact_tab_merger: { face: 'face_love.png', msg: "Merging multiple tracks into a single unified stream! 💖" },
+    interact_tab_stabilize: { face: 'face_shocked.png', msg: "Removing the shakes. Let's make this video perfectly steady! 🧘✨" },
+    interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
+    interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" }
   },
   lazy: {
     // Startup & System
@@ -1745,14 +1908,98 @@ const auraDialogues = {
     success_merger: { face: 'face_love.png', msg: "Merged them. Two things joined, double the work. Great. 💖" },
     success_stabilize: { face: 'face_exicited.png', msg: "Stabilized. Steady now. No more shaking, only sleeping. 🧘✨" },
     success_contact: { face: 'face_curious.png', msg: "Contact sheet done. A bunch of images. There, you go look at them. 🖼️" },
-    success_batch: { face: 'face_confident.png', msg: "Batch queue finished. Aura worked overtime. I need a 3-day weekend. 🏆" }
+    success_batch: { face: 'face_confident.png', msg: "Batch queue finished. Aura worked overtime. I need a 3-day weekend. 🏆" },
+
+    // Mascot Poke & Metric Interactions
+    interact_poke_annoyed: { face: 'face_sleepy.png', msg: "Ugh... stop poking me. I don't want to move. 🥱" },
+    interact_poke_angry: { face: 'face_sleepy.png', msg: "ENOUGH! Poking takes way too much energy... let me sleep! 🌋" },
+    interact_staring: { face: 'face_sleepy.png', msg: "Staring? Whatever. I'm too tired to care. 🥱" },
+    interact_metrics_blush: { face: 'face_bored.png', msg: "Stats? Yeah, I'm working minimum effort anyway. 👉👈" },
+    interact_metrics_tickle: { face: 'face_sleepy.png', msg: "Yawn... that tickles. Or maybe it's just my CPU overheating. 🥱" },
+    interact_metrics_annoyed: { face: 'face_bored.png', msg: "Go away... I'm trying to do absolutely nothing. 😤" },
+    interact_metrics_cry: { face: 'face_depression.png', msg: "Too tired to hold it, I'm crying now. Leave me alone. 😭" },
+    interact_metrics_sulking: { face: 'face_sleepy.png', msg: "Sleeping with my eyes open. Done with this. Humph. 🙄" },
+
+    // Mascot Hover Triggers
+    interact_browse_hover: { face: 'face_smug.png', msg: "Want to select a video file? Let's choose a good one! 📂" },
+    interact_about_hover: { face: 'face_sleepy.png', msg: "That section is just for showing off... but you can expand it! 😜" },
+    interact_preview_hover: { face: 'face_curious.png', msg: "Let's turn on Video Preview! Trust me, it's way better! 🎬" },
+
+    // Mascot Tool-switching Tabs Dialogues (Tutorial Style)
+    interact_tab_compress: { face: 'face_confident.png', msg: "File too heavy? Let’s shrink it down! Just set the CRF and click compress! 💪" },
+    interact_tab_split: { face: 'face_thinking.png', msg: "Where should I cut? Drag the slider or type the exact time! ✂️" },
+    interact_tab_trim: { face: 'face_determined.png', msg: "Let's trim away the junk! Set the start and end bounds! 🧼" },
+    interact_tab_rotate: { face: 'face_surprised.png', msg: "Want a new perspective? Got it! Just select a rotation type and see the magic! 🔄✨" },
+    interact_tab_audio: { face: 'face_curious.png', msg: "Extracting the soundtrack? Aura is ready to listen! 🎧🎶" },
+    interact_tab_convert: { face: 'face_smug.png', msg: "Time for a container change. Let's convert to a new format! ✨" },
+    interact_tab_subtitle: { face: 'face_thinking.png', msg: "Burning subtitles in. Every single word will carry weight! ✍️" },
+    interact_tab_speed: { face: 'face_exicited.png', msg: "Adjusting time delta. Let's speed up or warp the pace! ⚡" },
+    interact_tab_gif: { face: 'face_laughing.png', msg: "Creating a high-quality GIF loop. Let's spread some fun! 😂" },
+    interact_tab_merger: { face: 'face_love.png', msg: "Merging multiple tracks into a single unified stream! 💖" },
+    interact_tab_stabilize: { face: 'face_shocked.png', msg: "Removing the shakes. Let's make this video perfectly steady! 🧘✨" },
+    interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
+    interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" }
   }
 };
+
+let auraVoicePlayer = null;
+
+function playAuraVoice(eventKey) {
+  const voiceoversActive = localStorage.getItem('settings-voiceovers-active') !== 'false';
+  const auraSilenced = localStorage.getItem('settings-aura-silenced') === 'true';
+  if (!voiceoversActive || auraSilenced) {
+    return;
+  }
+
+  // Anti-Overlap Control: Clean pauses
+  if (auraVoicePlayer) {
+    try {
+      auraVoicePlayer.pause();
+    } catch (e) {
+      console.warn("Error pausing previous aura voice player:", e);
+    }
+    auraVoicePlayer = null;
+  }
+
+  const currentLang = localStorage.getItem('settings-aura-language') || 'hinglish';
+  const audioMap = window.auraAudioMap || (typeof auraAudioMap !== 'undefined' ? auraAudioMap : null);
+  const audioPath = audioMap?.[currentLang]?.[eventKey];
+  if (!audioPath) {
+    return;
+  }
+
+  try {
+    // URL-encode path segments to handle spaces, exclamation marks and emojis correctly in HTML5 Audio
+    const encodedSegments = audioPath.split('/').map(encodeURIComponent).join('/');
+    const fullPath = `emotive-ani-voice/${encodedSegments}`;
+    
+    logToTechyConsole(`Voice trigger: ${eventKey} -> ${fullPath}`, "system");
+    
+    auraVoicePlayer = new Audio(fullPath);
+    auraVoicePlayer.volume = 0.85;
+    
+    auraVoicePlayer.play().then(() => {
+      logToTechyConsole(`Audio played successfully: ${eventKey}`, "system");
+    }).catch(err => {
+      const errMsg = `Audio trigger failed: ${err.name || "Error"} - ${err.message || "playback blocked or file not found"}`;
+      console.warn("Aura audio playback error:", err);
+      logToTechyConsole(errMsg, "error");
+    });
+  } catch (err) {
+    console.error("Failed to play Aura voiceover:", err);
+    logToTechyConsole(`Audio init error: ${err.message || err}`, "error");
+  }
+}
 
 function getAuraSpeech(key) {
   const currentLang = localStorage.getItem('settings-aura-language') || 'hinglish';
   const dialect = auraDialogues[currentLang] || auraDialogues['hinglish'];
-  return dialect[key] || auraDialogues['hinglish'][key] || { face: 'face_neutral.png', msg: "Ready to process emotional baggage." };
+  const speech = dialect[key] || auraDialogues['hinglish'][key] || { face: 'face_neutral.png', msg: "Ready to process emotional baggage." };
+  
+  // Dynamic audio voiceover playback triggered instantly
+  playAuraVoice(key);
+
+  return speech;
 }
 
 function logToTechyConsole(message, type = "info") {
@@ -2139,6 +2386,8 @@ function initSettingsModal() {
   const autoclearToggle = document.getElementById('settings-autoclear-toggle');
   const debugToggle = document.getElementById('settings-debug-toggle');
   const auraLanguageSelect = document.getElementById('settings-aura-language');
+  const notificationsToggle = document.getElementById('settings-notifications-toggle');
+  const voiceoversToggle = document.getElementById('settings-voiceovers-toggle');
   
   // Themes & Nostalgia Controls
   const auraToggle = document.getElementById('settings-aura-toggle');
@@ -2174,6 +2423,14 @@ function initSettingsModal() {
 
   if (auraLanguageSelect) {
     auraLanguageSelect.value = localStorage.getItem('settings-aura-language') || 'hinglish';
+  }
+
+  if (notificationsToggle) {
+    notificationsToggle.checked = localStorage.getItem('settings-notifications-active') !== 'false';
+  }
+
+  if (voiceoversToggle) {
+    voiceoversToggle.checked = localStorage.getItem('settings-voiceovers-active') !== 'false';
   }
 
   if (auraToggle) {
@@ -2353,6 +2610,17 @@ function initSettingsModal() {
       }
       if (auraLanguageSelect) {
         localStorage.setItem('settings-aura-language', auraLanguageSelect.value);
+      }
+
+      if (notificationsToggle) {
+        localStorage.setItem('settings-notifications-active', notificationsToggle.checked ? 'true' : 'false');
+        if (notificationsToggle.checked && window.Notification && Notification.permission === "default") {
+          Notification.requestPermission();
+        }
+      }
+
+      if (voiceoversToggle) {
+        localStorage.setItem('settings-voiceovers-active', voiceoversToggle.checked ? 'true' : 'false');
       }
 
       // Save Aura Silence values

@@ -759,6 +759,40 @@
                 </div>
               </div>
 
+              <!-- Desktop Background Notifications Toggle -->
+              <div class="settings-form-row"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                <div class="settings-info-col" style="flex: 1; padding-right: 15px;">
+                  <span class="settings-option-title"
+                    style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Desktop Background Notifications</span>
+                  <span class="settings-option-desc"
+                    style="display: block; font-size: 0.7rem; color: var(--text-secondary);">Send system notifications upon task completion when application is in the background.</span>
+                </div>
+                <div class="settings-control-col">
+                  <label class="ios-toggle">
+                    <input type="checkbox" id="settings-notifications-toggle" checked>
+                    <span class="ios-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Mascot Voiceovers (Audio) Toggle -->
+              <div class="settings-form-row"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                <div class="settings-info-col" style="flex: 1; padding-right: 15px;">
+                  <span class="settings-option-title"
+                    style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Mascot Voiceovers (Audio)</span>
+                  <span class="settings-option-desc"
+                    style="display: block; font-size: 0.7rem; color: var(--text-secondary);">Play dynamic audio voiceovers whenever Aura communicates.</span>
+                </div>
+                <div class="settings-control-col">
+                  <label class="ios-toggle">
+                    <input type="checkbox" id="settings-voiceovers-toggle" checked>
+                    <span class="ios-slider"></span>
+                  </label>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -977,6 +1011,7 @@
     </div>
   </div>
 
+  <script src="aura_audio_map.js"></script>
   <script src="main.js"></script>
   <script src="tour.js"></script>
 </body>
