@@ -91,6 +91,10 @@ def main():
         print(f"\nProcessing dialect '{dialect}' ({len(matches)} dialogues parsed)...")
         
         for key, face, msg in matches:
+            # Skip silent keys like interact_tab_* since they only react with UI text/face and do not play audio
+            if key.startswith("interact_tab_"):
+                continue
+                
             folder_name = folder_map.get(key, key)
             target_folder = os.path.join(voice_dir, folder_name)
             
@@ -144,6 +148,19 @@ def main():
         f.write("window.auraAudioMap = ")
         f.write(json.dumps(final_audio_map, indent=2, ensure_ascii=False))
         f.write(";\nconst auraAudioMap = window.auraAudioMap;\n")
+        
+    # Clean up obsolete directories starting with 'interact_tab_' in voice_dir
+    print("\nCleaning up obsolete voice directories...")
+    import shutil
+    for name in os.listdir(voice_dir):
+        if name.startswith("interact_tab_"):
+            dir_to_remove = os.path.join(voice_dir, name)
+            if os.path.isdir(dir_to_remove):
+                try:
+                    shutil.rmtree(dir_to_remove)
+                    print(f"  [Cleaned] Removed obsolete directory: {name}")
+                except Exception as e:
+                    print(f"  [Warning] Could not remove {name}: {e}")
         
     print(f"\nSuccess! Generated audio map written to {output_js_path}")
 

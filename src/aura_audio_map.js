@@ -31,7 +31,18 @@ window.auraAudioMap = {
     "success_merger": "success_merger/Videos merged! Your timelines are beautifully unified! 💖.opus",
     "success_stabilize": "success_stabilize/Motion vector stabilization algorithm applied. Frame variance close to 0..opus",
     "success_contact": "success_contact/Contact sheet created. A grid of screenshots to prove we actually did something.opus",
-    "success_batch": "success_batch/Batch processing completed! Aura worked overtime, but we crushed it.opus"
+    "success_batch": "success_batch/Batch processing completed! Aura worked overtime, but we crushed it.opus",
+    "interact_poke_annoyed": "interact_poke_annoyed/Active compiler thread interrupted. Restoring focus baseline 😤.opus",
+    "interact_poke_angry": "interact_poke_angry/ENOUGH IS ENOUGH Bahut ho gaya ab.opus",
+    "interact_staring": "interact_staring/STOP STARING AT ME! Apna kaam karo na!.opus",
+    "interact_metrics_blush": "interact_metrics_blush/Oh, you like my performance stats 👉👈.opus",
+    "interact_metrics_tickle": "interact_metrics_tickle/Ah Stop it, that tickles! It's just my CPU and GPU stats 🙈.opus",
+    "interact_metrics_annoyed": "interact_metrics_annoyed/HEY Stop poking me and focus on your work 💢.opus",
+    "interact_metrics_cry": "interact_metrics_cry/Please don't disturb me, main cry kar dungi abhi... 😭.opus",
+    "interact_metrics_sulking": "interact_metrics_sulking/Ok, fine, jo karna hai karo... humph 🙄.opus",
+    "interact_browse_hover": "interact_browse_hover/Video select karni hai Koi solid file chuno.opus",
+    "interact_about_hover": "interact_about_hover/Yeh section sirf show-off ke liye hai... par expand kar lo😜.opus",
+    "interact_preview_hover": "interact_preview_hover/Live Preview chalu kar lo SplitTrim easy ho jayega 🎬.opus"
   },
   "english": {
     "sleepy_egg": "sleepy-egg/Yawn...-It_s-getting-late.-Make-sure-you-don_t-fall-asleep-while-splitting_-__.opus",
@@ -60,7 +71,18 @@ window.auraAudioMap = {
     "success_merger": "success_merger/Videos merged! Your timelines are beautifully unified! 💖.opus",
     "success_stabilize": "success_stabilize/Motion vector stabilization algorithm applied. Frame variance close to 0..opus",
     "success_contact": "success_contact/Contact sheet created. A grid of screenshots to prove we actually did something.opus",
-    "success_batch": "success_batch/Batch complete. I worked overtime, you did nothing. Typical. 🏆.opus"
+    "success_batch": "success_batch/Batch complete. I worked overtime, you did nothing. Typical. 🏆.opus",
+    "interact_poke_annoyed": "interact_poke_annoyed/Active compiler thread interrupted. Restoring focus baseline 😤.opus",
+    "interact_poke_angry": "interact_poke_angry/ENOUGH IS ENOUGH! Hands off.opus",
+    "interact_staring": "interact_staring/STOP STARING AT ME Mind your own business😤.opus",
+    "interact_metrics_blush": "interact_metrics_blush/Oh, you like my performance stats 👉👈.opus",
+    "interact_metrics_tickle": "interact_metrics_tickle/Ah Stop it, that tickles! It's just my CPU and GPU stats 🙈.opus",
+    "interact_metrics_annoyed": "interact_metrics_annoyed/HEY Stop poking me and focus on your work 💢.opus",
+    "interact_metrics_cry": "interact_metrics_cry/Please don't disturb me, I am crying now... 😭.opus",
+    "interact_metrics_sulking": "interact_metrics_sulking/Ok, fine, do what you want... humph.opus",
+    "interact_browse_hover": "interact_browse_hover/Want to select a video file Let's choose a good one.opus",
+    "interact_about_hover": "interact_about_hover/that section is just for showing off... but you can expand it.opus",
+    "interact_preview_hover": "interact_preview_hover/Let's turn on Video Preview Trust me, it's way better 🎬.opus"
   },
   "sarcastic": {
     "sleepy_egg": "sleepy-egg/Yawn...-Go-to-bed-already.-I_m-literally-sleepy-and-you_re-still-splitting-videos.opus",
@@ -89,7 +111,18 @@ window.auraAudioMap = {
     "success_merger": "success_merger/Merged. Unlike your broken relationship timeline..opus",
     "success_stabilize": "success_stabilize/Stabilized. Now the video is steady, even if your career choices aren't.opus",
     "success_contact": "success_contact/Contact sheet created. A grid of screenshots to prove we actually did something.opus",
-    "success_batch": "success_batch/Batch complete. I worked overtime, you did nothing. Typical. 🏆.opus"
+    "success_batch": "success_batch/Batch complete. I worked overtime, you did nothing. Typical. 🏆.opus",
+    "interact_poke_annoyed": "interact_poke_annoyed/Active compiler thread interrupted. Restoring focus baseline 😤.opus",
+    "interact_poke_angry": "interact_poke_angry/ENOUGH Click one more time and I will delete your system32..opus",
+    "interact_staring": "interact_staring/Take a picture, it lasts longer. Or better, focus on your video.opus",
+    "interact_metrics_blush": "interact_metrics_blush/Fascinated by a few performance bars High standards indeed. 👉👈.opus",
+    "interact_metrics_tickle": "interact_metrics_tickle/Tickling me won't fix your video's terrible bitrate, you know. 🙈.opus",
+    "interact_metrics_annoyed": "interact_metrics_annoyed/HEY Stop poking me and focus on your work 💢.opus",
+    "interact_metrics_cry": "interact_metrics_cry/Look what you did. Now my database is emotionally leaking. 😭.opus",
+    "interact_metrics_sulking": "interact_metrics_sulking/Sulking mode engaged. Talk to the wall, I am done. 🙄.opus",
+    "interact_browse_hover": "interact_browse_hover/Ah, looking for a file Try choosing something that compiles..opus",
+    "interact_about_hover": "interact_about_hover/Expand the about section to witness a monument of self-praise..opus",
+    "interact_preview_hover": "interact_preview_hover/Switch on Live Preview. Unless you prefer editing video completely blind. 🎬.opus"
   },
   "hacker": {
     "sleepy_egg": "sleepy-egg/Thread-sleep-bypassed.-Local-user-active-during-low-priority-cron-hours.-__.opus",
@@ -118,7 +151,18 @@ window.auraAudioMap = {
     "success_merger": "success_merger/Timelines unified successfully. Node join complete..opus",
     "success_stabilize": "success_stabilize/Motion vector stabilization algorithm applied. Frame variance close to 0..opus",
     "success_contact": "success_contact/Tile contact sheet compiled. Index grid built successfully..opus",
-    "success_batch": "success_batch/Batch queue flushed. All thread pipelines completed. 🏆.opus"
+    "success_batch": "success_batch/Batch queue flushed. All thread pipelines completed. 🏆.opus",
+    "interact_poke_annoyed": "interact_poke_annoyed/Active compiler thread interrupted. Restoring focus baseline 😤.opus",
+    "interact_poke_angry": "interact_poke_angry/BUFFER OVERFLOWDirect poke attacks will trigger cooling fail 🌋.opus",
+    "interact_staring": "interact_staring/Unauthorized visual packet scan intercepted. Access denied.opus",
+    "interact_metrics_blush": "interact_metrics_blush/Telemetry metrics analyzed. System integrity nominal. 👉👈.opus",
+    "interact_metrics_tickle": "interact_metrics_tickle/Tickle sequence bypassed. CPU registers reporting rapid latency spikes 🙈.opus",
+    "interact_metrics_annoyed": "interact_metrics_annoyed/HEY Stop poking me and focus on your work 💢.opus",
+    "interact_metrics_cry": "interact_metrics_cry/Runtime exception emotional buffer underflow. Crying.opus",
+    "interact_metrics_sulking": "interact_metrics_sulking/Connection timeout. Mascot going offline. Humph. 🙄.opus",
+    "interact_browse_hover": "interact_browse_hover/Want to select a video file Let's choose a good one.opus",
+    "interact_about_hover": "interact_about_hover/that section is just for showing off... but you can expand it.opus",
+    "interact_preview_hover": "interact_preview_hover/Let's turn on Video Preview Trust me, it's way better 🎬.opus"
   },
   "lazy": {
     "sleepy_egg": "sleepy-egg/Ugh-why-are-you-still-working-I_m-going-to-sleep_-bye-__.opus",
@@ -147,7 +191,18 @@ window.auraAudioMap = {
     "success_merger": "success_merger/Merged them. Two things joined, double the work. Great.opus",
     "success_stabilize": "success_stabilize/Stabilized. Steady now. No more shaking, only sleeping..opus",
     "success_contact": "success_contact/Contact sheet done. A bunch of images. There, you go look at them..opus",
-    "success_batch": "success_batch/Batch queue finished. Aura worked overtime. I need a 3-day weekend. 🏆.opus"
+    "success_batch": "success_batch/Batch queue finished. Aura worked overtime. I need a 3-day weekend. 🏆.opus",
+    "interact_poke_annoyed": "interact_poke_annoyed/Active compiler thread interrupted. Restoring focus baseline 😤.opus",
+    "interact_poke_angry": "interact_poke_angry/ENOUGH Poking takes way too much energy... let me sleep.opus",
+    "interact_staring": "interact_staring/Staring Whatever. I'm too tired to care. 🥱.opus",
+    "interact_metrics_blush": "interact_metrics_blush/Stats Yeah, I'm working minimum effort anyway. 👉👈.opus",
+    "interact_metrics_tickle": "interact_metrics_tickle/Yawn... that tickles. Or maybe it's just my CPU overheating. 🥱.opus",
+    "interact_metrics_annoyed": "interact_metrics_annoyed/HEY Stop poking me and focus on your work 💢.opus",
+    "interact_metrics_cry": "interact_metrics_cry/Too tired to hold it, I'm crying now. Leave me alone. 😭.opus",
+    "interact_metrics_sulking": "interact_metrics_sulking/Sleeping with my eyes open. Done with this. Humph. 🙄.opus",
+    "interact_browse_hover": "interact_browse_hover/Want to select a video file Let's choose a good one.opus",
+    "interact_about_hover": "interact_about_hover/that section is just for showing off... but you can expand it.opus",
+    "interact_preview_hover": "interact_preview_hover/Let's turn on Video Preview Trust me, it's way better 🎬.opus"
   }
 };
 const auraAudioMap = window.auraAudioMap;

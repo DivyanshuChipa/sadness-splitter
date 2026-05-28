@@ -822,10 +822,10 @@ function startSystemMetrics() {
       const cpu = Number(metrics?.cpu_percent);
       const gpu = Number(metrics?.gpu_percent);
 
-      // High CPU / RAM Panic warning with 30-second cooldown
+      // High CPU / RAM Panic warning with 3-minute cooldown
       if (Number.isFinite(ram) && Number.isFinite(cpu)) {
         const now = Date.now();
-        if ((cpu > 85 || ram > 85) && (now - lastCpuWarningTime > 30000)) {
+        if ((cpu > 85 || ram > 85) && (now - lastCpuWarningTime > 180000)) {
           lastCpuWarningTime = now;
           const speech = getAuraSpeech('cpu_panic');
           setPersonaEmotion(speech.face, speech.msg);
@@ -1943,12 +1943,29 @@ const auraDialogues = {
 };
 
 let auraVoicePlayer = null;
+const lastVoiceTimes = {};
 
 function playAuraVoice(eventKey) {
   const voiceoversActive = localStorage.getItem('settings-voiceovers-active') !== 'false';
   const auraSilenced = localStorage.getItem('settings-aura-silenced') === 'true';
   if (!voiceoversActive || auraSilenced) {
     return;
+  }
+
+  // Bypass voice/audio playback for tab switching events (keep text only, no sound files needed)
+  if (eventKey.startsWith('interact_tab_')) {
+    return;
+  }
+
+  // Cooldown Lockout for interaction/panic voiceovers to prevent spamming (individual per-voice tracking)
+  if (eventKey.startsWith('interact_') || eventKey === 'cpu_panic') {
+    const now = Date.now();
+    const lastPlayed = lastVoiceTimes[eventKey] || 0;
+    if (now - lastPlayed < 180000) {
+      logToTechyConsole(`Voice trigger silenced (cooldown active for ${eventKey}): ${eventKey}`, "system");
+      return;
+    }
+    lastVoiceTimes[eventKey] = now;
   }
 
   // Anti-Overlap Control: Clean pauses
@@ -2059,6 +2076,12 @@ function setTheme(themeName) {
     targetTheme = localStorage.getItem('last-standard-theme') || 'theme-blue';
   } else if (['theme-blue', 'theme-red', 'theme-green', 'theme-purple', 'theme-gold', 'theme-pink', 'theme-white', 'theme-yellow'].includes(themeName)) {
     localStorage.setItem('last-standard-theme', themeName);
+  }
+
+  // Automatically turn off emotional mode when switching to a retro theme to prevent UI jumpbacks
+  const isRetro = ['theme-win98', 'theme-winxp', 'theme-synth'].includes(targetTheme);
+  if (isRetro && typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
+    window.stopEmotionalMode?.({ silent: true });
   }
 
   // Remove existing themes (standard & retro)
