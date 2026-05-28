@@ -62,7 +62,17 @@
         </div>
       </div>
 
-      <nav>
+      <!-- Audio/Video Mode Switcher -->
+      <div class="mode-switcher-container">
+        <span class="subtext uppercase bold switcher-label">Toolkit Mode</span>
+        <div class="mode-switcher">
+          <button class="switcher-btn active" id="mode-video-btn"><i data-lucide="video"></i> Video</button>
+          <button class="switcher-btn" id="mode-audio-btn"><i data-lucide="music"></i> Audio</button>
+          <div class="switcher-slider"></div>
+        </div>
+      </div>
+
+      <nav class="nav-list active" id="video-nav-list">
         <button class="nav-btn active" data-target="compress"><i data-lucide="zap"></i> Compress</button>
         <button class="nav-btn" data-target="split"><i data-lucide="scissors"></i> Split</button>
         <button class="nav-btn" data-target="trim"><i data-lucide="scissors-line-dashed"></i> Trim</button>
@@ -76,6 +86,15 @@
         <button class="nav-btn" data-target="stabilize"><i data-lucide="wind"></i> Video Stabilizer</button>
         <button class="nav-btn" data-target="contact"><i data-lucide="grid"></i> Contact Sheet</button>
         <button class="nav-btn" data-target="batch"><i data-lucide="package"></i> Batch Processor</button>
+      </nav>
+
+      <nav class="nav-list" id="audio-nav-list" style="display: none;">
+        <button class="nav-btn" data-target="slowed-reverb"><i data-lucide="music"></i> Slowed + Reverb</button>
+        <button class="nav-btn" data-target="lofi-cassette"><i data-lucide="radio"></i> Lofi Cassette</button>
+        <button class="nav-btn" data-target="vocal-isolation"><i data-lucide="mic-off"></i> Vocal Isolation</button>
+        <button class="nav-btn" data-target="nightcore"><i data-lucide="zap"></i> Nightcore</button>
+        <button class="nav-btn" data-target="audio-extractor"><i data-lucide="headphones"></i> Audio Extractor</button>
+        <button class="nav-btn" data-target="audio-convert"><i data-lucide="refresh-cw"></i> Format Converter</button>
       </nav>
 
       <!-- Sidebar Status Footer (Moved from middle panel) -->
@@ -434,6 +453,116 @@
             <button id="run-batch-btn" class="btn action">▶️ RUN BATCH</button>
           </section>
 
+          <!-- SLOWED + REVERB TOOL -->
+          <section id="slowed-reverb" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Slowed + Reverb</h3>
+              <p>Pitch down your audio and add a gorgeous ambient echo.</p>
+            </div>
+            <div class="control-group">
+              <label>Playback Speed (Tempo & Pitch Scale)</label>
+              <select id="slowed-speed">
+                <option value="0.90">0.90x (Mildly Slowed)</option>
+                <option value="0.85" selected>0.85x (Standard Slowed + Reverb)</option>
+                <option value="0.80">0.80x (Deep Slowed)</option>
+                <option value="0.75">0.75x (Chop & Screwed)</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label>Reverb Intensity (Ambient Decay)</label>
+              <select id="slowed-reverb-intensity">
+                <option value="light">Light (Mild Room Echo)</option>
+                <option value="medium" selected>Medium (Standard Solitude Reverb)</option>
+                <option value="deep">Deep (Depression Echo Cave)</option>
+              </select>
+            </div>
+            <button id="run-slowed-btn" class="btn action">Apply Slowed + Reverb</button>
+          </section>
+
+          <!-- LOFI CASSETTE TOOL -->
+          <section id="lofi-cassette" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Lofi Cassette</h3>
+              <p>Inject vintage analog nostalgia, tape hiss, and flutter into your audio.</p>
+            </div>
+            <div class="control-group">
+              <label>Retro Cassette Preset</label>
+              <select id="lofi-preset">
+                <option value="cassette" selected>1998 Cassette (Tape Hiss & Flutter)</option>
+                <option value="gramophone">Gramophone Vintage (High Crackle, Radio Band)</option>
+                <option value="cyberlofi">Cyberpunk Lofi (Low Bitrate, High Flutter)</option>
+              </select>
+            </div>
+            <div class="control-group checkbox-group">
+              <input type="checkbox" id="lofi-crackle-checkbox" checked>
+              <label for="lofi-crackle-checkbox">Simulate Vinyl Crackle / Hiss Loop</label>
+            </div>
+            <button id="run-lofi-btn" class="btn action">Inject Lofi Warmth</button>
+          </section>
+
+          <!-- VOCAL ISOLATION TOOL -->
+          <section id="vocal-isolation" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Vocal Isolation (Vocal Remover)</h3>
+              <p>Mute the lead vocals using stereo phase-cancellation to extract clean instrumentals.</p>
+            </div>
+            <p class="subtext">Note: Works best on stereo tracks with centered lead vocals.</p>
+            <button id="run-vocal-btn" class="btn action">Mute Vocals (Extract Instrumental)</button>
+          </section>
+
+          <!-- NIGHTCORE TOOL -->
+          <section id="nightcore" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Nightcore Warp</h3>
+              <p>Pitch up and accelerate the tempo to generate energetic, hyperactive loops.</p>
+            </div>
+            <div class="control-group">
+              <label>Speed Multiplier</label>
+              <select id="nightcore-speed">
+                <option value="1.20">1.20x (Fast)</option>
+                <option value="1.25" selected>1.25x (Standard Nightcore)</option>
+                <option value="1.30">1.30x (Hyperactive)</option>
+              </select>
+            </div>
+            <button id="run-nightcore-btn" class="btn action">Generate Nightcore Track</button>
+          </section>
+
+          <!-- AUDIO EXTRACTOR (AUDIO NAVIGATION WRAPPER) -->
+          <section id="audio-extractor" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Audio Extractor</h3>
+              <p>Isolate the soundtrack of any video file.</p>
+            </div>
+            <div class="control-group">
+              <label>Output Audio Format</label>
+              <select id="audio-extractor-format">
+                <option value="mp3">MP3</option>
+                <option value="wav">WAV</option>
+                <option value="aac">AAC</option>
+              </select>
+            </div>
+            <button id="run-audio-extractor-btn" class="btn action">Extract Audio Stream</button>
+          </section>
+
+          <!-- AUDIO FORMAT CONVERTER -->
+          <section id="audio-convert" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Audio Format Converter</h3>
+              <p>Change your audio file container/format smoothly.</p>
+            </div>
+            <div class="control-group">
+              <label>Target Audio Format</label>
+              <select id="audio-convert-format">
+                <option value="mp3">MP3 (Compressed)</option>
+                <option value="wav">WAV (Lossless Uncompressed)</option>
+                <option value="flac">FLAC (Lossless Compressed)</option>
+                <option value="aac">AAC</option>
+                <option value="ogg">OGG (Vorbis)</option>
+              </select>
+            </div>
+            <button id="run-audio-convert-btn" class="btn action">Convert Audio Format</button>
+          </section>
+
         </div>
 
         <!-- Console Logs Bento Box -->
@@ -468,6 +597,9 @@
         <div class="preview-container">
           <!-- Video Player -->
           <video id="preview-video" style="display: none;" playsinline></video>
+
+          <!-- Audio Visualizer Canvas -->
+          <canvas id="preview-audio-canvas" style="display: none; width: 100%; height: 100%; min-height: 180px; border-radius: 8px;"></canvas>
 
           <!-- Placeholder (When no video is loaded) -->
           <div id="preview-placeholder" class="preview-placeholder">

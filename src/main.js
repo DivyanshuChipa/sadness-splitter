@@ -612,11 +612,11 @@ window.addEventListener('DOMContentLoaded', () => {
       if (paths && paths.length > 0) {
         const file = paths[0];
         const ext = file.split('.').pop().toLowerCase();
-        if (['mp4', 'mkv', 'avi', 'mov', 'webm'].includes(ext)) {
+        if (['mp4', 'mkv', 'avi', 'mov', 'webm', 'mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a'].includes(ext)) {
           logToTechyConsole(`Native file drop success: ${file}`, "system");
           await loadVideoFile(file);
         } else {
-          setPersonaEmotion('face_anger.png', "Oye! Sirf video files (.mp4, .mkv, .avi, etc.) support hoty hain! 😡");
+          setPersonaEmotion('face_anger.png', "Oye! Sirf audio/video media files (.mp4, .mp3, .wav, etc.) support hoty hain! 😡");
           logToTechyConsole(`Dropped invalid file: ${file}. Unsupported extension.`, "error");
         }
       }
@@ -668,13 +668,16 @@ async function loadVideoFile(file) {
     document.getElementById('global-input-path').value = file;
 
     const filename = file.split(/[\/\\]/).pop();
+    const extension = filename.split('.').pop().toLowerCase();
+    const isAudio = ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a'].includes(extension);
+
     updateStatus(`Selected: ${filename}`);
     setPersonaEmotion('face_happy.png', `Mil gayi file! Ab shuru karein? ${filename}`);
-    logToTechyConsole(`Loaded video file path successfully: ${file}`, "system");
+    logToTechyConsole(`Loaded media file path successfully: ${file}`, "system");
 
     // Get Duration (Needed for Sliders)
     videoDuration = await invoke('get_video_duration', { filePath: file, customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null });
-    logToTechyConsole(`Queried video duration: ${videoDuration.toFixed(2)} seconds.`, "info");
+    logToTechyConsole(`Queried media duration: ${videoDuration.toFixed(2)} seconds.`, "info");
 
     // Initialize Timeline Sliders
     const splitSlider = document.getElementById('split-slider');
@@ -720,11 +723,23 @@ async function loadVideoFile(file) {
       }
     }
 
-    // Initialize Live Video Preview Player
-    initPreviewPlayer(file);
+    // Automatically switch mode and player layout depending on media type loaded
+    if (isAudio) {
+      const switcherContainer = document.querySelector('.mode-switcher-container');
+      if (switcherContainer && switcherContainer.getAttribute('data-mode') !== 'audio') {
+        switchToolkitMode('audio');
+      }
+      initAudioVisualizer(file);
+    } else {
+      const switcherContainer = document.querySelector('.mode-switcher-container');
+      if (switcherContainer && switcherContainer.getAttribute('data-mode') !== 'video') {
+        switchToolkitMode('video');
+      }
+      initPreviewPlayer(file);
+    }
   } catch (err) {
-    console.error("Failed to load video file:", err);
-    updateStatus("Failed to query video duration metadata.");
+    console.error("Failed to load media file:", err);
+    updateStatus("Failed to query media duration metadata.");
     logToTechyConsole(`Metadata query failed for path: ${file}. Raw error logged.`, "error");
   }
 }
@@ -735,7 +750,7 @@ async function loadVideoFile(file) {
 document.getElementById('browse-input-btn').addEventListener('click', async () => {
   try {
     const file = await tauriDialog.open({
-      filters: [{ name: 'Video', extensions: ['mp4', 'mkv', 'avi', 'mov', 'webm'] }]
+      filters: [{ name: 'Media Files', extensions: ['mp4', 'mkv', 'avi', 'mov', 'webm', 'mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a'] }]
     });
     if (file) {
       await loadVideoFile(file);
@@ -2668,5 +2683,364 @@ function initSettingsModal() {
     });
   }
 }
+
+// ==========================================
+// --- Phase 2: Dynamic Audio Suite Logic ---
+// ==========================================
+
+let visualizerAudio = null;
+let audioContext = null;
+let analyserNode = null;
+let sourceNode = null;
+let animationFrameId = null;
+
+function switchToolkitMode(mode) {
+  const container = document.querySelector('.mode-switcher-container');
+  const videoBtn = document.getElementById('mode-video-btn');
+  const audioBtn = document.getElementById('mode-audio-btn');
+  const videoNav = document.getElementById('video-nav-list');
+  const audioNav = document.getElementById('audio-nav-list');
+
+  if (!container || !videoBtn || !audioBtn || !videoNav || !audioNav) return;
+
+  container.setAttribute('data-mode', mode);
+
+  if (mode === 'audio') {
+    videoBtn.classList.remove('active');
+    audioBtn.classList.add('active');
+
+    videoNav.classList.remove('active');
+    setTimeout(() => {
+      videoNav.style.display = 'none';
+      audioNav.style.display = 'flex';
+      void audioNav.offsetWidth;
+      audioNav.classList.add('active');
+    }, 200);
+
+    const activeTabButton = audioNav.querySelector('.nav-btn');
+    if (activeTabButton) activeTabButton.click();
+
+    updateStatus("Audio Mode active! Aura is vibing... 🎧🎶");
+    setPersonaEmotion('face_curious.png', "Audio Mode active! Aura is vibing... 🎧🎶");
+  } else {
+    audioBtn.classList.remove('active');
+    videoBtn.classList.add('active');
+
+    audioNav.classList.remove('active');
+    setTimeout(() => {
+      audioNav.style.display = 'none';
+      videoNav.style.display = 'flex';
+      void videoNav.offsetWidth;
+      videoNav.classList.add('active');
+    }, 200);
+
+    const activeTabButton = videoNav.querySelector('.nav-btn');
+    if (activeTabButton) activeTabButton.click();
+
+    updateStatus("Ready to process emotional baggage.");
+    setPersonaEmotion('face_neutral.png', "Ready to process emotional baggage.");
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function initAudioVisualizer(filePath) {
+  const canvas = document.getElementById('preview-audio-canvas');
+  const videoEl = document.getElementById('preview-video');
+  const placeholder = document.getElementById('preview-placeholder');
+  const warning = document.getElementById('preview-compat-warning');
+  const controls = document.getElementById('preview-controls');
+  const playBtn = document.getElementById('preview-play-btn');
+  const trimPlayBtn = document.getElementById('preview-trim-play-btn');
+
+  stopTrimRangePlayback();
+  if (visualizerAudio) {
+    visualizerAudio.pause();
+  }
+
+  if (videoEl) videoEl.style.display = 'none';
+  if (warning) warning.style.display = 'none';
+  if (placeholder) placeholder.style.display = 'none';
+  if (canvas) canvas.style.display = 'block';
+  if (controls) controls.style.display = 'flex';
+  if (trimPlayBtn) trimPlayBtn.style.display = 'none';
+
+  if (playBtn) {
+    playBtn.innerHTML = '<i data-lucide="play"></i> Play';
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  let assetUrl = filePath;
+  if (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.convertFileSrc === 'function') {
+    assetUrl = window.__TAURI__.core.convertFileSrc(filePath);
+  } else {
+    assetUrl = `https://asset.localhost/${filePath}`;
+  }
+
+  if (!visualizerAudio) {
+    visualizerAudio = new Audio();
+    visualizerAudio.crossOrigin = "anonymous";
+  }
+  visualizerAudio.src = assetUrl;
+  visualizerAudio.load();
+
+  visualizerAudio.onpause = () => {
+    if (playBtn) {
+      playBtn.innerHTML = '<i data-lucide="play"></i> Play';
+      if (window.lucide) window.lucide.createIcons();
+    }
+  };
+  visualizerAudio.onplay = () => {
+    if (playBtn) {
+      playBtn.innerHTML = '<i data-lucide="pause"></i> Pause';
+      if (window.lucide) window.lucide.createIcons();
+    }
+    setupWebAudioContext();
+  };
+}
+
+function setupWebAudioContext() {
+  if (audioContext) return;
+
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    audioContext = new AudioContextClass();
+    analyserNode = audioContext.createAnalyser();
+    analyserNode.fftSize = 256;
+
+    sourceNode = audioContext.createMediaElementSource(visualizerAudio);
+    sourceNode.connect(analyserNode);
+    analyserNode.connect(audioContext.destination);
+
+    startVisualizerDrawing();
+  } catch (err) {
+    console.warn("Failed to initialize Web Audio context:", err);
+  }
+}
+
+function startVisualizerDrawing() {
+  const canvas = document.getElementById('preview-audio-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const bufferLength = analyserNode.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  canvas.classList.add('canvas-glow');
+
+  function draw() {
+    animationFrameId = requestAnimationFrame(draw);
+
+    if (!visualizerAudio.paused) {
+      analyserNode.getByteFrequencyData(dataArray);
+    } else {
+      for (let i = 0; i < bufferLength; i++) {
+        dataArray[i] = dataArray[i] * 0.9;
+      }
+    }
+
+    const width = canvas.width = canvas.clientWidth;
+    const height = canvas.height = canvas.clientHeight;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const activeColor = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#3b82f6';
+    const activeGlow = getComputedStyle(document.body).getPropertyValue('--accent-glow').trim() || 'rgba(59,130,246,0.3)';
+
+    // 1. Draw glowing bar graphs
+    const barWidth = (width / bufferLength) * 1.4;
+    let barHeight;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+      barHeight = (dataArray[i] / 255) * (height * 0.65);
+
+      const grad = ctx.createLinearGradient(0, height, 0, height - barHeight);
+      grad.addColorStop(0, activeColor);
+      grad.addColorStop(1, 'rgba(255, 255, 255, 0.15)');
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, height - barHeight, barWidth - 2, barHeight);
+
+      x += barWidth;
+    }
+
+    // 2. Draw glowing sine wave
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = activeColor;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = activeGlow;
+    ctx.beginPath();
+
+    const sliceWidth = width / bufferLength;
+    let waveX = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+      const v = dataArray[i] / 128.0;
+      const waveY = (v * (height * 0.25)) + (height * 0.2);
+
+      if (i === 0) {
+        ctx.moveTo(waveX, waveY);
+      } else {
+        ctx.lineTo(waveX, waveY);
+      }
+
+      waveX += sliceWidth;
+    }
+
+    ctx.lineTo(width, height / 2);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+  }
+  draw();
+}
+
+// Bind Web Audio Visualizer play button action to preview panel controls
+window.addEventListener('DOMContentLoaded', () => {
+  const previewPlayBtn = document.getElementById('preview-play-btn');
+  if (previewPlayBtn) {
+    previewPlayBtn.addEventListener('click', () => {
+      if (visualizerAudio && visualizerAudio.src) {
+        if (visualizerAudio.paused) {
+          visualizerAudio.play();
+        } else {
+          visualizerAudio.pause();
+        }
+      }
+    });
+  }
+
+  // Bind Mode Switcher click events
+  const modeVideoBtn = document.getElementById('mode-video-btn');
+  const modeAudioBtn = document.getElementById('mode-audio-btn');
+  if (modeVideoBtn) {
+    modeVideoBtn.addEventListener('click', () => switchToolkitMode('video'));
+  }
+  if (modeAudioBtn) {
+    modeAudioBtn.addEventListener('click', () => switchToolkitMode('audio'));
+  }
+
+  // --- AUDIO DSP COMPILER BINDINGS ---
+
+  // 1. Slowed + Reverb Action
+  const runSlowedBtn = document.getElementById('run-slowed-btn');
+  if (runSlowedBtn) {
+    runSlowedBtn.addEventListener('click', () => {
+      if (!globalInputPath || !globalOutputPath) {
+        alert("Please select input media and output folder.");
+        return;
+      }
+      const speed = document.getElementById('slowed-speed').value;
+      const intensity = document.getElementById('slowed-reverb-intensity').value;
+      const intensityMap = {
+        'light': 'aecho=0.8:0.8:40:0.3',
+        'medium': 'aecho=0.8:0.8:60:0.45',
+        'deep': 'aecho=0.8:0.8:100:0.6'
+      };
+      const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
+      const output = `${globalOutputPath}/${filename}_slowed_reverb.mp3`;
+      const targetRate = Math.round(44100 * parseFloat(speed));
+      const filter = `asetrate=${targetRate},aresample=44100,${intensityMap[intensity]}`;
+      const args = ["-i", globalInputPath, "-af", filter, "-q:a", "2", "-y", output];
+      executeFFmpegTask("Slowed + Reverb", args);
+    });
+  }
+
+  // 2. Lofi Cassette Action
+  const runLofiBtn = document.getElementById('run-lofi-btn');
+  if (runLofiBtn) {
+    runLofiBtn.addEventListener('click', () => {
+      if (!globalInputPath || !globalOutputPath) {
+        alert("Please select input media and output folder.");
+        return;
+      }
+      const preset = document.getElementById('lofi-preset').value;
+      const applyCrackle = document.getElementById('lofi-crackle-checkbox').checked;
+      let filter = "";
+      if (preset === 'cassette') {
+        filter = "aresample=11025,vibrato=f=3.5:d=0.15,highpass=f=200,lowpass=f=3200";
+      } else if (preset === 'gramophone') {
+        filter = "aresample=8000,vibrato=f=5:d=0.25,highpass=f=350,lowpass=f=2000";
+      } else {
+        filter = "aresample=16000,vibrato=f=4.5:d=0.2,highpass=f=150,lowpass=f=4000";
+      }
+      if (applyCrackle) {
+        filter += ",tremolo=f=12:d=0.1";
+      }
+      const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
+      const output = `${globalOutputPath}/${filename}_lofi.mp3`;
+      const args = ["-i", globalInputPath, "-af", filter, "-q:a", "2", "-y", output];
+      executeFFmpegTask("Lofi Injector", args);
+    });
+  }
+
+  // 3. Vocal Isolation Action
+  const runVocalBtn = document.getElementById('run-vocal-btn');
+  if (runVocalBtn) {
+    runVocalBtn.addEventListener('click', () => {
+      if (!globalInputPath || !globalOutputPath) {
+        alert("Please select input media and output folder.");
+        return;
+      }
+      const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
+      const output = `${globalOutputPath}/${filename}_vocal_isolated.mp3`;
+      const args = ["-i", globalInputPath, "-af", "pan=stereo|c0=c0-c1|c1=c1-c0", "-q:a", "2", "-y", output];
+      executeFFmpegTask("Vocal Isolation", args);
+    });
+  }
+
+  // 4. Nightcore Action
+  const runNightcoreBtn = document.getElementById('run-nightcore-btn');
+  if (runNightcoreBtn) {
+    runNightcoreBtn.addEventListener('click', () => {
+      if (!globalInputPath || !globalOutputPath) {
+        alert("Please select input media and output folder.");
+        return;
+      }
+      const speed = document.getElementById('nightcore-speed').value;
+      const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
+      const output = `${globalOutputPath}/${filename}_nightcore.mp3`;
+      const targetRate = Math.round(44100 * parseFloat(speed));
+      const filter = `asetrate=${targetRate},aresample=44100`;
+      const args = ["-i", globalInputPath, "-af", filter, "-q:a", "2", "-y", output];
+      executeFFmpegTask("Nightcore Warp", args);
+    });
+  }
+
+  // 5. Audio Extractor Action
+  const runAudioExtractorBtn = document.getElementById('run-audio-extractor-btn');
+  if (runAudioExtractorBtn) {
+    runAudioExtractorBtn.addEventListener('click', () => {
+      if (!globalInputPath || !globalOutputPath) {
+        alert("Please select input media and output folder.");
+        return;
+      }
+      const format = document.getElementById('audio-extractor-format').value;
+      const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
+      const output = `${globalOutputPath}/${filename}_extracted.${format}`;
+      const args = ["-i", globalInputPath, "-q:a", "0", "-map", "a", "-y", output];
+      executeFFmpegTask("Audio Extraction", args);
+    });
+  }
+
+  // 6. Audio Converter Action
+  const runAudioConvertBtn = document.getElementById('run-audio-convert-btn');
+  if (runAudioConvertBtn) {
+    runAudioConvertBtn.addEventListener('click', () => {
+      if (!globalInputPath || !globalOutputPath) {
+        alert("Please select input media and output folder.");
+        return;
+      }
+      const format = document.getElementById('audio-convert-format').value;
+      const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
+      const output = `${globalOutputPath}/${filename}_converted.${format}`;
+      const args = ["-i", globalInputPath, "-q:a", "0", "-y", output];
+      executeFFmpegTask("Audio Conversion", args);
+    });
+  }
+});
 
 
