@@ -102,3 +102,10 @@
 - [ ] **v1.0**: Full implementation of all 9 tool argument-builders in `main.js`.
 - [ ] **v1.1**: Add "Preset" support for different social media formats (TikTok, YouTube, etc.).
 - [x] **v1.2 (Mascot Dynamic Voiceovers (Audio))**: Add settings toggle in General tab for enabling/disabling Aura Voiceovers and play dynamic audio streams based on dialects and keys (Completed).
+- [ ] **v2.0 (Dynamic Audio Suite & Mode Switcher)**:
+  - [ ] **Audio/Video Dual Mode Toggle**: Add a beautiful morphing toggle button in the sidebar under Aura Mood to switch the entire toolkit between "Video Mode" (standard tools) and "Audio Mode" (specialized sound utilities).
+  - [ ] **Slowed + Reverb Engine**: Re-engineer FFmpeg audio filters using `-af "asetrate=44100*0.85,aresample=44100,aecho=0.8:0.8:60:0.5"` to pitch-down tracks and envelope them in deep space reverb.
+  - [ ] **Lofi Cassette & Analog Tape Simulator**: Custom low-res downsampling (`aresample=11025`), lowpass/highpass filtering, analog vibrato pitch wow-and-flutter, and mixed vinyl crackle.
+  - [ ] **Vocal Isolation & Solitude Karaoke**: Phase-cancellation filters (`-af "pan=stereo|c0=c0-c1|c1=c1-c0"`) to mute vocals.
+  - [ ] **Interactive Canvas Audio Visualizer**: A gorgeous real-time canvas spectrum (glow-in-the-dark sine wave and retro bouncing EQ bars) using native Web Audio API (`AudioContext`, `AnalyserNode`) inside the preview card when audio files are loaded.
+  - [ ] **Format Converter & Audio Demuxer**: Support local conversion between MP3, WAV, FLAC, AAC, OGG.
