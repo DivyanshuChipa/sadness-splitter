@@ -730,14 +730,21 @@ select {
   padding: 12px 16px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #0f1115; /* Hardcoded fallback for Linux OS native menu renderer */
-  background: rgba(0, 0, 0, 0.2);
-  color: #ffffff; /* Hardcoded white for Linux native menu compatibility */
+  background-color: #151821 !important; /* Solid dark background fallback for Linux */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 16px center !important;
+  background-size: 16px !important;
+  color: #ffffff !important;
   font-family: inherit;
   font-size: 0.9rem;
   outline: none;
   transition: all 0.2s;
   cursor: pointer;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  padding-right: 40px !important; /* Ensure space for custom arrow */
 }
 
 select option {
