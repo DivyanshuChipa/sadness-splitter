@@ -6,6 +6,8 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use tauri::{Emitter, Window};
 use sysinfo::System;
+use std::sync::atomic::{AtomicU16, AtomicU32, Ordering};
+use warp::Filter;
 
 #[cfg(target_os = "windows")]
 use wmi::{COMLibrary, WMIConnection};
@@ -180,8 +182,6 @@ struct SystemMetricsPayload {
     gpu_percent: f32,
 }
 
-use std::sync::atomic::{AtomicU32, Ordering};
-
 // We use an AtomicU32 to store f32 as bits to avoid Mutex overhead
 static GPU_USAGE: AtomicU32 = AtomicU32::new(0);
 
@@ -258,7 +258,37 @@ fn get_gpu_usage() -> f32 {
     f32::from_bits(GPU_USAGE.load(Ordering::Relaxed))
 }
 
+static MEDIA_PORT: AtomicU16 = AtomicU16::new(0);
 
+#[tauri::command]
+fn get_media_server_port() -> u16 {
+    MEDIA_PORT.load(Ordering::Relaxed)
+}
+
+fn start_media_server() {
+    std::thread::spawn(|| {
+        let rt = tokio::runtime::Runtime::new().expect("Failed to start tokio runtime");
+        rt.block_on(async {
+            #[cfg(unix)]
+            let route = warp::path("media").and(warp::fs::dir("/"));
+            
+            #[cfg(windows)]
+            let route = warp::path("media").and(warp::fs::dir("C:\\"));
+
+            let cors = warp::cors()
+                .allow_any_origin()
+                .allow_methods(vec!["GET", "OPTIONS"])
+                .allow_headers(vec!["Range", "Accept", "Content-Type"]);
+
+            let (addr, server) = warp::serve(route.with(cors))
+                .bind_ephemeral(([127, 0, 0, 1], 0));
+
+            MEDIA_PORT.store(addr.port(), Ordering::Relaxed);
+
+            server.await;
+        });
+    });
+}
 
 #[tauri::command]
 fn get_system_metrics() -> Result<SystemMetricsPayload, String> {
@@ -354,7 +384,12 @@ fn send_native_notification(title: String, body: String) {
 }
 
 fn main() {
+    // Crucial fix for Linux hardware acceleration crash with WebKitGTK and Radeon/NVIDIA GPUs
+    #[cfg(target_os = "linux")]
+    std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+
     start_gpu_monitor();
+    start_media_server();
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
@@ -366,7 +401,8 @@ fn main() {
             check_ffmpeg, 
             get_ffmpeg_version, 
             get_system_metrics, 
-            send_native_notification
+            send_native_notification,
+            get_media_server_port
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

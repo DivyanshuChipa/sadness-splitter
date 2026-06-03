@@ -457,6 +457,13 @@ window.addEventListener('DOMContentLoaded', () => {
   initSettingsModal();
   checkEngineStatus();
 
+  if (window.__TAURI__ && window.__TAURI__.core) {
+    invoke('get_media_server_port').then(port => {
+      window.MEDIA_PORT = port;
+      logToTechyConsole(`Media Server active on port: ${port}`, "system");
+    }).catch(e => console.error("Failed to get media port:", e));
+  }
+
   // Request notifications permission if enabled (defaults to true)
   if (localStorage.getItem('settings-notifications-active') !== 'false') {
     if (window.Notification && Notification.permission === "default") {
@@ -2176,6 +2183,19 @@ function initPreviewPlayer(filePath) {
   // Stop any active playback loops
   stopTrimRangePlayback();
 
+  if (typeof visualizerAudio !== 'undefined' && visualizerAudio) {
+    visualizerAudio.pause();
+    visualizerAudio.removeAttribute('src');
+    visualizerAudio.src = '';
+    visualizerAudio.load();
+  }
+  if (typeof window.analysisAudio !== 'undefined' && window.analysisAudio) {
+    window.analysisAudio.pause();
+    window.analysisAudio.removeAttribute('src');
+    window.analysisAudio.src = '';
+    window.analysisAudio.load();
+  }
+
   // Reset controls
   if (previewPlayBtn) {
     previewPlayBtn.innerHTML = '<i data-lucide="play"></i> Play';
@@ -2187,13 +2207,19 @@ function initPreviewPlayer(filePath) {
   if (isSupported) {
     // Get Tauri asset URL
     let assetUrl = filePath;
-    if (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.convertFileSrc === 'function') {
+    const isLinux = navigator.userAgent.toLowerCase().includes('linux');
+    if (isLinux && window.MEDIA_PORT) {
+      const cleanPath = filePath.startsWith('/') ? filePath.substring(1) : filePath;
+      const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
+      assetUrl = `http://127.0.0.1:${window.MEDIA_PORT}/media/${encodedPath}`;
+    } else if (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.convertFileSrc === 'function') {
       assetUrl = window.__TAURI__.core.convertFileSrc(filePath);
     } else {
       assetUrl = `https://asset.localhost/${filePath}`;
     }
 
     previewVideo.src = assetUrl;
+    previewVideo.setAttribute('src', assetUrl);
     previewVideo.style.display = 'block';
     previewPlaceholder.style.display = 'none';
     previewCompatWarning.style.display = 'none';
@@ -2216,6 +2242,7 @@ function initPreviewPlayer(filePath) {
     previewPlaceholder.style.display = 'none';
     previewCompatWarning.style.display = 'flex';
     previewControls.style.display = 'none';
+    previewVideo.removeAttribute('src');
     previewVideo.src = '';
   }
   
@@ -2338,10 +2365,14 @@ window.addEventListener('DOMContentLoaded', () => {
   // 3. Play / Pause Control
   if (previewPlayBtn) {
     previewPlayBtn.addEventListener('click', () => {
-      if (!previewVideo || !previewVideo.src) return;
-      stopTrimRangePlayback();
+      if (!previewVideo || (!previewVideo.getAttribute('src') && !previewVideo.src)) return;
+      
+      const wasPaused = previewVideo.paused;
+      if (isPlayingTrimRange) {
+        stopTrimRangePlayback();
+      }
 
-      if (previewVideo.paused) {
+      if (wasPaused) {
         previewVideo.play();
         previewPlayBtn.innerHTML = '<i data-lucide="pause"></i> Pause';
       } else {
@@ -2756,9 +2787,22 @@ function initAudioVisualizer(filePath) {
   stopTrimRangePlayback();
   if (visualizerAudio) {
     visualizerAudio.pause();
+    visualizerAudio.removeAttribute('src');
+    visualizerAudio.src = '';
+  }
+  if (window.analysisAudio) {
+    window.analysisAudio.pause();
+    window.analysisAudio.removeAttribute('src');
+    window.analysisAudio.src = '';
   }
 
-  if (videoEl) videoEl.style.display = 'none';
+  if (videoEl) {
+    videoEl.pause();
+    videoEl.removeAttribute('src');
+    videoEl.src = '';
+    videoEl.load();
+    videoEl.style.display = 'none';
+  }
   if (warning) warning.style.display = 'none';
   if (placeholder) placeholder.style.display = 'none';
   if (canvas) canvas.style.display = 'block';
@@ -2771,7 +2815,12 @@ function initAudioVisualizer(filePath) {
   }
 
   let assetUrl = filePath;
-  if (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.convertFileSrc === 'function') {
+  const isLinux = navigator.userAgent.toLowerCase().includes('linux');
+  if (isLinux && window.MEDIA_PORT) {
+    const cleanPath = filePath.startsWith('/') ? filePath.substring(1) : filePath;
+    const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
+    assetUrl = `http://127.0.0.1:${window.MEDIA_PORT}/media/${encodedPath}`;
+  } else if (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.convertFileSrc === 'function') {
     assetUrl = window.__TAURI__.core.convertFileSrc(filePath);
   } else {
     assetUrl = `https://asset.localhost/${filePath}`;
@@ -2782,12 +2831,26 @@ function initAudioVisualizer(filePath) {
     visualizerAudio.crossOrigin = "anonymous";
   }
   visualizerAudio.src = assetUrl;
+  visualizerAudio.setAttribute('src', assetUrl);
   visualizerAudio.load();
+
+  if (isLinux) {
+    if (!window.analysisAudio) {
+      window.analysisAudio = new Audio();
+      window.analysisAudio.crossOrigin = "anonymous";
+    }
+    window.analysisAudio.src = assetUrl;
+    window.analysisAudio.setAttribute('src', assetUrl);
+    window.analysisAudio.load();
+  }
 
   visualizerAudio.onpause = () => {
     if (playBtn) {
       playBtn.innerHTML = '<i data-lucide="play"></i> Play';
       if (window.lucide) window.lucide.createIcons();
+    }
+    if (isLinux && window.analysisAudio) {
+      window.analysisAudio.pause();
     }
   };
   visualizerAudio.onplay = () => {
@@ -2795,8 +2858,26 @@ function initAudioVisualizer(filePath) {
       playBtn.innerHTML = '<i data-lucide="pause"></i> Pause';
       if (window.lucide) window.lucide.createIcons();
     }
+    if (isLinux && window.analysisAudio) {
+      window.analysisAudio.currentTime = visualizerAudio.currentTime;
+      window.analysisAudio.play();
+    }
     setupWebAudioContext();
   };
+  visualizerAudio.onended = () => {
+    if (isLinux && window.analysisAudio) {
+      window.analysisAudio.pause();
+      window.analysisAudio.currentTime = 0;
+    }
+    visualizerAudio.currentTime = 0;
+  };
+  if (isLinux) {
+    visualizerAudio.onseeking = () => {
+      if (window.analysisAudio) {
+        window.analysisAudio.currentTime = visualizerAudio.currentTime;
+      }
+    };
+  }
 }
 
 function setupWebAudioContext() {
@@ -2808,9 +2889,18 @@ function setupWebAudioContext() {
     analyserNode = audioContext.createAnalyser();
     analyserNode.fftSize = 256;
 
-    sourceNode = audioContext.createMediaElementSource(visualizerAudio);
-    sourceNode.connect(analyserNode);
-    analyserNode.connect(audioContext.destination);
+    const isLinux = navigator.userAgent.toLowerCase().includes('linux');
+    if (isLinux && window.analysisAudio) {
+      sourceNode = audioContext.createMediaElementSource(window.analysisAudio);
+      sourceNode.connect(analyserNode);
+      // On Linux, we do not connect analyserNode to audioContext.destination.
+      // This keeps the analysisAudio silent, while visualizerAudio plays out loud
+      // and routes natively to default devices/Bluetooth.
+    } else {
+      sourceNode = audioContext.createMediaElementSource(visualizerAudio);
+      sourceNode.connect(analyserNode);
+      analyserNode.connect(audioContext.destination);
+    }
 
     startVisualizerDrawing();
   } catch (err) {
@@ -2903,7 +2993,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const previewPlayBtn = document.getElementById('preview-play-btn');
   if (previewPlayBtn) {
     previewPlayBtn.addEventListener('click', () => {
-      if (visualizerAudio && visualizerAudio.src) {
+      if (visualizerAudio && (visualizerAudio.getAttribute('src') || visualizerAudio.src)) {
         if (visualizerAudio.paused) {
           visualizerAudio.play();
         } else {
