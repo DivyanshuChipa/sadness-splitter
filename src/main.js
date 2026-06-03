@@ -2010,7 +2010,12 @@ function playAuraVoice(eventKey) {
   try {
     // URL-encode path segments to handle spaces, exclamation marks and emojis correctly in HTML5 Audio
     const encodedSegments = audioPath.split('/').map(encodeURIComponent).join('/');
-    const fullPath = `emotive-ani-voice/${encodedSegments}`;
+    let fullPath = `emotive-ani-voice/${encodedSegments}`;
+    
+    const isLinux = navigator.userAgent.toLowerCase().includes('linux');
+    if (isLinux && window.MEDIA_PORT) {
+      fullPath = `http://127.0.0.1:${window.MEDIA_PORT}/app-assets/emotive-ani-voice/${encodedSegments}`;
+    }
     
     logToTechyConsole(`Voice trigger: ${eventKey} -> ${fullPath}`, "system");
     

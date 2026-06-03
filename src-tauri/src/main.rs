@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{Emitter, Window};
 use sysinfo::System;
 use std::sync::atomic::{AtomicU16, AtomicU32, Ordering};
-use warp::Filter;
+use warp::{Filter, Reply};
 
 #[cfg(target_os = "windows")]
 use wmi::{COMLibrary, WMIConnection};
@@ -265,15 +265,47 @@ fn get_media_server_port() -> u16 {
     MEDIA_PORT.load(Ordering::Relaxed)
 }
 
-fn start_media_server() {
-    std::thread::spawn(|| {
+fn start_media_server(handle: tauri::AppHandle) {
+    std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().expect("Failed to start tokio runtime");
         rt.block_on(async {
             #[cfg(unix)]
-            let route = warp::path("media").and(warp::fs::dir("/"));
+            let route_media = warp::path("media").and(warp::fs::dir("/"));
             
             #[cfg(windows)]
-            let route = warp::path("media").and(warp::fs::dir("C:\\"));
+            let route_media = warp::path("media").and(warp::fs::dir("C:\\"));
+
+            let handle_clone = handle.clone();
+            let route_assets = warp::path("app-assets")
+                .and(warp::path::tail())
+                .map(move |tail: warp::path::Tail| {
+                    let path_str = tail.as_str();
+                    match handle_clone.asset_resolver().get(path_str.to_string()) {
+                        Some(asset) => {
+                            let res = warp::reply::with_header(
+                                warp::reply::with_status(asset.bytes, warp::http::StatusCode::OK),
+                                "Content-Type",
+                                asset.mime_type
+                            );
+                            let res_with_ranges = warp::reply::with_header(
+                                res,
+                                "Accept-Ranges",
+                                "bytes"
+                            );
+                            res_with_ranges.into_response()
+                        }
+                        None => {
+                            let res_err = warp::reply::with_header(
+                                warp::reply::with_status(Vec::new(), warp::http::StatusCode::NOT_FOUND),
+                                "Content-Type",
+                                "application/octet-stream"
+                            );
+                            res_err.into_response()
+                        }
+                    }
+                });
+
+            let route = route_media.or(route_assets);
 
             let cors = warp::cors()
                 .allow_any_origin()
@@ -389,10 +421,15 @@ fn main() {
     std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
 
     start_gpu_monitor();
-    start_media_server();
+    
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            let handle = app.handle().clone();
+            start_media_server(handle);
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             get_video_duration, 
             process_video, 
