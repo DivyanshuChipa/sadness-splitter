@@ -33,6 +33,8 @@
 - **Emotional Auras**: Choose your theme—Blue (Peace), Red (Passion), Gold (Acceptance), and more.
 - **Aura the Mascot**: Meet your reactive anime companion who evolves with your processing progress and has a sassy personality!
 - **Emotive voice**: voices that gives emotions.
+- **Audio and Video** toolkit option that wow independent options.
+- **cpu and Ram Gpu** stats visiblity works in windows mean while in linus it kinda sloppy .
 
 ### 🛠️ Professional Tool Suite
 - **Compress & Resize**: Shrink videos with CRF control and downscale to any resolution (1080p to 240p).
@@ -41,7 +43,8 @@
 - **Batch Processing**: Process entire folders of video in one click.
 - **Format Rebirth**: Convert to MP4, MKV, WebM, and even legacy **3GP**.
 - **The "Full Package"**: GIF Maker, Audio Extractor, Subtitle Burner, Speed Warp, and Video Merger.
-
+###  Music 
+- **Slowed reverb song creation** Make music, or create your normal music to today standard that loved.
 ### 🎭 The Experience
 - **Sadness Meter**: Real-time progress tracking through the 5 stages of grief.
 - **Guided Tour**: Let the app show you around its features.
@@ -64,6 +67,7 @@
 2. **Choose Aura**: Set your theme from the sidebar.
 3. **Process**: Select a tool and hit the action button.
 4. **Acceptance**: Watch the progress bar reach 100% and find peace.
+
 
 ---
 
