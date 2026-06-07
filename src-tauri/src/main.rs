@@ -1,12 +1,15 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::process::{Command, Stdio};
-use std::io::{BufRead, BufReader};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use tauri::{Emitter, Window};
+use sha2::{Digest, Sha256};
+use std::fs;
+use std::io::{BufRead, BufReader, Read, Write};
+use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
+use std::sync::atomic::{AtomicBool, AtomicU16, AtomicU32, Ordering};
 use sysinfo::System;
-use std::sync::atomic::{AtomicU16, AtomicU32, Ordering};
+use tauri::{AppHandle, Emitter, Manager, Window};
 use warp::{Filter, Reply};
 
 #[cfg(target_os = "windows")]
@@ -16,6 +19,7 @@ use wmi::{COMLibrary, WMIConnection};
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 struct GpuEngine {
+    #[allow(dead_code)]
     name: String,
     utilization_percentage: u32,
 }
@@ -30,34 +34,187 @@ struct FinishedPayload {
     success: bool,
 }
 
-fn get_command_path(name: &str, custom_ffmpeg_path: &Option<String>) -> String {
-    if let Some(ref path) = custom_ffmpeg_path {
-        if !path.trim().is_empty() {
-            if name == "ffprobe" {
-                let p = std::path::Path::new(path);
-                if let Some(parent) = p.parent() {
-                    let exe_name = p.file_name().and_then(|f| f.to_str()).unwrap_or("ffmpeg.exe");
-                    let ffprobe_exe = exe_name.replace("ffmpeg", "ffprobe").replace("FFMPEG", "FFPROBE");
-                    let resolved = parent.join(ffprobe_exe);
-                    if resolved.exists() {
-                        return resolved.to_string_lossy().to_string();
-                    }
-                }
-            }
-            return path.clone();
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct FfmpegStatus {
+    available: bool,
+    version: String,
+    source: String,
+    path: String,
+    platform: String,
+    install_supported: bool,
+    managed_path: String,
+    distro: Option<String>,
+    install_command: Option<String>,
+    install_warning: Option<String>,
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct FfmpegInstallProgress {
+    stage: String,
+    downloaded_bytes: u64,
+    total_bytes: u64,
+    percent: u8,
+    message: String,
+}
+
+#[derive(Clone)]
+struct FfmpegPair {
+    ffmpeg: PathBuf,
+    ffprobe: PathBuf,
+    source: &'static str,
+    version: String,
+}
+
+static FFMPEG_INSTALLING: AtomicBool = AtomicBool::new(false);
+
+const FFMPEG_ZIP_URL: &str = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip";
+const FFMPEG_SHA256_URL: &str =
+    "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip.sha256";
+
+fn executable_name(tool: &str) -> String {
+    if cfg!(target_os = "windows") {
+        format!("{tool}.exe")
+    } else {
+        tool.to_string()
+    }
+}
+
+fn managed_ffmpeg_root(app: &AppHandle) -> Result<PathBuf, String> {
+    app.path()
+        .app_local_data_dir()
+        .map(|path| path.join("ffmpeg"))
+        .map_err(|error| format!("Could not resolve app data directory: {error}"))
+}
+
+fn pair_from_ffmpeg_path(path: PathBuf, source: &'static str) -> Option<FfmpegPair> {
+    let parent = path.parent()?;
+    let ffprobe = parent.join(executable_name("ffprobe"));
+
+    if !path.is_file() || !ffprobe.is_file() {
+        return None;
+    }
+
+    let version = read_ffmpeg_version(&path)?;
+    if !command_succeeds(&ffprobe, &["-version"]) {
+        return None;
+    }
+
+    Some(FfmpegPair {
+        ffmpeg: path,
+        ffprobe,
+        source,
+        version,
+    })
+}
+
+fn pair_from_commands(
+    ffmpeg: PathBuf,
+    ffprobe: PathBuf,
+    source: &'static str,
+) -> Option<FfmpegPair> {
+    let version = read_ffmpeg_version(&ffmpeg)?;
+    if !command_succeeds(&ffprobe, &["-version"]) {
+        return None;
+    }
+
+    Some(FfmpegPair {
+        ffmpeg,
+        ffprobe,
+        source,
+        version,
+    })
+}
+
+fn command_succeeds(command: &Path, args: &[&str]) -> bool {
+    Command::new(command)
+        .args(args)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .map(|status| status.success())
+        .unwrap_or(false)
+}
+
+fn read_ffmpeg_version(command: &Path) -> Option<String> {
+    let output = Command::new(command).arg("-version").output().ok()?;
+    if !output.status.success() {
+        return None;
+    }
+
+    let first_line = String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .next()?
+        .trim()
+        .to_string();
+    let re = Regex::new(r"ffmpeg version (\S+)").ok()?;
+    Some(
+        re.captures(&first_line)
+            .and_then(|captures| captures.get(1))
+            .map(|value| value.as_str().to_string())
+            .unwrap_or(first_line),
+    )
+}
+
+fn resolve_ffmpeg(app: &AppHandle, custom_ffmpeg_path: &Option<String>) -> Option<FfmpegPair> {
+    if let Some(path) = custom_ffmpeg_path
+        .as_ref()
+        .map(|path| path.trim())
+        .filter(|path| !path.is_empty())
+    {
+        if let Some(pair) = pair_from_ffmpeg_path(PathBuf::from(path), "custom") {
+            return Some(pair);
         }
     }
-    name.to_string()
+
+    let system_pair = pair_from_commands(
+        PathBuf::from(executable_name("ffmpeg")),
+        PathBuf::from(executable_name("ffprobe")),
+        "system",
+    );
+    if system_pair.is_some() {
+        return system_pair;
+    }
+
+    let managed_root = managed_ffmpeg_root(app).ok()?;
+    pair_from_ffmpeg_path(
+        managed_root.join("bin").join(executable_name("ffmpeg")),
+        "managed",
+    )
+}
+
+fn resolved_command_path(
+    app: &AppHandle,
+    tool: &str,
+    custom_ffmpeg_path: &Option<String>,
+) -> PathBuf {
+    if let Some(pair) = resolve_ffmpeg(app, custom_ffmpeg_path) {
+        if tool == "ffprobe" {
+            pair.ffprobe
+        } else {
+            pair.ffmpeg
+        }
+    } else {
+        PathBuf::from(executable_name(tool))
+    }
 }
 
 #[tauri::command]
-fn get_video_duration(file_path: String, custom_ffmpeg_path: Option<String>) -> f64 {
-    let cmd = get_command_path("ffprobe", &custom_ffmpeg_path);
+fn get_video_duration(
+    app: AppHandle,
+    file_path: String,
+    custom_ffmpeg_path: Option<String>,
+) -> f64 {
+    let cmd = resolved_command_path(&app, "ffprobe", &custom_ffmpeg_path);
     let output = Command::new(cmd)
         .args([
-            "-v", "error",
-            "-show_entries", "format=duration",
-            "-of", "default=noprint_wrappers=1:nokey=1",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
             &file_path,
         ])
         .output();
@@ -72,9 +229,15 @@ fn get_video_duration(file_path: String, custom_ffmpeg_path: Option<String>) -> 
 }
 
 #[tauri::command]
-fn process_video(window: Window, args: Vec<String>, total_duration: f64, custom_ffmpeg_path: Option<String>) {
+fn process_video(
+    window: Window,
+    args: Vec<String>,
+    total_duration: f64,
+    custom_ffmpeg_path: Option<String>,
+) {
+    let app = window.app_handle().clone();
     std::thread::spawn(move || {
-        let cmd = get_command_path("ffmpeg", &custom_ffmpeg_path);
+        let cmd = resolved_command_path(&app, "ffmpeg", &custom_ffmpeg_path);
         let mut child = match Command::new(cmd)
             .args(&args)
             .stdin(Stdio::piped())
@@ -91,7 +254,7 @@ fn process_video(window: Window, args: Vec<String>, total_duration: f64, custom_
 
         let stderr = child.stderr.take().expect("Failed to open stderr");
         let reader = BufReader::new(stderr);
-        
+
         // Regex to parse `time=HH:MM:SS.ms` or similar (supports flexible decimal places)
         let re = Regex::new(r"time=(\d{2}):(\d{2}):(\d{2}(?:\.\d+)?)").unwrap();
 
@@ -128,25 +291,30 @@ fn process_video(window: Window, args: Vec<String>, total_duration: f64, custom_
         }
 
         let status = child.wait().expect("Failed to wait on child");
-        let _ = window.emit("finished", FinishedPayload { success: status.success() });
+        let _ = window.emit(
+            "finished",
+            FinishedPayload {
+                success: status.success(),
+            },
+        );
     });
 }
 
 #[tauri::command]
-fn generate_thumbnail(file_path: String, custom_ffmpeg_path: Option<String>) -> String {
+fn generate_thumbnail(
+    app: AppHandle,
+    file_path: String,
+    custom_ffmpeg_path: Option<String>,
+) -> String {
     let temp_dir = std::env::temp_dir();
     let thumb_path = temp_dir.join("sadness_thumb.jpg");
     let thumb_str = thumb_path.to_str().unwrap_or("");
-    let cmd = get_command_path("ffmpeg", &custom_ffmpeg_path);
+    let cmd = resolved_command_path(&app, "ffmpeg", &custom_ffmpeg_path);
 
     // ffmpeg -i input -ss 00:00:01 -vframes 1 -q:v 2 output.jpg
     let _ = Command::new(cmd)
         .args([
-            "-i", &file_path,
-            "-ss", "00:00:01",
-            "-vframes", "1",
-            "-q:v", "2",
-            "-y", thumb_str,
+            "-i", &file_path, "-ss", "00:00:01", "-vframes", "1", "-q:v", "2", "-y", thumb_str,
         ])
         .output();
 
@@ -173,7 +341,6 @@ fn list_videos_in_folder(folder_path: String) -> Vec<String> {
     }
     videos
 }
-
 
 #[derive(Clone, Serialize)]
 struct SystemMetricsPayload {
@@ -207,9 +374,13 @@ fn start_gpu_monitor() {
             if let Ok(results) = wmi_con.raw_query::<GpuEngine>(query) {
                 // Sum up the utilization across all running 3D processes
                 let total_utilization: u32 = results.iter().map(|e| e.utilization_percentage).sum();
-                
+
                 // Cap at 100% just in case
-                let final_percentage = if total_utilization > 100 { 100.0 } else { total_utilization as f32 };
+                let final_percentage = if total_utilization > 100 {
+                    100.0
+                } else {
+                    total_utilization as f32
+                };
                 GPU_USAGE.store(final_percentage.to_bits(), Ordering::Relaxed);
             } else {
                 GPU_USAGE.store(f32::NAN.to_bits(), Ordering::Relaxed);
@@ -230,7 +401,7 @@ fn start_gpu_monitor() {
                 "/sys/class/drm/card0/device/gpu_busy_percent",
                 "/sys/class/drm/card1/device/gpu_busy_percent",
             ];
-            
+
             let mut found = false;
             for path in paths {
                 if let Ok(content) = std::fs::read_to_string(path) {
@@ -271,39 +442,39 @@ fn start_media_server(handle: tauri::AppHandle) {
         rt.block_on(async {
             #[cfg(unix)]
             let route_media = warp::path("media").and(warp::fs::dir("/"));
-            
+
             #[cfg(windows)]
             let route_media = warp::path("media").and(warp::fs::dir("C:\\"));
 
             let handle_clone = handle.clone();
-            let route_assets = warp::path("app-assets")
-                .and(warp::path::tail())
-                .map(move |tail: warp::path::Tail| {
+            let route_assets = warp::path("app-assets").and(warp::path::tail()).map(
+                move |tail: warp::path::Tail| {
                     let path_str = tail.as_str();
                     match handle_clone.asset_resolver().get(path_str.to_string()) {
                         Some(asset) => {
                             let res = warp::reply::with_header(
                                 warp::reply::with_status(asset.bytes, warp::http::StatusCode::OK),
                                 "Content-Type",
-                                asset.mime_type
+                                asset.mime_type,
                             );
-                            let res_with_ranges = warp::reply::with_header(
-                                res,
-                                "Accept-Ranges",
-                                "bytes"
-                            );
+                            let res_with_ranges =
+                                warp::reply::with_header(res, "Accept-Ranges", "bytes");
                             res_with_ranges.into_response()
                         }
                         None => {
                             let res_err = warp::reply::with_header(
-                                warp::reply::with_status(Vec::new(), warp::http::StatusCode::NOT_FOUND),
+                                warp::reply::with_status(
+                                    Vec::new(),
+                                    warp::http::StatusCode::NOT_FOUND,
+                                ),
                                 "Content-Type",
-                                "application/octet-stream"
+                                "application/octet-stream",
                             );
                             res_err.into_response()
                         }
                     }
-                });
+                },
+            );
 
             let route = route_media.or(route_assets);
 
@@ -312,8 +483,7 @@ fn start_media_server(handle: tauri::AppHandle) {
                 .allow_methods(vec!["GET", "OPTIONS"])
                 .allow_headers(vec!["Range", "Accept", "Content-Type"]);
 
-            let (addr, server) = warp::serve(route.with(cors))
-                .bind_ephemeral(([127, 0, 0, 1], 0));
+            let (addr, server) = warp::serve(route.with(cors)).bind_ephemeral(([127, 0, 0, 1], 0));
 
             MEDIA_PORT.store(addr.port(), Ordering::Relaxed);
 
@@ -342,44 +512,409 @@ fn get_system_metrics() -> Result<SystemMetricsPayload, String> {
     let cpu_percent = sys.global_cpu_info().cpu_usage();
     let gpu_percent = get_gpu_usage();
 
-    Ok(SystemMetricsPayload { cpu_percent, ram_percent, gpu_percent })
+    Ok(SystemMetricsPayload {
+        cpu_percent,
+        ram_percent,
+        gpu_percent,
+    })
+}
+
+fn platform_name() -> &'static str {
+    if cfg!(target_os = "windows") {
+        "windows"
+    } else if cfg!(target_os = "linux") {
+        "linux"
+    } else if cfg!(target_os = "macos") {
+        "macos"
+    } else {
+        "unknown"
+    }
+}
+
+#[allow(dead_code)]
+fn linux_install_guidance_from(contents: &str) -> (Option<String>, Option<String>, Option<String>) {
+    let mut id = String::new();
+    let mut id_like = String::new();
+
+    for line in contents.lines() {
+        if let Some(value) = line.strip_prefix("ID=") {
+            id = value.trim_matches('"').to_lowercase();
+        } else if let Some(value) = line.strip_prefix("ID_LIKE=") {
+            id_like = value.trim_matches('"').to_lowercase();
+        }
+    }
+
+    let family = format!("{id} {id_like}");
+    if family.contains("ubuntu") || family.contains("debian") {
+        return (
+            Some(id),
+            Some("sudo apt update && sudo apt install ffmpeg".to_string()),
+            None,
+        );
+    }
+    if family.contains("arch") || family.contains("manjaro") {
+        return (Some(id), Some("sudo pacman -S ffmpeg".to_string()), None);
+    }
+    if family.contains("fedora") {
+        return (
+            Some(id),
+            Some("sudo dnf install ffmpeg-free".to_string()),
+            Some(
+                "Fedora's ffmpeg-free package may support fewer patented codecs than third-party builds."
+                    .to_string(),
+            ),
+        );
+    }
+
+    (
+        if id.is_empty() { None } else { Some(id) },
+        None,
+        Some(
+            "Use your distribution package manager or the official FFmpeg download page."
+                .to_string(),
+        ),
+    )
+}
+
+fn linux_install_guidance() -> (Option<String>, Option<String>, Option<String>) {
+    #[cfg(target_os = "linux")]
+    {
+        let contents = fs::read_to_string("/etc/os-release").unwrap_or_default();
+        linux_install_guidance_from(&contents)
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    {
+        (None, None, None)
+    }
+}
+
+fn parse_sha256_response(contents: &str) -> Result<String, String> {
+    let checksum = contents
+        .split_whitespace()
+        .next()
+        .ok_or_else(|| "FFmpeg checksum response was empty.".to_string())?
+        .to_lowercase();
+    if checksum.len() != 64
+        || !checksum
+            .chars()
+            .all(|character| character.is_ascii_hexdigit())
+    {
+        return Err("FFmpeg checksum response was invalid.".to_string());
+    }
+    Ok(checksum)
 }
 
 #[tauri::command]
-fn check_ffmpeg(custom_ffmpeg_path: Option<String>) -> bool {
-    let cmd = get_command_path("ffmpeg", &custom_ffmpeg_path);
-    Command::new(cmd)
-        .arg("-version")
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .map(|s| s.success())
-        .unwrap_or(false)
+fn get_ffmpeg_status(app: AppHandle, custom_ffmpeg_path: Option<String>) -> FfmpegStatus {
+    let managed_root = managed_ffmpeg_root(&app).unwrap_or_default();
+    let managed_executable = managed_root.join("bin").join(executable_name("ffmpeg"));
+    let (distro, install_command, install_warning) = linux_install_guidance();
+
+    if let Some(pair) = resolve_ffmpeg(&app, &custom_ffmpeg_path) {
+        return FfmpegStatus {
+            available: true,
+            version: pair.version,
+            source: pair.source.to_string(),
+            path: pair.ffmpeg.to_string_lossy().to_string(),
+            platform: platform_name().to_string(),
+            install_supported: false,
+            managed_path: managed_executable.to_string_lossy().to_string(),
+            distro,
+            install_command,
+            install_warning,
+        };
+    }
+
+    FfmpegStatus {
+        available: false,
+        version: "Not Found".to_string(),
+        source: "missing".to_string(),
+        path: String::new(),
+        platform: platform_name().to_string(),
+        install_supported: cfg!(target_os = "windows"),
+        managed_path: managed_executable.to_string_lossy().to_string(),
+        distro,
+        install_command,
+        install_warning,
+    }
 }
 
 #[tauri::command]
-fn get_ffmpeg_version(custom_ffmpeg_path: Option<String>) -> String {
-    let cmd = get_command_path("ffmpeg", &custom_ffmpeg_path);
-    let output = Command::new(cmd)
-        .arg("-version")
-        .output();
-    
-    match output {
-        Ok(out) => {
-            let stdout_str = String::from_utf8_lossy(&out.stdout);
-            if let Some(first_line) = stdout_str.lines().next() {
-                let re = Regex::new(r"ffmpeg version (\S+)").unwrap();
-                if let Some(caps) = re.captures(first_line) {
-                    caps[1].to_string()
-                } else {
-                    first_line.trim().to_string()
-                }
-            } else {
-                "Unknown".to_string()
+fn check_ffmpeg(app: AppHandle, custom_ffmpeg_path: Option<String>) -> bool {
+    resolve_ffmpeg(&app, &custom_ffmpeg_path).is_some()
+}
+
+#[tauri::command]
+fn get_ffmpeg_version(app: AppHandle, custom_ffmpeg_path: Option<String>) -> String {
+    resolve_ffmpeg(&app, &custom_ffmpeg_path)
+        .map(|pair| pair.version)
+        .unwrap_or_else(|| "Not Found".to_string())
+}
+
+fn emit_install_progress(
+    app: &AppHandle,
+    stage: &str,
+    downloaded_bytes: u64,
+    total_bytes: u64,
+    message: &str,
+) {
+    let percent = if total_bytes > 0 {
+        ((downloaded_bytes.saturating_mul(100) / total_bytes).min(100)) as u8
+    } else {
+        0
+    };
+    let _ = app.emit(
+        "ffmpeg-install-progress",
+        FfmpegInstallProgress {
+            stage: stage.to_string(),
+            downloaded_bytes,
+            total_bytes,
+            percent,
+            message: message.to_string(),
+        },
+    );
+}
+
+struct InstallFlagGuard;
+
+impl Drop for InstallFlagGuard {
+    fn drop(&mut self) {
+        FFMPEG_INSTALLING.store(false, Ordering::Release);
+    }
+}
+
+fn extract_managed_binaries(zip_path: &Path, prepared_root: &Path) -> Result<(), String> {
+    let file = fs::File::open(zip_path)
+        .map_err(|error| format!("Could not open downloaded archive: {error}"))?;
+    let mut archive = zip::ZipArchive::new(file)
+        .map_err(|error| format!("Invalid FFmpeg ZIP archive: {error}"))?;
+    let bin_dir = prepared_root.join("bin");
+    fs::create_dir_all(&bin_dir)
+        .map_err(|error| format!("Could not create FFmpeg directory: {error}"))?;
+
+    let wanted = [executable_name("ffmpeg"), executable_name("ffprobe")];
+    let mut extracted = [false, false];
+
+    for index in 0..archive.len() {
+        let mut entry = archive
+            .by_index(index)
+            .map_err(|error| format!("Could not read ZIP entry: {error}"))?;
+        let Some(safe_path) = entry.enclosed_name() else {
+            return Err("FFmpeg archive contained an unsafe path.".to_string());
+        };
+        let Some(file_name) = safe_path.file_name().and_then(|name| name.to_str()) else {
+            continue;
+        };
+
+        for (wanted_index, wanted_name) in wanted.iter().enumerate() {
+            if file_name.eq_ignore_ascii_case(wanted_name) {
+                let output_path = bin_dir.join(wanted_name);
+                let mut output = fs::File::create(&output_path).map_err(|error| {
+                    format!("Could not create {}: {error}", output_path.display())
+                })?;
+                std::io::copy(&mut entry, &mut output)
+                    .map_err(|error| format!("Could not extract {wanted_name}: {error}"))?;
+                extracted[wanted_index] = true;
             }
         }
-        Err(_) => "Not Found".to_string(),
     }
+
+    if extracted.iter().all(|found| *found) {
+        Ok(())
+    } else {
+        Err("Archive did not contain both ffmpeg and ffprobe binaries.".to_string())
+    }
+}
+
+fn install_prepared_directory(prepared_root: &Path, final_root: &Path) -> Result<(), String> {
+    let parent = final_root
+        .parent()
+        .ok_or_else(|| "Invalid managed FFmpeg destination.".to_string())?;
+    fs::create_dir_all(parent)
+        .map_err(|error| format!("Could not create app data directory: {error}"))?;
+
+    let backup_root = parent.join("ffmpeg-backup");
+    if backup_root.exists() {
+        fs::remove_dir_all(&backup_root)
+            .map_err(|error| format!("Could not clear old FFmpeg backup: {error}"))?;
+    }
+
+    if final_root.exists() {
+        fs::rename(final_root, &backup_root)
+            .map_err(|error| format!("Could not stage existing FFmpeg installation: {error}"))?;
+    }
+
+    if let Err(error) = fs::rename(prepared_root, final_root) {
+        if backup_root.exists() {
+            let _ = fs::rename(&backup_root, final_root);
+        }
+        return Err(format!("Could not activate FFmpeg installation: {error}"));
+    }
+
+    if backup_root.exists() {
+        let _ = fs::remove_dir_all(backup_root);
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "windows")]
+#[tauri::command]
+async fn install_managed_ffmpeg(app: AppHandle) -> Result<FfmpegStatus, String> {
+    if FFMPEG_INSTALLING
+        .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+        .is_err()
+    {
+        return Err("An FFmpeg installation is already in progress.".to_string());
+    }
+    let _install_guard = InstallFlagGuard;
+
+    let final_root = managed_ffmpeg_root(&app)?;
+    if pair_from_ffmpeg_path(
+        final_root.join("bin").join(executable_name("ffmpeg")),
+        "managed",
+    )
+    .is_some()
+    {
+        return Ok(get_ffmpeg_status(app, None));
+    }
+
+    let parent = final_root
+        .parent()
+        .ok_or_else(|| "Invalid managed FFmpeg destination.".to_string())?
+        .to_path_buf();
+    fs::create_dir_all(&parent)
+        .map_err(|error| format!("Could not create app data directory: {error}"))?;
+
+    let staging_root = parent.join(format!("ffmpeg-install-{}", std::process::id()));
+    if staging_root.exists() {
+        fs::remove_dir_all(&staging_root)
+            .map_err(|error| format!("Could not clear previous installer files: {error}"))?;
+    }
+    fs::create_dir_all(&staging_root)
+        .map_err(|error| format!("Could not create installer directory: {error}"))?;
+
+    let result = async {
+        let client = reqwest::Client::builder()
+            .user_agent("Sadness-Splitter-3000/2.0")
+            .build()
+            .map_err(|error| format!("Could not initialize downloader: {error}"))?;
+
+        emit_install_progress(
+            &app,
+            "downloading",
+            0,
+            0,
+            "Connecting to FFmpeg download server...",
+        );
+        let mut response = client
+            .get(FFMPEG_ZIP_URL)
+            .send()
+            .await
+            .map_err(|error| format!("FFmpeg download failed: {error}"))?
+            .error_for_status()
+            .map_err(|error| format!("FFmpeg server returned an error: {error}"))?;
+        let total_bytes = response.content_length().unwrap_or(0);
+        let zip_path = staging_root.join("ffmpeg.zip");
+        let mut zip_file = fs::File::create(&zip_path)
+            .map_err(|error| format!("Could not create download file: {error}"))?;
+        let mut downloaded_bytes = 0_u64;
+
+        while let Some(chunk) = response
+            .chunk()
+            .await
+            .map_err(|error| format!("FFmpeg download was interrupted: {error}"))?
+        {
+            zip_file
+                .write_all(&chunk)
+                .map_err(|error| format!("Could not save FFmpeg download: {error}"))?;
+            downloaded_bytes += chunk.len() as u64;
+            emit_install_progress(
+                &app,
+                "downloading",
+                downloaded_bytes,
+                total_bytes,
+                "Downloading FFmpeg essentials...",
+            );
+        }
+        zip_file
+            .flush()
+            .map_err(|error| format!("Could not finish FFmpeg download: {error}"))?;
+        drop(zip_file);
+
+        emit_install_progress(
+            &app,
+            "verifying",
+            downloaded_bytes,
+            total_bytes,
+            "Verifying SHA-256 checksum...",
+        );
+        let checksum_response = client
+            .get(FFMPEG_SHA256_URL)
+            .send()
+            .await
+            .map_err(|error| format!("Could not download FFmpeg checksum: {error}"))?
+            .error_for_status()
+            .map_err(|error| format!("Checksum server returned an error: {error}"))?
+            .text()
+            .await
+            .map_err(|error| format!("Could not read FFmpeg checksum: {error}"))?;
+        let expected_checksum = parse_sha256_response(&checksum_response)?;
+
+        let mut downloaded_file = fs::File::open(&zip_path)
+            .map_err(|error| format!("Could not reopen FFmpeg download: {error}"))?;
+        let mut hasher = Sha256::new();
+        let mut buffer = [0_u8; 1024 * 1024];
+        loop {
+            let read = downloaded_file
+                .read(&mut buffer)
+                .map_err(|error| format!("Could not verify FFmpeg download: {error}"))?;
+            if read == 0 {
+                break;
+            }
+            hasher.update(&buffer[..read]);
+        }
+        let actual_checksum = format!("{:x}", hasher.finalize());
+        if actual_checksum != expected_checksum {
+            return Err(
+                "FFmpeg checksum verification failed. The download was discarded.".to_string(),
+            );
+        }
+
+        emit_install_progress(
+            &app,
+            "extracting",
+            downloaded_bytes,
+            total_bytes,
+            "Extracting verified FFmpeg binaries...",
+        );
+        let prepared_root = staging_root.join("ffmpeg");
+        extract_managed_binaries(&zip_path, &prepared_root)?;
+        let prepared_ffmpeg = prepared_root.join("bin").join(executable_name("ffmpeg"));
+        let prepared_pair = pair_from_ffmpeg_path(prepared_ffmpeg, "managed")
+            .ok_or_else(|| "Extracted FFmpeg binaries failed verification.".to_string())?;
+
+        install_prepared_directory(&prepared_root, &final_root)?;
+        emit_install_progress(
+            &app,
+            "ready",
+            downloaded_bytes,
+            total_bytes,
+            &format!("FFmpeg {} is ready.", prepared_pair.version),
+        );
+
+        Ok(get_ffmpeg_status(app.clone(), None))
+    }
+    .await;
+
+    let _ = fs::remove_dir_all(&staging_root);
+    result
+}
+
+#[cfg(not(target_os = "windows"))]
+#[tauri::command]
+async fn install_managed_ffmpeg(_app: AppHandle) -> Result<FfmpegStatus, String> {
+    Err("Automatic FFmpeg installation is only supported on Windows.".to_string())
 }
 
 #[tauri::command]
@@ -396,22 +931,21 @@ fn send_native_notification(title: String, body: String) {
             .args(["-NoProfile", "-Command", &ps_script])
             .spawn();
     }
-    
+
     #[cfg(target_os = "macos")]
     {
         let safe_body = body.replace('"', "\\\"");
         let safe_title = title.replace('"', "\\\"");
-        let osa_script = format!("display notification \"{}\" with title \"{}\"", safe_body, safe_title);
-        let _ = Command::new("osascript")
-            .args(["-e", &osa_script])
-            .spawn();
+        let osa_script = format!(
+            "display notification \"{}\" with title \"{}\"",
+            safe_body, safe_title
+        );
+        let _ = Command::new("osascript").args(["-e", &osa_script]).spawn();
     }
 
     #[cfg(target_os = "linux")]
     {
-        let _ = Command::new("notify-send")
-            .args([&title, &body])
-            .spawn();
+        let _ = Command::new("notify-send").args([&title, &body]).spawn();
     }
 }
 
@@ -421,7 +955,7 @@ fn main() {
     std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
 
     start_gpu_monitor();
-    
+
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
@@ -431,16 +965,59 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            get_video_duration, 
-            process_video, 
-            list_videos_in_folder, 
-            generate_thumbnail, 
-            check_ffmpeg, 
-            get_ffmpeg_version, 
-            get_system_metrics, 
+            get_video_duration,
+            process_video,
+            list_videos_in_folder,
+            generate_thumbnail,
+            check_ffmpeg,
+            get_ffmpeg_version,
+            get_ffmpeg_status,
+            install_managed_ffmpeg,
+            get_system_metrics,
             send_native_notification,
             get_media_server_port
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{linux_install_guidance_from, parse_sha256_response};
+
+    #[test]
+    fn parses_supported_linux_families() {
+        let (_, ubuntu_command, _) =
+            linux_install_guidance_from("ID=linuxmint\nID_LIKE=\"ubuntu debian\"\n");
+        assert_eq!(
+            ubuntu_command.as_deref(),
+            Some("sudo apt update && sudo apt install ffmpeg")
+        );
+
+        let (_, arch_command, _) = linux_install_guidance_from("ID=manjaro\nID_LIKE=arch\n");
+        assert_eq!(arch_command.as_deref(), Some("sudo pacman -S ffmpeg"));
+
+        let (_, fedora_command, warning) = linux_install_guidance_from("ID=fedora\n");
+        assert_eq!(
+            fedora_command.as_deref(),
+            Some("sudo dnf install ffmpeg-free")
+        );
+        assert!(warning.is_some());
+    }
+
+    #[test]
+    fn rejects_unknown_linux_family_without_guessing_a_command() {
+        let (distro, command, warning) = linux_install_guidance_from("ID=gentoo\n");
+        assert_eq!(distro.as_deref(), Some("gentoo"));
+        assert!(command.is_none());
+        assert!(warning.is_some());
+    }
+
+    #[test]
+    fn validates_sha256_response() {
+        let checksum = "6f58ce889f59c311410f7d2b18895b33c03456463486f3b1ebc93d97a0f54541";
+        assert_eq!(parse_sha256_response(checksum).unwrap(), checksum);
+        assert!(parse_sha256_response("not-a-checksum").is_err());
+        assert!(parse_sha256_response("").is_err());
+    }
 }

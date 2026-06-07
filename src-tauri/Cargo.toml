@@ -1,6 +1,6 @@
 [package]
 name = "sadness-splitter-3000"
-version = "2.0.0-beta"
+version = "2.0.0"
 description = "A beautiful FFmpeg wrapper for emotional baggage."
 authors = ["Pumpkin(copilot) & Antigravity(gemini) & Divyanshu_Shopra"]
 edition = "2021"
@@ -20,3 +20,6 @@ wmi = "0.13"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 warp = "0.3"
 urlencoding = "2"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
+sha2 = "0.10"
+zip = { version = "2", default-features = false, features = ["deflate"] }

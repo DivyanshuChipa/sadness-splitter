@@ -2211,6 +2211,147 @@ input:checked+.ios-slider:before {
   box-shadow: inset 5px 0 10px rgba(255, 255, 255, 0.01);
 }
 
+.ffmpeg-fix-action {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--danger);
+  margin-top: 8px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ffmpeg-setup-card {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ffmpeg-setup-card strong {
+  color: var(--text-primary);
+  font-size: 0.86rem;
+}
+
+.ffmpeg-setup-card p {
+  margin: 5px 0 12px;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.ffmpeg-setup-card .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+}
+
+.ffmpeg-install-progress {
+  margin-top: 12px;
+}
+
+.ffmpeg-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ffmpeg-progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #22c55e);
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: width 0.2s ease;
+}
+
+.ffmpeg-progress-fill.indeterminate {
+  width: 100% !important;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  background-size: 200% 100%;
+  animation: indeterminateSlide 1.1s linear infinite;
+}
+
+.ffmpeg-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+}
+
+.ffmpeg-install-error,
+.ffmpeg-install-warning {
+  color: var(--danger) !important;
+}
+
+.ffmpeg-linux-command {
+  display: block;
+  overflow-x: auto;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--accent);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.ffmpeg-guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.modal-content.ffmpeg-install-modal-content {
+  max-width: 520px;
+  text-align: left;
+}
+
+.ffmpeg-install-modal-content .modal-icon,
+.ffmpeg-install-modal-content h2 {
+  text-align: center;
+}
+
+.ffmpeg-install-modal-content .modal-icon svg {
+  width: 48px;
+  height: 48px;
+  color: var(--accent);
+}
+
+.ffmpeg-install-modal-content > p {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.ffmpeg-install-facts {
+  display: grid;
+  gap: 8px;
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+}
+
+.ffmpeg-install-facts code {
+  overflow-wrap: anywhere;
+  color: var(--accent);
+}
+
+.modal-actions.ffmpeg-confirm-actions {
+  flex-direction: row;
+  justify-content: center;
+}
+
 /* Theme preset visual cards hover & active styling */
 .theme-preview-card:hover {
   transform: translateY(-4px) scale(1.03);
