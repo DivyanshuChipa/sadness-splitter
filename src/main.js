@@ -363,6 +363,7 @@ navBtns.forEach(btn => {
 
 let latestFfmpegStatus = null;
 let ffmpegInstallInProgress = false;
+let startupPopupShown = false;
 
 function ffmpegSourceLabel(source) {
   return {
@@ -477,6 +478,10 @@ function initFfmpegSetupControls() {
     const modal = document.getElementById('ffmpeg-install-modal');
     if (modal) modal.style.display = 'none';
   });
+  document.getElementById('ffmpeg-modal-close-btn')?.addEventListener('click', () => {
+    const modal = document.getElementById('ffmpeg-install-modal');
+    if (modal) modal.style.display = 'none';
+  });
   document.getElementById('ffmpeg-install-modal')?.addEventListener('click', (event) => {
     if (event.target.id === 'ffmpeg-install-modal' && !ffmpegInstallInProgress) {
       event.currentTarget.style.display = 'none';
@@ -488,6 +493,15 @@ function initFfmpegSetupControls() {
     try {
       await navigator.clipboard.writeText(command);
       updateStatus('FFmpeg install command copied.');
+    } catch (error) {
+      updateStatus(`Could not copy command: ${error}`);
+    }
+  });
+  document.getElementById('modal-copy-winget-btn')?.addEventListener('click', async () => {
+    const command = 'winget install "FFmpeg (Essentials Build)"';
+    try {
+      await navigator.clipboard.writeText(command);
+      updateStatus('Winget installation command copied.');
     } catch (error) {
       updateStatus(`Could not copy command: ${error}`);
     }
@@ -559,8 +573,10 @@ async function checkEngineStatus() {
       if (ffmpegDot) ffmpegDot.className = 'dot red';
       if (ffmpegStatus) ffmpegStatus.textContent = 'FFmpeg: Not Active';
       if (ffmpegFix) {
-        ffmpegFix.style.display = 'block';
-        ffmpegFix.textContent = status.platform === 'windows' ? 'Install FFmpeg' : 'How to Install FFmpeg';
+        ffmpegFix.style.display = 'inline-flex';
+        const icon = status.platform === 'windows' ? 'download' : 'help-circle';
+        ffmpegFix.innerHTML = `<i data-lucide="${icon}" style="width: 12px; height: 12px;"></i> ${status.platform === 'windows' ? 'Install FFmpeg' : 'How to Install FFmpeg'}`;
+        if (window.lucide) window.lucide.createIcons();
       }
 
       if (settingsFfmpegDot) {
@@ -603,12 +619,28 @@ async function checkEngineStatus() {
       if (typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive()) {
         setTheme('theme-blue');
       }
+
+      // Auto popup on startup if FFmpeg is missing
+      if (!startupPopupShown) {
+        startupPopupShown = true;
+        setTimeout(() => {
+          if (status.platform === 'windows') {
+            showFfmpegInstallConfirmation();
+          } else {
+            openEngineSettings();
+          }
+        }, 1000);
+      }
     }
   } catch (e) {
     latestFfmpegStatus = null;
     if (ffmpegDot) ffmpegDot.className = 'dot red';
     if (ffmpegStatus) ffmpegStatus.textContent = 'FFmpeg: Not Active';
-    if (ffmpegFix) ffmpegFix.style.display = 'block';
+    if (ffmpegFix) {
+      ffmpegFix.style.display = 'inline-flex';
+      ffmpegFix.innerHTML = `<i data-lucide="alert-circle" style="width: 12px; height: 12px;"></i> Install FFmpeg`;
+      if (window.lucide) window.lucide.createIcons();
+    }
 
     if (settingsFfmpegDot) {
       settingsFfmpegDot.className = 'dot red';

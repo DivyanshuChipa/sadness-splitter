@@ -727,6 +727,40 @@ fn extract_managed_binaries(zip_path: &Path, prepared_root: &Path) -> Result<(),
     }
 }
 
+fn rename_with_retry(from: &Path, to: &Path) -> std::io::Result<()> {
+    let mut retries = 0;
+    loop {
+        match fs::rename(from, to) {
+            Ok(_) => return Ok(()),
+            Err(err) => {
+                if err.kind() == std::io::ErrorKind::PermissionDenied && retries < 10 {
+                    retries += 1;
+                    std::thread::sleep(std::time::Duration::from_millis(150));
+                } else {
+                    return Err(err);
+                }
+            }
+        }
+    }
+}
+
+fn remove_dir_all_with_retry(path: &Path) -> std::io::Result<()> {
+    let mut retries = 0;
+    loop {
+        match fs::remove_dir_all(path) {
+            Ok(_) => return Ok(()),
+            Err(err) => {
+                if err.kind() == std::io::ErrorKind::PermissionDenied && retries < 10 {
+                    retries += 1;
+                    std::thread::sleep(std::time::Duration::from_millis(150));
+                } else {
+                    return Err(err);
+                }
+            }
+        }
+    }
+}
+
 fn install_prepared_directory(prepared_root: &Path, final_root: &Path) -> Result<(), String> {
     let parent = final_root
         .parent()
@@ -736,24 +770,24 @@ fn install_prepared_directory(prepared_root: &Path, final_root: &Path) -> Result
 
     let backup_root = parent.join("ffmpeg-backup");
     if backup_root.exists() {
-        fs::remove_dir_all(&backup_root)
+        remove_dir_all_with_retry(&backup_root)
             .map_err(|error| format!("Could not clear old FFmpeg backup: {error}"))?;
     }
 
     if final_root.exists() {
-        fs::rename(final_root, &backup_root)
+        rename_with_retry(final_root, &backup_root)
             .map_err(|error| format!("Could not stage existing FFmpeg installation: {error}"))?;
     }
 
-    if let Err(error) = fs::rename(prepared_root, final_root) {
+    if let Err(error) = rename_with_retry(prepared_root, final_root) {
         if backup_root.exists() {
-            let _ = fs::rename(&backup_root, final_root);
+            let _ = rename_with_retry(&backup_root, final_root);
         }
         return Err(format!("Could not activate FFmpeg installation: {error}"));
     }
 
     if backup_root.exists() {
-        let _ = fs::remove_dir_all(backup_root);
+        let _ = remove_dir_all_with_retry(&backup_root);
     }
     Ok(())
 }
@@ -907,7 +941,7 @@ async fn install_managed_ffmpeg(app: AppHandle) -> Result<FfmpegStatus, String> 
     }
     .await;
 
-    let _ = fs::remove_dir_all(&staging_root);
+    let _ = remove_dir_all_with_retry(&staging_root);
     result
 }
 

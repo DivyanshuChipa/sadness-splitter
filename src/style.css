@@ -2212,13 +2212,32 @@ input:checked+.ios-slider:before {
 }
 
 .ffmpeg-fix-action {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--danger);
-  margin-top: 8px;
-  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.05);
+  color: #ef4444;
+  margin-top: 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.ffmpeg-fix-action:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  transform: translateY(-1px);
+}
+
+.ffmpeg-fix-action:active {
+  transform: translateY(0);
 }
 
 .ffmpeg-setup-card {
@@ -2703,6 +2722,201 @@ input:checked+.ios-slider:before {
 
 .checkbox-group input[type="checkbox"] {
   accent-color: var(--accent);
+}
+
+.terminal-container {
+  background: #05070a;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+
+.terminal-screen {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  height: 150px;
+  overflow-y: auto;
+  padding-right: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Custom Scrollbar for Terminal screen */
+.terminal-screen::-webkit-scrollbar {
+  width: 6px;
+}
+
+.terminal-screen::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.terminal-screen::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+.terminal-screen::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.terminal-line {
+  line-height: 1.4;
+  word-break: break-all;
+  white-space: pre-wrap;
+  color: var(--text-primary);
+  transition: color 0.3s;
+}
+
+.terminal-line.system {
+  color: var(--accent); /* Syncs perfectly with Aura active mood theme */
+  font-weight: 500;
+}
+
+.terminal-line.info {
+  color: var(--text-secondary);
+}
+
+.terminal-line.command {
+  color: var(--accent); /* Syncs raw commands with Aura mood colors */
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.terminal-line.error {
+  color: #ef4444; /* Standard red for fatal operations error output */
+  font-weight: bold;
+}
+
+/* ==========================================
+   === Phase 2: Dynamic Audio Suite Styles ===
+   ========================================== */
+
+/* 1. Mode Switcher Slider in Sidebar */
+.mode-switcher-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 0 5px;
+}
+
+.mode-switcher-container .switcher-label {
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mode-switcher {
+  position: relative;
+  display: flex;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--panel-border);
+  border-radius: 99px;
+  padding: 3px;
+  height: 36px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.switcher-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: color 0.3s ease;
+}
+
+.switcher-btn i,
+.switcher-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.switcher-btn.active {
+  color: #fff;
+}
+
+.switcher-slider {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  height: calc(100% - 6px);
+  background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+  border-radius: 99px;
+  z-index: 1;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s, box-shadow 0.3s;
+  box-shadow: 0 2px 10px var(--accent-glow);
+}
+
+.mode-switcher-container[data-mode="audio"] .switcher-slider {
+  transform: translateX(100%);
+}
+
+/* 2. Nav Lists Sliding Transitions */
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-list:not(.active) {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.nav-list.active {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 3. Audio Canvas Visualizer */
+#preview-audio-canvas {
+  background: linear-gradient(180deg, rgba(10, 15, 25, 0.95), rgba(5, 7, 10, 0.98));
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+/* Glow effects centered inside container matching active theme color */
+.preview-container canvas.canvas-glow {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9), 0 0 20px var(--accent-glow);
+}
+
+/* Custom visual styling adjustments for checkboxes inside parameters */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 5px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  accent-color: var(--accent);
   width: 16px;
   height: 16px;
   cursor: pointer;
@@ -2713,4 +2927,38 @@ input:checked+.ios-slider:before {
   color: var(--text-secondary);
   font-weight: 500;
   cursor: pointer;
+}
+
+/* Recommended Glow and Pulse animations for Setup Modal */
+.setup-option-card.recommended-glow {
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.25) !important;
+}
+
+.setup-option-card {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.setup-option-card:hover {
+  transform: translateY(-2px);
+}
+
+.setup-option-card.recommended-glow:hover {
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
+  border-color: rgba(34, 197, 94, 0.45) !important;
+}
+
+.badge-pulse {
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.35);
+    opacity: 0.95;
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.75);
+    opacity: 1;
+  }
 }
