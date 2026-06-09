@@ -2905,6 +2905,280 @@ input:checked+.ios-slider:before {
   box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9), 0 0 20px var(--accent-glow);
 }
 
+/* Fullscreen Icon Button Overlay */
+.preview-container {
+  position: relative;
+}
+
+.preview-fs-btn-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(15, 17, 21, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.preview-fs-btn-overlay:hover {
+  background: var(--accent);
+  color: var(--btn-text);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  transform: scale(1.08);
+}
+
+.preview-fs-btn-overlay i,
+.preview-fs-btn-overlay svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Fullscreen Media HUD Container */
+.fullscreen-hud-container {
+  display: none;
+}
+
+/* Fullscreen Pseudo-class Rules */
+#live-preview-card:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 30px !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: #05070a !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  box-shadow: none !important;
+  z-index: 99999 !important;
+}
+
+#live-preview-card:fullscreen .settings-header {
+  display: none !important;
+}
+
+#live-preview-card:fullscreen .preview-container {
+  flex: 1 !important;
+  width: 100% !important;
+  height: auto !important;
+  max-height: calc(100vh - 160px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin-bottom: 20px !important;
+}
+
+#live-preview-card:fullscreen video,
+#live-preview-card:fullscreen canvas {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
+}
+
+#live-preview-card:fullscreen #preview-controls {
+  display: none !important;
+}
+
+#live-preview-card:fullscreen .fullscreen-hud-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px;
+  width: 100% !important;
+  max-width: 800px !important;
+  background: rgba(15, 17, 21, 0.75) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 16px 24px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+  animation: slideUpHUD 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpHUD {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.hud-timeline-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.hud-time {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  min-width: 55px;
+  text-align: center;
+}
+
+.hud-seek-slider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  accent-color: var(--accent);
+  outline: none;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.hud-seek-slider:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.hud-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.hud-controls-left,
+.hud-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hud-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hud-btn i,
+.hud-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.hud-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.hud-btn.primary-hud {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--btn-text);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.hud-btn.primary-hud:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.hud-btn#hud-exit-fs-btn {
+  width: auto;
+  padding: 0 14px;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.hud-select {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35) !important;
+  color: #fff !important;
+  font-size: 0.75rem;
+  font-family: inherit;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  outline: none;
+  cursor: pointer;
+  min-width: 160px;
+  height: 38px;
+}
+
+.hud-select option {
+  background: #11141a !important;
+  color: #fff !important;
+}
+
+.hud-volume-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 3px;
+  border-radius: 10px;
+  height: 38px;
+}
+
+.hud-volume-group .hud-btn {
+  border: none;
+  background: transparent;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.hud-volume-group .hud-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hud-volume-slider {
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  accent-color: var(--accent);
+  outline: none;
+  cursor: pointer;
+  border: none;
+  margin-right: 8px;
+  transition: all 0.2s;
+}
+
+.hud-volume-slider:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* Custom visual styling adjustments for checkboxes inside parameters */
 .checkbox-group {
   display: flex;

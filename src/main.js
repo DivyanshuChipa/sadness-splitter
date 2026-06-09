@@ -2439,6 +2439,10 @@ function initPreviewPlayer(filePath) {
     previewPlaceholder.style.display = 'none';
     previewCompatWarning.style.display = 'none';
     previewControls.style.display = 'flex';
+    
+    const fsTriggerBtn = document.getElementById('preview-fullscreen-trigger-btn');
+    if (fsTriggerBtn) fsTriggerBtn.style.display = 'flex';
+
     previewVideo.load();
 
     // Set correct "Play Trim Selection" visibility depending on current active tab
@@ -2450,6 +2454,11 @@ function initPreviewPlayer(filePath) {
     // React to video load metadata
     previewVideo.onloadedmetadata = () => {
       previewVideo.currentTime = 0;
+      if (typeof syncMediaPlayerUI === 'function') syncMediaPlayerUI();
+    };
+
+    previewVideo.ontimeupdate = () => {
+      if (typeof syncMediaPlayerUI === 'function') syncMediaPlayerUI();
     };
   } else {
     // Fallback for unsupported containers
@@ -2457,6 +2466,10 @@ function initPreviewPlayer(filePath) {
     previewPlaceholder.style.display = 'none';
     previewCompatWarning.style.display = 'flex';
     previewControls.style.display = 'none';
+    
+    const fsTriggerBtn = document.getElementById('preview-fullscreen-trigger-btn');
+    if (fsTriggerBtn) fsTriggerBtn.style.display = 'none';
+
     previewVideo.removeAttribute('src');
     previewVideo.src = '';
   }
@@ -2990,6 +3003,203 @@ function switchToolkitMode(mode) {
   if (window.lucide) window.lucide.createIcons();
 }
 
+function getActivePreviewElement() {
+  const previewVideo = document.getElementById('preview-video');
+  if (previewVideo && previewVideo.style.display !== 'none' && (previewVideo.getAttribute('src') || previewVideo.src)) {
+    return previewVideo;
+  }
+  if (visualizerAudio && (visualizerAudio.getAttribute('src') || visualizerAudio.src)) {
+    return visualizerAudio;
+  }
+  return null;
+}
+
+function syncMediaPlayerUI() {
+  const activeEl = getActivePreviewElement();
+  const hudSeekSlider = document.getElementById('hud-seek-slider');
+  const hudTimeCurrent = document.getElementById('hud-time-current');
+  const hudTimeTotal = document.getElementById('hud-time-total');
+  
+  if (!activeEl) return;
+  
+  const currentTime = activeEl.currentTime || 0;
+  const duration = activeEl.duration || 0;
+  
+  if (hudTimeCurrent) {
+    hudTimeCurrent.textContent = formatTime(currentTime);
+  }
+  
+  if (hudTimeTotal && !isNaN(duration) && duration > 0) {
+    hudTimeTotal.textContent = formatTime(duration);
+    if (hudSeekSlider) {
+      hudSeekSlider.max = duration;
+      if (!hudSeekSlider.dataset.dragging) {
+        hudSeekSlider.value = currentTime;
+      }
+    }
+  } else if (hudTimeTotal) {
+    hudTimeTotal.textContent = "00:00:00";
+    if (hudSeekSlider) hudSeekSlider.value = 0;
+  }
+}
+
+function updatePlayButtons(isPlaying) {
+  const previewPlayBtn = document.getElementById('preview-play-btn');
+  const hudPlayBtn = document.getElementById('hud-play-btn');
+  
+  if (previewPlayBtn) {
+    previewPlayBtn.innerHTML = isPlaying ? '<i data-lucide="pause"></i> Pause' : '<i data-lucide="play"></i> Play';
+  }
+  if (hudPlayBtn) {
+    hudPlayBtn.innerHTML = isPlaying ? '<i data-lucide="pause"></i>' : '<i data-lucide="play"></i>';
+  }
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function updateVolumeButtonsState(volume, isMuted) {
+  const volBtn = document.getElementById('hud-volume-btn');
+  if (!volBtn) return;
+  
+  if (isMuted || volume === 0) {
+    volBtn.innerHTML = '<i data-lucide="volume-x"></i>';
+  } else if (volume < 0.5) {
+    volBtn.innerHTML = '<i data-lucide="volume-1"></i>';
+  } else {
+    volBtn.innerHTML = '<i data-lucide="volume-2"></i>';
+  }
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function applyPersistedVolume() {
+  const activeEl = getActivePreviewElement();
+  if (!activeEl) return;
+  const lastVol = parseFloat(localStorage.getItem('preview-volume'));
+  const volume = isNaN(lastVol) ? 1.0 : lastVol;
+  activeEl.volume = volume;
+  const volSlider = document.getElementById('hud-volume-slider');
+  if (volSlider) volSlider.value = volume;
+  updateVolumeButtonsState(volume, activeEl.muted);
+}
+
+function toggleMute() {
+  const activeEl = getActivePreviewElement();
+  const volSlider = document.getElementById('hud-volume-slider');
+  if (!activeEl) return;
+  
+  const currentlyMuted = activeEl.muted || activeEl.volume === 0;
+  if (currentlyMuted) {
+    const lastVol = parseFloat(localStorage.getItem('preview-volume')) || 1.0;
+    activeEl.volume = lastVol === 0 ? 1.0 : lastVol;
+    activeEl.muted = false;
+    if (volSlider) volSlider.value = activeEl.volume;
+    updateVolumeButtonsState(activeEl.volume, false);
+  } else {
+    activeEl.muted = true;
+    if (volSlider) volSlider.value = 0;
+    updateVolumeButtonsState(0, true);
+  }
+}
+
+function handleVolumeSliderInput(e) {
+  const val = parseFloat(e.target.value);
+  const activeEl = getActivePreviewElement();
+  if (activeEl) {
+    activeEl.volume = val;
+    activeEl.muted = (val === 0);
+  }
+  localStorage.setItem('preview-volume', val);
+  updateVolumeButtonsState(val, false);
+}
+
+function initFullscreenMediaPlayer() {
+  const card = document.getElementById('live-preview-card');
+  const triggerBtn = document.getElementById('preview-fullscreen-trigger-btn');
+  const exitBtn = document.getElementById('hud-exit-fs-btn');
+  const playBtn = document.getElementById('hud-play-btn');
+  const seekSlider = document.getElementById('hud-seek-slider');
+  const volBtn = document.getElementById('hud-volume-btn');
+  const volSlider = document.getElementById('hud-volume-slider');
+  const previewVideo = document.getElementById('preview-video');
+  const previewCanvas = document.getElementById('preview-audio-canvas');
+
+  if (!card) return;
+
+  const toggleFS = () => {
+    if (!document.fullscreenElement) {
+      card.requestFullscreen().catch(err => {
+        console.error("Failed to enter fullscreen:", err);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  if (triggerBtn) triggerBtn.addEventListener('click', toggleFS);
+  if (exitBtn) exitBtn.addEventListener('click', toggleFS);
+
+  if (previewVideo) previewVideo.addEventListener('dblclick', toggleFS);
+  if (previewCanvas) previewCanvas.addEventListener('dblclick', toggleFS);
+
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      const activeEl = getActivePreviewElement();
+      if (!activeEl) return;
+      if (activeEl.paused) {
+        activeEl.play();
+      } else {
+        activeEl.pause();
+      }
+    });
+  }
+
+  if (seekSlider) {
+    seekSlider.addEventListener('input', (e) => {
+      seekSlider.dataset.dragging = "true";
+      const val = parseFloat(e.target.value);
+      const hudTimeCurrent = document.getElementById('hud-time-current');
+      if (hudTimeCurrent) hudTimeCurrent.textContent = formatTime(val);
+    });
+
+    seekSlider.addEventListener('change', (e) => {
+      const val = parseFloat(e.target.value);
+      const activeEl = getActivePreviewElement();
+      if (activeEl) activeEl.currentTime = val;
+      delete seekSlider.dataset.dragging;
+    });
+  }
+
+  if (volBtn) volBtn.addEventListener('click', toggleMute);
+  if (volSlider) volSlider.addEventListener('input', handleVolumeSliderInput);
+
+  document.addEventListener('fullscreenchange', () => {
+    const isFullscreen = (document.fullscreenElement === card);
+    const hud = document.getElementById('fullscreen-media-hud');
+    const normalControls = document.getElementById('preview-controls');
+    
+    if (isFullscreen) {
+      if (hud) hud.style.display = 'flex';
+      if (normalControls) normalControls.style.display = 'none';
+      
+      const isAudioActive = visualizerAudio && (visualizerAudio.getAttribute('src') || visualizerAudio.src);
+      const hudSelect = document.getElementById('hud-visualizer-select');
+      if (hudSelect) {
+        hudSelect.style.display = isAudioActive ? 'block' : 'none';
+      }
+      
+      applyPersistedVolume();
+    } else {
+      if (hud) hud.style.display = 'none';
+      
+      const activeEl = getActivePreviewElement();
+      if (activeEl && normalControls) {
+        normalControls.style.display = 'flex';
+      }
+    }
+    
+    if (window.lucide) window.lucide.createIcons();
+  });
+}
+
 function initAudioVisualizer(filePath) {
   const canvas = document.getElementById('preview-audio-canvas');
   const videoEl = document.getElementById('preview-video');
@@ -3023,6 +3233,9 @@ function initAudioVisualizer(filePath) {
   if (canvas) canvas.style.display = 'block';
   if (controls) controls.style.display = 'flex';
   if (trimPlayBtn) trimPlayBtn.style.display = 'none';
+
+  const fsTriggerBtn = document.getElementById('preview-fullscreen-trigger-btn');
+  if (fsTriggerBtn) fsTriggerBtn.style.display = 'flex';
 
   if (playBtn) {
     playBtn.innerHTML = '<i data-lucide="play"></i> Play';
@@ -3059,20 +3272,16 @@ function initAudioVisualizer(filePath) {
     window.analysisAudio.load();
   }
 
+  applyPersistedVolume();
+
   visualizerAudio.onpause = () => {
-    if (playBtn) {
-      playBtn.innerHTML = '<i data-lucide="play"></i> Play';
-      if (window.lucide) window.lucide.createIcons();
-    }
+    updatePlayButtons(false);
     if (isLinux && window.analysisAudio) {
       window.analysisAudio.pause();
     }
   };
   visualizerAudio.onplay = () => {
-    if (playBtn) {
-      playBtn.innerHTML = '<i data-lucide="pause"></i> Pause';
-      if (window.lucide) window.lucide.createIcons();
-    }
+    updatePlayButtons(true);
     if (isLinux && window.analysisAudio) {
       window.analysisAudio.currentTime = visualizerAudio.currentTime;
       window.analysisAudio.play();
@@ -3080,11 +3289,16 @@ function initAudioVisualizer(filePath) {
     setupWebAudioContext();
   };
   visualizerAudio.onended = () => {
+    updatePlayButtons(false);
     if (isLinux && window.analysisAudio) {
       window.analysisAudio.pause();
       window.analysisAudio.currentTime = 0;
     }
     visualizerAudio.currentTime = 0;
+    if (typeof syncMediaPlayerUI === 'function') syncMediaPlayerUI();
+  };
+  visualizerAudio.ontimeupdate = () => {
+    if (typeof syncMediaPlayerUI === 'function') syncMediaPlayerUI();
   };
   if (isLinux) {
     visualizerAudio.onseeking = () => {
@@ -3123,12 +3337,204 @@ function setupWebAudioContext() {
   }
 }
 
+function drawGlowBars(ctx, width, height, dataArray, bufferLength, activeColor, activeGlow) {
+  ctx.clearRect(0, 0, width, height);
+  const barWidth = (width / bufferLength) * 1.4;
+  let barHeight;
+  let x = 0;
+  for (let i = 0; i < bufferLength; i++) {
+    barHeight = (dataArray[i] / 255) * (height * 0.65);
+    const grad = ctx.createLinearGradient(0, height, 0, height - barHeight);
+    grad.addColorStop(0, activeColor);
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0.15)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, height - barHeight, barWidth - 2, barHeight);
+    x += barWidth;
+  }
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = activeColor;
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = activeGlow;
+  ctx.beginPath();
+  const sliceWidth = width / bufferLength;
+  let waveX = 0;
+  for (let i = 0; i < bufferLength; i++) {
+    const v = dataArray[i] / 128.0;
+    const waveY = (v * (height * 0.25)) + (height * 0.2);
+    if (i === 0) {
+      ctx.moveTo(waveX, waveY);
+    } else {
+      ctx.lineTo(waveX, waveY);
+    }
+    waveX += sliceWidth;
+  }
+  ctx.lineTo(width, height / 2);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+function drawRetroWormhole(ctx, width, height, dataArray, bufferLength, activeColor) {
+  ctx.fillStyle = 'rgba(5, 7, 10, 0.2)';
+  ctx.fillRect(0, 0, width, height);
+  const cx = width / 2;
+  const cy = height / 2;
+  const maxDim = Math.min(width, height);
+  const maxRadius = maxDim * 0.45;
+  const numRings = 8;
+  const timeOffset = (Date.now() / 12) % (maxRadius / numRings);
+  for (let k = 0; k < numRings; k++) {
+    const baseR = (k / numRings) * maxRadius + timeOffset;
+    if (baseR <= 0 || baseR > maxRadius) continue;
+    const progress = baseR / maxRadius;
+    const hue = (Date.now() / 45 + k * 18) % 360;
+    const opacity = (1 - progress) * 0.8;
+    ctx.strokeStyle = `hsla(${hue}, 100%, 60%, ${opacity})`;
+    ctx.lineWidth = 2 + progress * 6;
+    ctx.beginPath();
+    const numPoints = 60;
+    for (let i = 0; i <= numPoints; i++) {
+      const angle = (i / numPoints) * 2 * Math.PI;
+      const dataIdx = Math.floor(Math.abs(numPoints / 2 - (i % numPoints)) / (numPoints / 2) * bufferLength * 0.7);
+      const freqFactor = (dataArray[dataIdx] / 255);
+      const r = baseR + freqFactor * (50 * progress);
+      const angleRot = angle + (Date.now() / 4000) * (k % 2 === 0 ? 1 : -1);
+      const x = cx + Math.cos(angleRot) * r;
+      const y = cy + Math.sin(angleRot) * r;
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.stroke();
+  }
+  const centerBass = dataArray[Math.floor(bufferLength * 0.05)] / 255;
+  const coreRadius = 15 + centerBass * 18;
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius);
+  grad.addColorStop(0, '#ffffff');
+  grad.addColorStop(0.5, activeColor);
+  grad.addColorStop(1, 'transparent');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, coreRadius, 0, 2 * Math.PI);
+  ctx.fill();
+}
+
+function drawHyperStarfield(ctx, width, height, dataArray, bufferLength) {
+  ctx.fillStyle = 'rgba(5, 7, 10, 0.25)';
+  ctx.fillRect(0, 0, width, height);
+  const cx = width / 2;
+  const cy = height / 2;
+  if (!window.starfieldStars || window.starfieldStars.length === 0) {
+    window.starfieldStars = [];
+    for (let i = 0; i < 160; i++) {
+      window.starfieldStars.push({
+        x: (Math.random() - 0.5) * 2000,
+        y: (Math.random() - 0.5) * 2000,
+        z: Math.random() * 1000,
+        hue: Math.random() * 360
+      });
+    }
+  }
+  let totalFreq = 0;
+  for (let i = 0; i < bufferLength; i++) {
+    totalFreq += dataArray[i];
+  }
+  const avgAmp = totalFreq / bufferLength;
+  const speed = 2 + (avgAmp / 255) * 16;
+  const bassFactor = dataArray[Math.floor(bufferLength * 0.04)] / 255;
+  window.starfieldStars.forEach(star => {
+    const prevZ = star.z;
+    star.z -= speed;
+    if (star.z <= 0) {
+      star.z = 1000;
+      star.x = (Math.random() - 0.5) * 2000;
+      star.y = (Math.random() - 0.5) * 2000;
+      star.hue = Math.random() * 360;
+      return;
+    }
+    const px = cx + (star.x / star.z) * (width * 0.7);
+    const py = cy + (star.y / star.z) * (height * 0.7);
+    const ppx = cx + (star.x / prevZ) * (width * 0.7);
+    const ppy = cy + (star.y / prevZ) * (height * 0.7);
+    if (px < 0 || px > width || py < 0 || py > height) {
+      star.z = 1000;
+      star.x = (Math.random() - 0.5) * 2000;
+      star.y = (Math.random() - 0.5) * 2000;
+      return;
+    }
+    const depth = (1 - star.z / 1000);
+    const hue = (star.hue + Date.now() / 50) % 360;
+    ctx.strokeStyle = `hsla(${hue}, 100%, 75%, ${depth * 0.9})`;
+    ctx.lineWidth = depth * (1.5 + bassFactor * 7.5);
+    ctx.beginPath();
+    ctx.moveTo(ppx, ppy);
+    ctx.lineTo(px, py);
+    ctx.stroke();
+  });
+}
+
+function drawOscilloscopeCircle(ctx, width, height, timeDomainArray, bufferLength, activeColor, activeGlow) {
+  ctx.clearRect(0, 0, width, height);
+  const cx = width / 2;
+  const cy = height / 2;
+  const baseRadius = Math.min(width, height) * 0.32;
+  ctx.strokeStyle = activeColor;
+  ctx.lineWidth = 3.5;
+  ctx.shadowBlur = 18;
+  ctx.shadowColor = activeGlow;
+  ctx.beginPath();
+  for (let i = 0; i <= bufferLength; i++) {
+    const angle = (i / bufferLength) * 2 * Math.PI;
+    const dataIdx = i % bufferLength;
+    const val = (timeDomainArray[dataIdx] - 128) / 128.0;
+    const r = baseRadius + val * (baseRadius * 0.38);
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  ctx.closePath();
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx, cy, baseRadius, 0, 2 * Math.PI);
+  ctx.stroke();
+}
+
+function drawRgbSpectrum(ctx, width, height, dataArray, bufferLength) {
+  ctx.clearRect(0, 0, width, height);
+  const cx = width / 2;
+  const barWidth = (width / bufferLength) * 0.9;
+  const cy = height / 2;
+  for (let i = 0; i < bufferLength; i++) {
+    const barHeight = (dataArray[i] / 255) * (height * 0.45);
+    const hue = (i / bufferLength) * 360 + (Date.now() / 25) % 360;
+    ctx.fillStyle = `hsla(${hue}, 100%, 55%, 0.85)`;
+    const xLeft = cx - i * barWidth;
+    const xRight = cx + i * barWidth;
+    const yStart = cy - barHeight;
+    if (xRight < width) {
+      ctx.fillRect(xRight, yStart, barWidth - 1.5, barHeight * 2);
+    }
+    if (xLeft > 0) {
+      ctx.fillRect(xLeft, yStart, barWidth - 1.5, barHeight * 2);
+    }
+  }
+}
+
 function startVisualizerDrawing() {
   const canvas = document.getElementById('preview-audio-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const bufferLength = analyserNode.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
+  const timeDomainArray = new Uint8Array(bufferLength);
 
   canvas.classList.add('canvas-glow');
 
@@ -3137,64 +3543,33 @@ function startVisualizerDrawing() {
 
     if (!visualizerAudio.paused) {
       analyserNode.getByteFrequencyData(dataArray);
+      analyserNode.getByteTimeDomainData(timeDomainArray);
     } else {
       for (let i = 0; i < bufferLength; i++) {
         dataArray[i] = dataArray[i] * 0.9;
+        timeDomainArray[i] = 128 + (timeDomainArray[i] - 128) * 0.9;
       }
     }
 
     const width = canvas.width = canvas.clientWidth;
     const height = canvas.height = canvas.clientHeight;
 
-    ctx.clearRect(0, 0, width, height);
-
     const activeColor = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#3b82f6';
     const activeGlow = getComputedStyle(document.body).getPropertyValue('--accent-glow').trim() || 'rgba(59,130,246,0.3)';
 
-    // 1. Draw glowing bar graphs
-    const barWidth = (width / bufferLength) * 1.4;
-    let barHeight;
-    let x = 0;
+    const preset = document.getElementById('hud-visualizer-select')?.value || 'glow-bars-wave';
 
-    for (let i = 0; i < bufferLength; i++) {
-      barHeight = (dataArray[i] / 255) * (height * 0.65);
-
-      const grad = ctx.createLinearGradient(0, height, 0, height - barHeight);
-      grad.addColorStop(0, activeColor);
-      grad.addColorStop(1, 'rgba(255, 255, 255, 0.15)');
-
-      ctx.fillStyle = grad;
-      ctx.fillRect(x, height - barHeight, barWidth - 2, barHeight);
-
-      x += barWidth;
+    if (preset === 'glow-bars-wave') {
+      drawGlowBars(ctx, width, height, dataArray, bufferLength, activeColor, activeGlow);
+    } else if (preset === 'retro-wormhole') {
+      drawRetroWormhole(ctx, width, height, dataArray, bufferLength, activeColor);
+    } else if (preset === 'hyper-starfield') {
+      drawHyperStarfield(ctx, width, height, dataArray, bufferLength);
+    } else if (preset === 'oscilloscope-circle') {
+      drawOscilloscopeCircle(ctx, width, height, timeDomainArray, bufferLength, activeColor, activeGlow);
+    } else if (preset === 'rgb-spectrum') {
+      drawRgbSpectrum(ctx, width, height, dataArray, bufferLength);
     }
-
-    // 2. Draw glowing sine wave
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = activeColor;
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = activeGlow;
-    ctx.beginPath();
-
-    const sliceWidth = width / bufferLength;
-    let waveX = 0;
-
-    for (let i = 0; i < bufferLength; i++) {
-      const v = dataArray[i] / 128.0;
-      const waveY = (v * (height * 0.25)) + (height * 0.2);
-
-      if (i === 0) {
-        ctx.moveTo(waveX, waveY);
-      } else {
-        ctx.lineTo(waveX, waveY);
-      }
-
-      waveX += sliceWidth;
-    }
-
-    ctx.lineTo(width, height / 2);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
   }
 
   if (animationFrameId) {
@@ -3205,6 +3580,8 @@ function startVisualizerDrawing() {
 
 // Bind Web Audio Visualizer play button action to preview panel controls
 window.addEventListener('DOMContentLoaded', () => {
+  initFullscreenMediaPlayer();
+
   const previewPlayBtn = document.getElementById('preview-play-btn');
   if (previewPlayBtn) {
     previewPlayBtn.addEventListener('click', () => {

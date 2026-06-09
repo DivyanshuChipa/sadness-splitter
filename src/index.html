@@ -607,6 +607,11 @@
           <canvas id="preview-audio-canvas"
             style="display: none; width: 100%; height: 100%; min-height: 180px; border-radius: 8px;"></canvas>
 
+          <!-- Fullscreen overlay button -->
+          <button id="preview-fullscreen-trigger-btn" class="preview-fs-btn-overlay" title="Open Media Player Fullscreen" style="display: none;">
+            <i data-lucide="maximize-2"></i>
+          </button>
+
           <!-- Placeholder (When no video is loaded) -->
           <div id="preview-placeholder" class="preview-placeholder">
             <div class="placeholder-icon"><i data-lucide="video-off"></i></div>
@@ -620,6 +625,43 @@
             <span>Preview Restricted</span>
             <small>Direct browser preview is not supported for AVI/MKV, but Split & Trim will still work
               perfectly!</small>
+          </div>
+        </div>
+
+        <!-- Fullscreen HUD Controls (Only active in fullscreen mode) -->
+        <div id="fullscreen-media-hud" class="fullscreen-hud-container" style="display: none;">
+          <!-- Scrubber Timeline -->
+          <div class="hud-timeline-wrapper">
+            <span id="hud-time-current" class="hud-time">00:00:00</span>
+            <input type="range" id="hud-seek-slider" min="0" max="100" value="0" step="0.1" class="hud-seek-slider">
+            <span id="hud-time-total" class="hud-time">00:00:00</span>
+          </div>
+
+          <!-- Actions & Adjustments Row -->
+          <div class="hud-controls-row">
+            <div class="hud-controls-left">
+              <button id="hud-play-btn" class="hud-btn primary-hud" title="Play/Pause"><i data-lucide="play"></i></button>
+              
+              <!-- Custom Presets Dropdown for Audio files -->
+              <select id="hud-visualizer-select" class="hud-select" title="Change Visualizer Effect">
+                <option value="glow-bars-wave">Glow Bars & Sine</option>
+                <option value="retro-wormhole">Retro RGB Wormhole</option>
+                <option value="hyper-starfield">Hyper Starfield</option>
+                <option value="oscilloscope-circle">Oscilloscope Circle</option>
+                <option value="rgb-spectrum">Vibrant RGB Spectrum</option>
+              </select>
+            </div>
+
+            <div class="hud-controls-right">
+              <!-- Volume Group -->
+              <div class="hud-volume-group">
+                <button id="hud-volume-btn" class="hud-btn secondary-hud" title="Mute/Unmute"><i data-lucide="volume-2"></i></button>
+                <input type="range" id="hud-volume-slider" min="0" max="1" step="0.05" value="1" class="hud-volume-slider">
+              </div>
+
+              <!-- Exit Fullscreen -->
+              <button id="hud-exit-fs-btn" class="hud-btn secondary-hud" title="Exit Fullscreen"><i data-lucide="minimize-2"></i> Exit</button>
+            </div>
           </div>
         </div>
 
