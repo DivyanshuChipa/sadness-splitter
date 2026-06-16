@@ -95,6 +95,7 @@
         <button class="nav-btn" data-target="nightcore"><i data-lucide="zap"></i> Nightcore</button>
         <button class="nav-btn" data-target="audio-extractor"><i data-lucide="headphones"></i> Audio Extractor</button>
         <button class="nav-btn" data-target="audio-convert"><i data-lucide="refresh-cw"></i> Format Converter</button>
+        <button class="nav-btn" data-target="metadata-editor"><i data-lucide="edit-3"></i> Tags & Cover Editor</button>
       </nav>
 
       <!-- Sidebar Status Footer (Moved from middle panel) -->
@@ -563,6 +564,39 @@
             <button id="run-audio-convert-btn" class="btn action">Convert Audio Format</button>
           </section>
 
+          <!-- AUDIO METADATA & COVER EDITOR -->
+          <section id="metadata-editor" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Tags & Cover Editor</h3>
+              <p>Add custom album art cover and update ID3 metadata tags (Title, Artist, Album).</p>
+            </div>
+            
+            <div class="control-group">
+              <label>Song Title</label>
+              <input type="text" id="metadata-title" placeholder="e.g. My Favorite Song">
+            </div>
+
+            <div class="control-group">
+              <label>Artist Name</label>
+              <input type="text" id="metadata-artist" placeholder="e.g. Artist / Singer">
+            </div>
+
+            <div class="control-group">
+              <label>Album Name</label>
+              <input type="text" id="metadata-album" placeholder="e.g. Greatest Hits">
+            </div>
+
+            <div class="control-group">
+              <label>Album Art / Cover Image</label>
+              <div class="file-input-wrapper" style="display: flex; gap: 10px; align-items: center;">
+                <button id="browse-cover-btn" class="btn-small secondary" style="margin-top: 0; width: auto;"><i data-lucide="image"></i> Select Image</button>
+                <span id="cover-path-display" class="path-display" style="font-size: 0.85em; opacity: 0.8; word-break: break-all;">No image selected</span>
+              </div>
+            </div>
+
+            <button id="run-metadata-btn" class="btn action">Save Tags & Cover</button>
+          </section>
+
         </div>
 
         <!-- Console Logs Bento Box -->
@@ -670,6 +704,8 @@
           <button id="preview-play-btn" class="btn-small secondary"><i data-lucide="play"></i> Play</button>
           <button id="preview-trim-play-btn" class="btn-small primary" style="display: none;"><i
               data-lucide="play-circle"></i> Play Trim Selection</button>
+          <button id="preview-output-btn" class="btn-small success" style="display: none;"><i
+              data-lucide="play-circle"></i> Preview Work</button>
         </div>
       </div>
 

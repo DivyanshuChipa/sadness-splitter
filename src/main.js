@@ -13,6 +13,8 @@ const progressLabel = document.getElementById('progress-label');
 let isDemoMode = false; // Controlled by tour/emotional mode choices
 let globalInputPath = "";
 let globalOutputPath = "";
+let lastProcessedOutputPath = "";
+let selectedCoverImagePath = "";
 let videoDuration = 0;
 let previewPromptCount = 0;
 let isWaitingForPreviewConsent = false;
@@ -53,7 +55,8 @@ const toolReactions = {
   'merger': { face: 'face_love.png', msg: "Combine them both? Sweet! 💖" },
   'stabilize': { face: 'face_shocked.png', msg: "So much shake?! Don’t worry, I’ll fix it! 😵‍💫" },
   'contact': { face: 'face_curious.png', msg: "Want to see everything at once? Let’s go! 🖼️" },
-  'batch': { face: 'face_surprised.png', msg: "So many files? Looks like you’ve got me working overtime…" }
+  'batch': { face: 'face_surprised.png', msg: "So many files? Looks like you’ve got me working overtime…" },
+  'metadata-editor': { face: 'face_curious.png', msg: "Want to customize your song metadata and cover art? Aura is ready! 🎵✨" }
 };
 
 const emoteThemeMap = {
@@ -884,6 +887,17 @@ async function loadVideoFile(file) {
     globalInputPath = file;
     document.getElementById('global-input-path').value = file;
 
+    // Reset metadata fields
+    selectedCoverImagePath = "";
+    const coverDisplay = document.getElementById('cover-path-display');
+    if (coverDisplay) coverDisplay.textContent = "No image selected";
+    const titleInput = document.getElementById('metadata-title');
+    if (titleInput) titleInput.value = "";
+    const artistInput = document.getElementById('metadata-artist');
+    if (artistInput) artistInput.value = "";
+    const albumInput = document.getElementById('metadata-album');
+    if (albumInput) albumInput.value = "";
+
     const filename = file.split(/[\/\\]/).pop();
     const extension = filename.split('.').pop().toLowerCase();
     const isAudio = ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a'].includes(extension);
@@ -1125,6 +1139,12 @@ listen('finished', (event) => {
     logToTechyConsole(`Task finished successfully. Stream compile return OK.`, "system");
     displayedProgress = Math.max(displayedProgress, 99);
     setProgressSmooth(100);
+
+    // Show Preview Work button if we have a valid lastProcessedOutputPath
+    const previewOutBtn = document.getElementById('preview-output-btn');
+    if (previewOutBtn && lastProcessedOutputPath) {
+      previewOutBtn.style.display = 'inline-flex';
+    }
     
     const reaction = getAuraSpeech('success_' + activeTab);
     if (reaction && reaction.msg !== "Ready to process emotional baggage.") {
@@ -1561,6 +1581,14 @@ async function executeFFmpegTask(taskName, args, customDuration = null) {
     return;
   }
 
+  if (args && args.length > 0) {
+    lastProcessedOutputPath = args[args.length - 1];
+  }
+  const previewOutBtn = document.getElementById('preview-output-btn');
+  if (previewOutBtn) {
+    previewOutBtn.style.display = 'none';
+  }
+
   if (isDemoMode) {
     updateStatus(`${taskName} completed (Demo mode activated 🎭)`);
     return;
@@ -1873,6 +1901,7 @@ const auraDialogues = {
     success_stabilize: { face: 'face_exicited.png', msg: "Anti-shake complete! Smooth footage achieved, no more shaky memories! 🧘✨" },
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch processing completed! Aura worked overtime, but we crushed it! 🏆" },
+    "success_metadata-editor": { face: 'face_smug.png', msg: "Gane ke metadata aur cover art update ho gaye! Ab tagda dikhega! 🏷️🖼️" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "HEY! Stop poking me and focus on your work! 💢" },
@@ -1902,7 +1931,8 @@ const auraDialogues = {
     interact_tab_merger: { face: 'face_love.png', msg: "Timeline join! Do videos ko merge karke ek kar dete hain! 💖" },
     interact_tab_stabilize: { face: 'face_shocked.png', msg: "Shaky memories? Don't worry, stabilizer se smooth kar dungi! 🧘✨" },
     interact_tab_contact: { face: 'face_curious.png', msg: "Contact sheet select kiya? Screen grid ek dum mast lagega! 🖼️" },
-    interact_tab_batch: { face: 'face_surprised.png', msg: "Itne saare files? Aura worked overtime, but hum crush kar denge! 🏆" }
+    interact_tab_batch: { face: 'face_surprised.png', msg: "Itne saare files? Aura worked overtime, but hum crush kar denge! 🏆" },
+    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Gane ka details aur cover change karna hai? Badhiya cover photo select kijiye! 🎵✨" }
   },
   english: {
     // Startup & System
@@ -1940,6 +1970,7 @@ const auraDialogues = {
     success_stabilize: { face: 'face_exicited.png', msg: "Anti-shake complete! Smooth footage achieved, no more shaky memories! 🧘✨" },
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch processing completed! We worked overtime, but we crushed it! 🏆" },
+    "success_metadata-editor": { face: 'face_smug.png', msg: "Audio metadata and cover art successfully updated! 🏷️🖼️" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "HEY! Stop poking me and focus on your work! 💢" },
@@ -1969,7 +2000,8 @@ const auraDialogues = {
     interact_tab_merger: { face: 'face_love.png', msg: "Merging multiple tracks into a single unified stream! 💖" },
     interact_tab_stabilize: { face: 'face_shocked.png', msg: "Removing the shakes. Let's make this video perfectly steady! 🧘✨" },
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
-    interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" }
+    interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
+    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Want to edit song details and cover art? Let's make it look professional! 🎵✨" }
   },
   sarcastic: {
     // Startup & System
@@ -2007,6 +2039,7 @@ const auraDialogues = {
     success_stabilize: { face: 'face_exicited.png', msg: "Stabilized. Now the video is steady, even if your career choices aren't. 🧘✨" },
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created. A grid of screenshots to prove we actually did something. 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch complete. I worked overtime, you did nothing. Typical. 🏆" },
+    "success_metadata-editor": { face: 'face_smug.png', msg: "Tags and cover updated. Now everyone can see how bad your taste in music is. 🏷️🖼️" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_smug.png', msg: "Oh great, poking me again. Is this your primary job profile? 🙄" },
@@ -2036,7 +2069,8 @@ const auraDialogues = {
     interact_tab_merger: { face: 'face_love.png', msg: "Merging. Combining two items together. Double the files, double the fun. 💖" },
     interact_tab_stabilize: { face: 'face_shocked.png', msg: "Stabilizing. Steadying the footage, even if your life choices aren't. 🧘✨" },
     interact_tab_contact: { face: 'face_curious.png', msg: "Contact sheet. A grid of screenshots to prove you actually did something. 🖼️" },
-    interact_tab_batch: { face: 'face_surprised.png', msg: "Batch processor. Aura works overtime while you sit back. Typical. 🏆" }
+    interact_tab_batch: { face: 'face_surprised.png', msg: "Batch processor. Aura works overtime while you sit back. Typical. 🏆" },
+    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Editing metadata. Because renaming 'final_final_v2.mp3' to something decent is hard. 🏷️✨" }
   },
   hacker: {
     // Startup & System
@@ -2074,6 +2108,7 @@ const auraDialogues = {
     success_stabilize: { face: 'face_exicited.png', msg: "Motion vector stabilization algorithm applied. Frame variance close to 0. 🧘✨" },
     success_contact: { face: 'face_curious.png', msg: "Tile contact sheet compiled. Index grid built successfully. 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch queue flushed. All thread pipelines completed. 🏆" },
+    "success_metadata-editor": { face: 'face_smug.png', msg: "ID3 header modification complete. Art payload embedded successfully. 🏷️🖼️" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "Interrupt signal detected on root node. Focus packet dropped. 💢" },
@@ -2103,7 +2138,8 @@ const auraDialogues = {
     interact_tab_merger: { face: 'face_love.png', msg: "Merging multiple tracks into a single unified stream! 💖" },
     interact_tab_stabilize: { face: 'face_shocked.png', msg: "Removing the shakes. Let's make this video perfectly steady! 🧘✨" },
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
-    interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" }
+    interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
+    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Mapping metadata editor. Injecting ID3v2 tags and binary cover payloads. 🏷️✨" }
   },
   lazy: {
     // Startup & System
@@ -2141,6 +2177,7 @@ const auraDialogues = {
     success_stabilize: { face: 'face_exicited.png', msg: "Stabilized. Steady now. No more shaking, only sleeping. 🧘✨" },
     success_contact: { face: 'face_curious.png', msg: "Contact sheet done. A bunch of images. There, you go look at them. 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch queue finished. Aura worked overtime. I need a 3-day weekend. 🏆" },
+    "success_metadata-editor": { face: 'face_smug.png', msg: "Metadata updated or whatever. Please don't ask me to rename another file. 🏷️🖼️" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_sleepy.png', msg: "Ugh... stop poking me. I don't want to move. 🥱" },
@@ -2170,7 +2207,8 @@ const auraDialogues = {
     interact_tab_merger: { face: 'face_love.png', msg: "Merging multiple tracks into a single unified stream! 💖" },
     interact_tab_stabilize: { face: 'face_shocked.png', msg: "Removing the shakes. Let's make this video perfectly steady! 🧘✨" },
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
-    interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" }
+    interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
+    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Tags and cover editor. Just type the details, it's not that hard... 🏷️✨" }
   }
 };
 
@@ -2394,6 +2432,12 @@ function initPreviewPlayer(filePath) {
   const previewTrimPlayBtn = document.getElementById('preview-trim-play-btn');
 
   if (!previewVideo) return;
+
+  // Hide the preview output button on new source load
+  const previewOutBtn = document.getElementById('preview-output-btn');
+  if (previewOutBtn) {
+    previewOutBtn.style.display = 'none';
+  }
 
   // Stop any active playback loops
   stopTrimRangePlayback();
@@ -3209,6 +3253,12 @@ function initAudioVisualizer(filePath) {
   const playBtn = document.getElementById('preview-play-btn');
   const trimPlayBtn = document.getElementById('preview-trim-play-btn');
 
+  // Hide the preview output button on new source load
+  const previewOutBtn = document.getElementById('preview-output-btn');
+  if (previewOutBtn) {
+    previewOutBtn.style.display = 'none';
+  }
+
   stopTrimRangePlayback();
   if (visualizerAudio) {
     visualizerAudio.pause();
@@ -3317,6 +3367,7 @@ function setupWebAudioContext() {
     audioContext = new AudioContextClass();
     analyserNode = audioContext.createAnalyser();
     analyserNode.fftSize = 256;
+    analyserNode.smoothingTimeConstant = 0.85;
 
     const isLinux = navigator.userAgent.toLowerCase().includes('linux');
     if (isLinux && window.analysisAudio) {
@@ -3544,6 +3595,12 @@ function startVisualizerDrawing() {
     if (!visualizerAudio.paused) {
       analyserNode.getByteFrequencyData(dataArray);
       analyserNode.getByteTimeDomainData(timeDomainArray);
+
+      // Damp values to reduce visualizer sensitivity (avoid clipping/spiking)
+      for (let i = 0; i < bufferLength; i++) {
+        dataArray[i] = dataArray[i] * 0.75;
+        timeDomainArray[i] = 128 + (timeDomainArray[i] - 128) * 0.75;
+      }
     } else {
       for (let i = 0; i < bufferLength; i++) {
         dataArray[i] = dataArray[i] * 0.9;
@@ -3721,6 +3778,115 @@ window.addEventListener('DOMContentLoaded', () => {
       const output = `${globalOutputPath}/${filename}_converted.${format}`;
       const args = ["-i", globalInputPath, "-q:a", "0", "-y", output];
       executeFFmpegTask("Audio Conversion", args);
+    });
+  }
+
+  // 7. Tags & Cover Editor Actions
+  const browseCoverBtn = document.getElementById('browse-cover-btn');
+  if (browseCoverBtn) {
+    browseCoverBtn.addEventListener('click', async () => {
+      try {
+        const file = await tauriDialog.open({
+          filters: [{ name: 'Image Files', extensions: ['png', 'jpg', 'jpeg'] }]
+        });
+        if (file) {
+          selectedCoverImagePath = file;
+          const display = document.getElementById('cover-path-display');
+          if (display) {
+            display.textContent = file.split(/[\/\\]/).pop();
+            display.title = file;
+          }
+          logToTechyConsole(`Selected cover art: ${file}`, "info");
+        }
+      } catch (e) {
+        console.error("Cover image selection failed:", e);
+        logToTechyConsole("Failed to open cover image dialog.", "error");
+      }
+    });
+  }
+
+  const runMetadataBtn = document.getElementById('run-metadata-btn');
+  if (runMetadataBtn) {
+    runMetadataBtn.addEventListener('click', () => {
+      if (!globalInputPath || !globalOutputPath) {
+        alert("Please select input media and output folder.");
+        return;
+      }
+
+      const title = document.getElementById('metadata-title').value.trim();
+      const artist = document.getElementById('metadata-artist').value.trim();
+      const album = document.getElementById('metadata-album').value.trim();
+
+      const inputFilename = globalInputPath.split(/[\/\\]/).pop();
+      const dotIndex = inputFilename.lastIndexOf('.');
+      const nameWithoutExt = dotIndex !== -1 ? inputFilename.substring(0, dotIndex) : inputFilename;
+      const ext = dotIndex !== -1 ? inputFilename.substring(dotIndex + 1).toLowerCase() : 'mp3';
+      const output = `${globalOutputPath}/${nameWithoutExt}_tagged.${ext}`;
+
+      let args = [];
+      if (selectedCoverImagePath) {
+        args = [
+          "-i", globalInputPath,
+          "-i", selectedCoverImagePath,
+          "-map", "0:0",
+          "-map", "1:0",
+          "-c", "copy",
+          "-id3v2_version", "3",
+          "-metadata:s:v", "title=Album cover",
+          "-metadata:s:v", "comment=Cover (front)"
+        ];
+      } else {
+        args = [
+          "-i", globalInputPath,
+          "-c", "copy"
+        ];
+      }
+
+      if (title) {
+        args.push("-metadata", `title=${title}`);
+      }
+      if (artist) {
+        args.push("-metadata", `artist=${artist}`);
+      }
+      if (album) {
+        args.push("-metadata", `album=${album}`);
+      }
+
+      args.push("-y", output);
+      executeFFmpegTask("Metadata Update", args);
+    });
+  }
+
+  // 8. Preview Work Action
+  const previewOutBtn = document.getElementById('preview-output-btn');
+  if (previewOutBtn) {
+    previewOutBtn.addEventListener('click', async () => {
+      if (!lastProcessedOutputPath) {
+        alert("No recently processed file found.");
+        return;
+      }
+      try {
+        logToTechyConsole(`Previewing processed file: ${lastProcessedOutputPath}`, "system");
+        await loadVideoFile(lastProcessedOutputPath);
+        
+        // Auto-play the file
+        const extension = lastProcessedOutputPath.split('.').pop().toLowerCase();
+        const isAudio = ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a'].includes(extension);
+        if (isAudio) {
+          if (visualizerAudio) {
+            visualizerAudio.play().catch(err => console.error("Auto-play audio failed:", err));
+          }
+        } else {
+          const previewVideo = document.getElementById('preview-video');
+          if (previewVideo) {
+            previewVideo.play().catch(err => console.error("Auto-play video failed:", err));
+          }
+        }
+      } catch (err) {
+        console.error("Preview Work error:", err);
+        updateStatus("Failed to preview work.");
+        logToTechyConsole(`Failed to load preview for output: ${lastProcessedOutputPath}`, "error");
+      }
     });
   }
 });

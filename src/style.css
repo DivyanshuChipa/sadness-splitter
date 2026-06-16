@@ -2139,6 +2139,17 @@ input:checked+.ios-slider:before {
   transition: all 0.2s;
 }
 
+.preview-controls button.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.preview-controls button.success:hover {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
 /* Pulsing Placeholder Animation for loaded state */
 .preview-placeholder .placeholder-icon {
   animation: pulse-slow 2s infinite ease-in-out;
