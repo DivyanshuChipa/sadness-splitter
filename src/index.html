@@ -96,6 +96,7 @@
         <button class="nav-btn" data-target="audio-extractor"><i data-lucide="headphones"></i> Audio Extractor</button>
         <button class="nav-btn" data-target="audio-convert"><i data-lucide="refresh-cw"></i> Format Converter</button>
         <button class="nav-btn" data-target="metadata-editor"><i data-lucide="edit-3"></i> Tags & Cover Editor</button>
+        <button class="nav-btn" data-target="youtube-downloader"><i data-lucide="download"></i> YouTube Downloader</button>
       </nav>
 
       <!-- Sidebar Status Footer (Moved from middle panel) -->
@@ -594,7 +595,30 @@
               </div>
             </div>
 
-            <button id="run-metadata-btn" class="btn action">Save Tags & Cover</button>
+             <button id="run-metadata-btn" class="btn action">Save Tags & Cover</button>
+          </section>
+
+          <!-- YOUTUBE DOWNLOADER -->
+          <section id="youtube-downloader" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>YouTube Downloader</h3>
+              <p>Download audio/video directly from YouTube links using yt-dlp.</p>
+            </div>
+            
+            <div class="control-group">
+              <label>YouTube Video URL</label>
+              <input type="text" id="ytdlp-url" placeholder="https://www.youtube.com/watch?v=...">
+            </div>
+
+            <div class="control-group">
+              <label>Download Format</label>
+              <select id="ytdlp-format">
+                <option value="mp3">Audio Only (MP3 format)</option>
+                <option value="mp4">Video + Audio (MP4 format)</option>
+              </select>
+            </div>
+
+            <button id="run-ytdlp-btn" class="btn action">Download Media</button>
           </section>
 
         </div>
@@ -1251,6 +1275,74 @@
                   <a id="ffmpeg-official-download-link" href="https://ffmpeg.org/download.html" target="_blank"
                     class="btn secondary">Official Downloads</a>
                 </div>
+              </div>
+
+              <!-- Custom yt-dlp Executable Path -->
+              <div class="settings-ytdlp-path-wrapper"
+                style="padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; margin-top: 10px;">
+                <label class="settings-input-label"
+                  style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Custom
+                  yt-dlp Binary Path</label>
+                <span class="settings-option-desc"
+                  style="display: block; font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 8px;">Point the
+                  engine directly to your local `yt-dlp` executable.</span>
+                <div class="input-group" style="display: flex; gap: 8px;">
+                  <input type="text" id="settings-ytdlp-path" readonly
+                    placeholder="No custom executable set (using system default)"
+                    style="flex: 1; font-size: 0.75rem; font-family: monospace; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 8px 12px; color: var(--text-primary);">
+                  <button id="settings-browse-ytdlp-btn" class="btn secondary"
+                    style="padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; flex-shrink: 0;">Browse
+                    File</button>
+                  <button id="settings-clear-ytdlp-btn" class="btn danger" title="Reset custom path"
+                    style="padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; flex-shrink: 0;"><i
+                      data-lucide="trash-2" style="width: 14px; height: 14px;"></i></button>
+                </div>
+              </div>
+
+              <!-- yt-dlp Engine Status Area -->
+              <div class="settings-ytdlp-status-area"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; margin-top: 5px; gap: 15px; flex-wrap: wrap;">
+                <div class="engine-check-details" style="flex: 1; min-width: 200px;">
+                  <div class="status-indicator"
+                    style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">
+                    <span class="dot" id="settings-ytdlp-dot"
+                      style="width: 8px; height: 8px; border-radius: 50%; display: inline-block;"></span>
+                    <span id="settings-ytdlp-status-text">yt-dlp Status: Checking...</span>
+                  </div>
+                  <small id="settings-ytdlp-version"
+                    style="display: block; color: var(--text-secondary); font-size: 0.7rem; margin-top: 4px;">Version:
+                    checking...</small>
+                </div>
+                <button id="settings-force-check-ytdlp-btn" class="btn action"
+                  style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 500;">
+                  <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i> Force Re-check yt-dlp
+                </button>
+              </div>
+
+              <!-- yt-dlp Automatic Install Card -->
+              <div id="ytdlp-managed-install-card" class="ffmpeg-setup-card" style="display: none; border: 1px solid rgba(34, 197, 94, 0.25); background: rgba(34, 197, 94, 0.025); padding: 16px; border-radius: 12px; margin-top: 10px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
+                  <div style="flex: 1; min-width: 220px;">
+                    <strong style="font-size: 0.92rem; color: var(--text-primary); display: block;">Setup yt-dlp Engine</strong>
+                    <p style="margin: 4px 0 0; color: var(--text-secondary); font-size: 0.72rem; line-height: 1.45;">
+                      Download yt-dlp binary automatically for your system.
+                    </p>
+                  </div>
+                  <button id="settings-install-ytdlp-btn" type="button" class="btn primary" style="background: linear-gradient(135deg, #22c55e 0%, #10b981 100%); border: none; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25); padding: 10px 18px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: transform 0.2s;">
+                    <i data-lucide="download" style="width: 15px; height: 15px;"></i>
+                    <span>Setup yt-dlp</span>
+                  </button>
+                </div>
+                <div id="ytdlp-install-progress" class="ffmpeg-install-progress" style="display: none; margin-top: 15px;">
+                  <div class="ffmpeg-progress-track">
+                    <div id="ytdlp-install-progress-fill" class="ffmpeg-progress-fill"></div>
+                  </div>
+                  <div class="ffmpeg-progress-meta">
+                    <span id="ytdlp-install-stage">Preparing...</span>
+                    <span id="ytdlp-install-size"></span>
+                  </div>
+                </div>
+                <p id="ytdlp-install-error" class="ffmpeg-install-error" style="display: none; margin-top: 8px; font-size: 0.72rem;"></p>
               </div>
 
             </div>

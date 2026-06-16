@@ -56,7 +56,8 @@ const toolReactions = {
   'stabilize': { face: 'face_shocked.png', msg: "So much shake?! Don’t worry, I’ll fix it! 😵‍💫" },
   'contact': { face: 'face_curious.png', msg: "Want to see everything at once? Let’s go! 🖼️" },
   'batch': { face: 'face_surprised.png', msg: "So many files? Looks like you’ve got me working overtime…" },
-  'metadata-editor': { face: 'face_curious.png', msg: "Want to customize your song metadata and cover art? Aura is ready! 🎵✨" }
+  'metadata-editor': { face: 'face_curious.png', msg: "Want to customize your song metadata and cover art? Aura is ready! 🎵✨" },
+  'youtube-downloader': { face: 'face_curious.png', msg: "Paste a YouTube URL and let's download the sadness directly! 🎬📥" }
 };
 
 const emoteThemeMap = {
@@ -661,6 +662,61 @@ async function checkEngineStatus() {
       setTheme('theme-blue');
     }
   }
+  checkYtdlpStatus();
+}
+
+let latestYtdlpStatus = null;
+
+async function checkYtdlpStatus() {
+  const settingsYtdlpDot = document.getElementById('settings-ytdlp-dot');
+  const settingsYtdlpStatus = document.getElementById('settings-ytdlp-status-text');
+  const settingsYtdlpVersion = document.getElementById('settings-ytdlp-version');
+  const managedInstallCard = document.getElementById('ytdlp-managed-install-card');
+  const customPath = localStorage.getItem('ytdlp-custom-path') || null;
+
+  try {
+    const status = await invoke('get_ytdlp_status', { customYtdlpPath: customPath });
+    latestYtdlpStatus = status;
+
+    if (status.available) {
+      if (settingsYtdlpDot) {
+        settingsYtdlpDot.className = 'dot green';
+        settingsYtdlpDot.style.background = 'var(--success)';
+        settingsYtdlpDot.style.boxShadow = '0 0 5px var(--success)';
+      }
+      if (settingsYtdlpStatus) {
+        settingsYtdlpStatus.textContent = 'Status: Active';
+      }
+      if (settingsYtdlpVersion) {
+        settingsYtdlpVersion.textContent = `Version: ${status.version} (${status.source})`;
+      }
+      if (managedInstallCard) {
+        managedInstallCard.style.display = (status.source !== 'managed' && status.installSupported) ? 'block' : 'none';
+      }
+    } else {
+      if (settingsYtdlpDot) {
+        settingsYtdlpDot.className = 'dot red';
+        settingsYtdlpDot.style.background = 'var(--danger)';
+        settingsYtdlpDot.style.boxShadow = '0 0 5px var(--danger)';
+      }
+      if (settingsYtdlpStatus) settingsYtdlpStatus.textContent = 'Status: Not Active';
+      if (settingsYtdlpVersion) settingsYtdlpVersion.textContent = 'Version: Not Found';
+
+      if (managedInstallCard) {
+        managedInstallCard.style.display = status.installSupported ? 'block' : 'none';
+      }
+    }
+  } catch (e) {
+    console.error("yt-dlp status check failed:", e);
+    latestYtdlpStatus = null;
+    if (settingsYtdlpDot) {
+      settingsYtdlpDot.className = 'dot red';
+      settingsYtdlpDot.style.background = 'var(--danger)';
+      settingsYtdlpDot.style.boxShadow = '0 0 5px var(--danger)';
+    }
+    if (settingsYtdlpStatus) settingsYtdlpStatus.textContent = 'Status: Error';
+    if (settingsYtdlpVersion) settingsYtdlpVersion.textContent = 'Version: Error';
+  }
 }
 
 // Initialize
@@ -1131,6 +1187,12 @@ listen('progress', (event) => {
   }
 });
 
+// --- Backend Log Listener ---
+listen('backend-log', (event) => {
+  const payload = event.payload;
+  logToTechyConsole(payload.message, payload.type || "info");
+});
+
 listen('finished', (event) => {
   progressFill.classList.remove('indeterminate');
   const activeTab = document.querySelector('.nav-btn.active')?.dataset.target;
@@ -1139,6 +1201,11 @@ listen('finished', (event) => {
     logToTechyConsole(`Task finished successfully. Stream compile return OK.`, "system");
     displayedProgress = Math.max(displayedProgress, 99);
     setProgressSmooth(100);
+
+    // Capture output path if provided by the backend (e.g. yt-dlp downloader)
+    if (event.payload.outputPath || event.payload.output_path) {
+      lastProcessedOutputPath = event.payload.outputPath || event.payload.output_path;
+    }
 
     // Show Preview Work button if we have a valid lastProcessedOutputPath
     const previewOutBtn = document.getElementById('preview-output-btn');
@@ -1902,6 +1969,7 @@ const auraDialogues = {
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch processing completed! Aura worked overtime, but we crushed it! 🏆" },
     "success_metadata-editor": { face: 'face_smug.png', msg: "Gane ke metadata aur cover art update ho gaye! Ab tagda dikhega! 🏷️🖼️" },
+    "success_youtube-downloader": { face: 'face_exicited.png', msg: "YouTube download complete! Ab direct preview play karo ya next tools me chain karo! 📥🚀" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "HEY! Stop poking me and focus on your work! 💢" },
@@ -1932,7 +2000,8 @@ const auraDialogues = {
     interact_tab_stabilize: { face: 'face_shocked.png', msg: "Shaky memories? Don't worry, stabilizer se smooth kar dungi! 🧘✨" },
     interact_tab_contact: { face: 'face_curious.png', msg: "Contact sheet select kiya? Screen grid ek dum mast lagega! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Itne saare files? Aura worked overtime, but hum crush kar denge! 🏆" },
-    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Gane ka details aur cover change karna hai? Badhiya cover photo select kijiye! 🎵✨" }
+    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Gane ka details aur cover change karna hai? Badhiya cover photo select kijiye! 🎵✨" },
+    "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "YouTube video download karni hai? Link yahan chipkao aur launch karo! 🌐✨" }
   },
   english: {
     // Startup & System
@@ -1971,6 +2040,7 @@ const auraDialogues = {
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch processing completed! We worked overtime, but we crushed it! 🏆" },
     "success_metadata-editor": { face: 'face_smug.png', msg: "Audio metadata and cover art successfully updated! 🏷️🖼️" },
+    "success_youtube-downloader": { face: 'face_exicited.png', msg: "YouTube download finished! You can now preview it or feed it into other tools. 📥🚀" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "HEY! Stop poking me and focus on your work! 💢" },
@@ -2001,7 +2071,8 @@ const auraDialogues = {
     interact_tab_stabilize: { face: 'face_shocked.png', msg: "Removing the shakes. Let's make this video perfectly steady! 🧘✨" },
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
-    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Want to edit song details and cover art? Let's make it look professional! 🎵✨" }
+    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Want to edit song details and cover art? Let's make it look professional! 🎵✨" },
+    "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "Want to download a YouTube video? Just paste the URL here and hit download! 🌐✨" }
   },
   sarcastic: {
     // Startup & System
@@ -2040,6 +2111,7 @@ const auraDialogues = {
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created. A grid of screenshots to prove we actually did something. 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch complete. I worked overtime, you did nothing. Typical. 🏆" },
     "success_metadata-editor": { face: 'face_smug.png', msg: "Tags and cover updated. Now everyone can see how bad your taste in music is. 🏷️🖼️" },
+    "success_youtube-downloader": { face: 'face_smug.png', msg: "Oh, look, we successfully downloaded a YouTube video. Let's add it to your stash of things you'll never watch. 📥💅" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_smug.png', msg: "Oh great, poking me again. Is this your primary job profile? 🙄" },
@@ -2070,7 +2142,8 @@ const auraDialogues = {
     interact_tab_stabilize: { face: 'face_shocked.png', msg: "Stabilizing. Steadying the footage, even if your life choices aren't. 🧘✨" },
     interact_tab_contact: { face: 'face_curious.png', msg: "Contact sheet. A grid of screenshots to prove you actually did something. 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Batch processor. Aura works overtime while you sit back. Typical. 🏆" },
-    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Editing metadata. Because renaming 'final_final_v2.mp3' to something decent is hard. 🏷️✨" }
+    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Editing metadata. Because renaming 'final_final_v2.mp3' to something decent is hard. 🏷️✨" },
+    "interact_tab_youtube-downloader": { face: 'face_thinking.png', msg: "Ah, the YouTube downloader. Let's grab some online video to bloat your local storage. 🌐🙄" }
   },
   hacker: {
     // Startup & System
@@ -2109,6 +2182,7 @@ const auraDialogues = {
     success_contact: { face: 'face_curious.png', msg: "Tile contact sheet compiled. Index grid built successfully. 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch queue flushed. All thread pipelines completed. 🏆" },
     "success_metadata-editor": { face: 'face_smug.png', msg: "ID3 header modification complete. Art payload embedded successfully. 🏷️🖼️" },
+    "success_youtube-downloader": { face: 'face_confident.png', msg: "Stream ingestion and media pull from YouTube completed. Target file cached. 📥💻" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "Interrupt signal detected on root node. Focus packet dropped. 💢" },
@@ -2139,7 +2213,8 @@ const auraDialogues = {
     interact_tab_stabilize: { face: 'face_shocked.png', msg: "Removing the shakes. Let's make this video perfectly steady! 🧘✨" },
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
-    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Mapping metadata editor. Injecting ID3v2 tags and binary cover payloads. 🏷️✨" }
+    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Mapping metadata editor. Injecting ID3v2 tags and binary cover payloads. 🏷️✨" },
+    "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "YouTube stream interceptor ready. Provide URL endpoint to dump media payload. 🌐⚡" }
   },
   lazy: {
     // Startup & System
@@ -2178,6 +2253,7 @@ const auraDialogues = {
     success_contact: { face: 'face_curious.png', msg: "Contact sheet done. A bunch of images. There, you go look at them. 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch queue finished. Aura worked overtime. I need a 3-day weekend. 🏆" },
     "success_metadata-editor": { face: 'face_smug.png', msg: "Metadata updated or whatever. Please don't ask me to rename another file. 🏷️🖼️" },
+    "success_youtube-downloader": { face: 'face_sleepy.png', msg: "Downloaded that YouTube link. Don't ask me to watch it for you, I'm taking a nap. 📥🥱" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_sleepy.png', msg: "Ugh... stop poking me. I don't want to move. 🥱" },
@@ -2208,7 +2284,8 @@ const auraDialogues = {
     interact_tab_stabilize: { face: 'face_shocked.png', msg: "Removing the shakes. Let's make this video perfectly steady! 🧘✨" },
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
-    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Tags and cover editor. Just type the details, it's not that hard... 🏷️✨" }
+    "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Tags and cover editor. Just type the details, it's not that hard... 🏷️✨" },
+    "interact_tab_youtube-downloader": { face: 'face_sleepy.png', msg: "Download YouTube videos... okay, paste the URL if you must. Too much network activity. 🌐😴" }
   }
 };
 
@@ -2784,6 +2861,12 @@ function initSettingsModal() {
     ffmpegPathInput.value = customFfmpegPath;
   }
 
+  const ytdlpPathInput = document.getElementById('settings-ytdlp-path');
+  const customYtdlpPath = localStorage.getItem('ytdlp-custom-path') || "";
+  if (ytdlpPathInput) {
+    ytdlpPathInput.value = customYtdlpPath;
+  }
+
   // Aura silence on start check
   const auraSpeechContainer = document.getElementById('aura-speech-container');
   if (localStorage.getItem('settings-aura-silenced') === 'true') {
@@ -2874,9 +2957,12 @@ function initSettingsModal() {
   if (browseFfmpegBtn) {
     browseFfmpegBtn.addEventListener('click', async () => {
       try {
-        const file = await tauriDialog.open({
-          filters: [{ name: 'Executable', extensions: ['exe'] }]
-        });
+        const isWindows = navigator.userAgent.toLowerCase().includes('win');
+        const dialogOptions = {};
+        if (isWindows) {
+          dialogOptions.filters = [{ name: 'Executable', extensions: ['exe'] }];
+        }
+        const file = await tauriDialog.open(dialogOptions);
         if (file) {
           localStorage.setItem('ffmpeg-custom-path', file);
           if (ffmpegPathInput) ffmpegPathInput.value = file;
@@ -2900,6 +2986,110 @@ function initSettingsModal() {
       
       // Re-verify instantly
       checkEngineStatus();
+    });
+  }
+
+  // Browse Custom yt-dlp Path
+  const browseYtdlpBtn = document.getElementById('settings-browse-ytdlp-btn');
+  if (browseYtdlpBtn) {
+    browseYtdlpBtn.addEventListener('click', async () => {
+      try {
+        const isWindows = navigator.userAgent.toLowerCase().includes('win');
+        const dialogOptions = {};
+        if (isWindows) {
+          dialogOptions.filters = [{ name: 'Executable', extensions: ['exe'] }];
+        }
+        const file = await tauriDialog.open(dialogOptions);
+        if (file) {
+          localStorage.setItem('ytdlp-custom-path', file);
+          const ytdlpPathInput = document.getElementById('settings-ytdlp-path');
+          if (ytdlpPathInput) ytdlpPathInput.value = file;
+          updateStatus(`Custom yt-dlp path selected.`);
+          checkYtdlpStatus();
+        }
+      } catch (err) {
+        console.error("yt-dlp browse error:", err);
+      }
+    });
+  }
+
+  // Clear Custom yt-dlp Path
+  const clearYtdlpBtn = document.getElementById('settings-clear-ytdlp-btn');
+  if (clearYtdlpBtn) {
+    clearYtdlpBtn.addEventListener('click', () => {
+      localStorage.removeItem('ytdlp-custom-path');
+      const ytdlpPathInput = document.getElementById('settings-ytdlp-path');
+      if (ytdlpPathInput) ytdlpPathInput.value = "";
+      updateStatus("Custom yt-dlp path reset.");
+      checkYtdlpStatus();
+    });
+  }
+
+  // Force Re-check yt-dlp
+  const forceCheckYtdlpBtn = document.getElementById('settings-force-check-ytdlp-btn');
+  if (forceCheckYtdlpBtn) {
+    forceCheckYtdlpBtn.addEventListener('click', () => {
+      checkYtdlpStatus();
+    });
+  }
+
+  // Install Managed yt-dlp
+  const installYtdlpBtn = document.getElementById('settings-install-ytdlp-btn');
+  if (installYtdlpBtn) {
+    installYtdlpBtn.addEventListener('click', async () => {
+      try {
+        const confirmResult = confirm("Do you want to download the latest yt-dlp binary automatically?");
+        if (!confirmResult) return;
+
+        const stageSpan = document.getElementById('ytdlp-install-stage');
+        const sizeSpan = document.getElementById('ytdlp-install-size');
+        const fill = document.getElementById('ytdlp-install-progress-fill');
+        const progressDiv = document.getElementById('ytdlp-install-progress');
+        const errorText = document.getElementById('ytdlp-install-error');
+
+        if (progressDiv) progressDiv.style.display = 'block';
+        if (errorText) errorText.style.display = 'none';
+
+        if (installYtdlpBtn) {
+          installYtdlpBtn.disabled = true;
+          installYtdlpBtn.querySelector('span').textContent = 'Installing...';
+        }
+
+        const unlisten = await listen('ytdlp-install-progress', (event) => {
+          const payload = event.payload;
+          if (stageSpan) stageSpan.textContent = payload.stage;
+          if (sizeSpan) {
+            const sizeDisplay = payload.totalBytes > 0 
+              ? `${(payload.downloadedBytes / 1024 / 1024).toFixed(1)}MB / ${(payload.totalBytes / 1024 / 1024).toFixed(1)}MB`
+              : `${(payload.downloadedBytes / 1024 / 1024).toFixed(1)}MB`;
+            sizeSpan.textContent = sizeDisplay;
+          }
+          if (fill) fill.style.width = `${payload.percent}%`;
+        });
+
+        const status = await invoke('install_managed_ytdlp');
+        latestYtdlpStatus = status;
+
+        if (installYtdlpBtn) {
+          installYtdlpBtn.querySelector('span').textContent = 'Setup yt-dlp';
+          installYtdlpBtn.disabled = false;
+        }
+
+        unlisten();
+        checkYtdlpStatus();
+        updateStatus("yt-dlp configured successfully.");
+      } catch (err) {
+        console.error("Managed yt-dlp install failed:", err);
+        const errorText = document.getElementById('ytdlp-install-error');
+        if (errorText) {
+          errorText.textContent = String(err || 'Installation failed.');
+          errorText.style.display = 'block';
+        }
+        if (installYtdlpBtn) {
+          installYtdlpBtn.querySelector('span').textContent = 'Retry Installation';
+          installYtdlpBtn.disabled = false;
+        }
+      }
     });
   }
 
@@ -3886,6 +4076,47 @@ window.addEventListener('DOMContentLoaded', () => {
         console.error("Preview Work error:", err);
         updateStatus("Failed to preview work.");
         logToTechyConsole(`Failed to load preview for output: ${lastProcessedOutputPath}`, "error");
+      }
+    });
+  }
+
+  // 9. YouTube Downloader Action
+  const runYtdlpBtn = document.getElementById('run-ytdlp-btn');
+  if (runYtdlpBtn) {
+    runYtdlpBtn.addEventListener('click', async () => {
+      if (!globalOutputPath) {
+        alert("Please select default output folder first.");
+        return;
+      }
+      
+      const url = document.getElementById('ytdlp-url').value.trim();
+      if (!url) {
+        alert("Please enter a valid YouTube link.");
+        return;
+      }
+
+      const format = document.getElementById('ytdlp-format').value;
+      const customPath = localStorage.getItem('ytdlp-custom-path') || null;
+
+      progressContainer.style.display = 'block';
+      displayedProgress = 0;
+      progressFill.classList.add('indeterminate');
+      updateStatus("Downloading from YouTube... Please wait.");
+      
+      logToTechyConsole(`Initiating YouTube download command: yt-dlp ${url} into ${globalOutputPath}`, "command");
+
+      try {
+        await invoke('download_youtube', {
+          url,
+          format,
+          outputDir: globalOutputPath,
+          customYtdlpPath: customPath,
+          customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null
+        });
+      } catch (err) {
+        console.error("YouTube Download command failed:", err);
+        updateStatus("Download failed.");
+        logToTechyConsole(`Error initiating download command: ${err}`, "error");
       }
     });
   }
