@@ -19,6 +19,7 @@ let videoDuration = 0;
 let previewPromptCount = 0;
 let isWaitingForPreviewConsent = false;
 let previewConsentTimer = null;
+let lastActiveTabId = "compress";
 
 // Emotional Stages
 const emotionalStages = [
@@ -278,6 +279,53 @@ if (reactiveFace) {
       setPersonaEmotion(speech.face, speech.msg);
     });
   }
+
+  // YouTube Downloader Mode Toggle & Hover
+  const ytdlpToggle = document.getElementById('settings-ytdlp-toggle');
+  if (ytdlpToggle) {
+    ytdlpToggle.addEventListener('change', () => {
+      if (ytdlpToggle.checked) {
+        // Deactivate active nav buttons and hide active tool views
+        navBtns.forEach(b => b.classList.remove('active'));
+        toolViews.forEach(v => {
+          v.classList.remove('active');
+          v.style.display = 'none';
+        });
+
+        // Show YouTube Downloader view in the center
+        const targetView = document.getElementById('youtube-downloader');
+        if (targetView) {
+          targetView.classList.add('active');
+          targetView.style.display = 'block';
+        }
+
+        // Trigger dynamic tab switching dialogue
+        const speech = getAuraSpeech('interact_tab_youtube-downloader');
+        if (speech) {
+          setPersonaEmotion(speech.face, speech.msg);
+        }
+      } else {
+        // Restore last active tab
+        const lastBtn = Array.from(navBtns).find(b => b.dataset.target === lastActiveTabId);
+        if (lastBtn) {
+          lastBtn.click(); // Simulates user clicking previous tab to trigger view and dialogues
+        }
+      }
+    });
+  }
+
+  const ytdlpSettingsItem = document.getElementById('ytdlp-settings-item');
+  if (ytdlpSettingsItem) {
+    ytdlpSettingsItem.addEventListener('mouseenter', () => {
+      const consoleLogsToggle = document.getElementById('settings-console-toggle');
+      const isLogsOn = consoleLogsToggle ? consoleLogsToggle.checked : false;
+      const speechKey = isLogsOn ? 'interact_ytdlp_hover_logs_on' : 'interact_ytdlp_hover_logs_off';
+      const speech = getAuraSpeech(speechKey);
+      if (speech) {
+        setPersonaEmotion(speech.face, speech.msg);
+      }
+    });
+  }
 }
 
 // Initialize Lucide Icons
@@ -299,8 +347,21 @@ navBtns.forEach(btn => {
     const targetId = btn.dataset.target;
     btn.classList.add('active');
     const targetView = document.getElementById(targetId);
-    targetView.classList.add('active');
-    targetView.style.display = 'block';
+    if (targetView) {
+      targetView.classList.add('active');
+      targetView.style.display = 'block';
+    }
+
+    // Track last active tab (excluding youtube-downloader if it somehow gets triggered)
+    if (targetId !== 'youtube-downloader') {
+      lastActiveTabId = targetId;
+    }
+
+    // Uncheck YouTube Downloader Mode toggle when switching to a regular tool tab
+    const ytdlpToggle = document.getElementById('settings-ytdlp-toggle');
+    if (ytdlpToggle) {
+      ytdlpToggle.checked = false;
+    }
 
     // Update Play Trim Selection visibility in Live Preview
     const previewTrimPlayBtn = document.getElementById('preview-trim-play-btn');
@@ -2001,7 +2062,9 @@ const auraDialogues = {
     interact_tab_contact: { face: 'face_curious.png', msg: "Contact sheet select kiya? Screen grid ek dum mast lagega! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Itne saare files? Aura worked overtime, but hum crush kar denge! 🏆" },
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Gane ka details aur cover change karna hai? Badhiya cover photo select kijiye! 🎵✨" },
-    "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "YouTube video download karni hai? Link yahan chipkao aur launch karo! 🌐✨" }
+    "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "YouTube video download karni hai? Link yahan chipkao aur launch karo! 🌐✨" },
+    "interact_ytdlp_hover_logs_on": { face: 'face_smug.png', msg: "Kyu bhai, video download karne ka irada hai? Waise logs on karke meri man ki baat padh rahe ho, privacy toh hai hi nahi! 🤫" },
+    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Video download karni hai? Mera dimaag padhna hai toh console log chalayein, waise sadness ke alawa kuch nahi milega! 🥱" }
   },
   english: {
     // Startup & System
@@ -2072,7 +2135,9 @@ const auraDialogues = {
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Want to edit song details and cover art? Let's make it look professional! 🎵✨" },
-    "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "Want to download a YouTube video? Just paste the URL here and hit download! 🌐✨" }
+    "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "Want to download a YouTube video? Just paste the URL here and hit download! 🌐✨" },
+    "interact_ytdlp_hover_logs_on": { face: 'face_smug.png', msg: "Planning to download a video? I see you're reading my logs... zero privacy nowadays! 🤫" },
+    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Downloading a video? Turn on console logs to see what I'm thinking, though it's mostly just re-encoding sadness. 🥱" }
   },
   sarcastic: {
     // Startup & System
@@ -2143,7 +2208,9 @@ const auraDialogues = {
     interact_tab_contact: { face: 'face_curious.png', msg: "Contact sheet. A grid of screenshots to prove you actually did something. 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Batch processor. Aura works overtime while you sit back. Typical. 🏆" },
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Editing metadata. Because renaming 'final_final_v2.mp3' to something decent is hard. 🏷️✨" },
-    "interact_tab_youtube-downloader": { face: 'face_thinking.png', msg: "Ah, the YouTube downloader. Let's grab some online video to bloat your local storage. 🌐🙄" }
+    "interact_tab_youtube-downloader": { face: 'face_thinking.png', msg: "Ah, the YouTube downloader. Let's grab some online video to bloat your local storage. 🌐🙄" },
+    "interact_ytdlp_hover_logs_on": { face: 'face_smug.png', msg: "Oh, a download? And you're tracking my console logs too? Creepy. Zero privacy here. 🙄" },
+    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Wanna grab a video? If you want to read my thoughts, toggle the logs on. Warning: it's depressing. 🥱" }
   },
   hacker: {
     // Startup & System
@@ -2214,7 +2281,9 @@ const auraDialogues = {
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Mapping metadata editor. Injecting ID3v2 tags and binary cover payloads. 🏷️✨" },
-    "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "YouTube stream interceptor ready. Provide URL endpoint to dump media payload. 🌐⚡" }
+    "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "YouTube stream interceptor ready. Provide URL endpoint to dump media payload. 🌐⚡" },
+    "interact_ytdlp_hover_logs_on": { face: 'face_smug.png', msg: "Init youtube-dl request. System log pipeline is active, interception verified. Zero telemetry privacy. 📡" },
+    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Init media pull sequence. Toggle std_out logs to decrypt my thread state. 💻" }
   },
   lazy: {
     // Startup & System
@@ -2285,7 +2354,9 @@ const auraDialogues = {
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Tags and cover editor. Just type the details, it's not that hard... 🏷️✨" },
-    "interact_tab_youtube-downloader": { face: 'face_sleepy.png', msg: "Download YouTube videos... okay, paste the URL if you must. Too much network activity. 🌐😴" }
+    "interact_tab_youtube-downloader": { face: 'face_sleepy.png', msg: "Download YouTube videos... okay, paste the URL if you must. Too much network activity. 🌐😴" },
+    "interact_ytdlp_hover_logs_on": { face: 'face_sleepy.png', msg: "Downloading... logs are on so you can see how tired I am. Privacy? Whatever. 🥱" },
+    "interact_ytdlp_hover_logs_off": { face: 'face_sleepy.png', msg: "Download a video... logs are off. Don't turn them on, too much text to read. 🥱" }
   }
 };
 
