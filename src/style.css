@@ -240,7 +240,7 @@ body.theme-winxp .brand h2 {
 /* --- 3. Synthwave Theme --- */
 body.theme-synth {
   --bg-color: #12031c;
-  --panel-bg: rgba(26, 8, 38, 0.5);
+  --panel-bg: rgba(26, 8, 38, 0.45);
   --panel-border: #ff007f; /* Neon Hot Pink */
   --text-primary: #ffffff;
   --text-secondary: #00ffff; /* Neon Cyan */
@@ -249,6 +249,22 @@ body.theme-synth {
   --accent-glow: rgba(255, 0, 127, 0.4);
   --btn-text: #ffffff;
   --metric-ring-center: #1a0826;
+  position: relative;
+}
+
+/* Background image overlay with blur and dimming for synth theme */
+body.theme-synth::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background: url('theme-asset-retro/Screenshot%202026-07-27%20153551.svg') no-repeat center center;
+  background-size: cover;
+  filter: blur(5px) brightness(0.35) contrast(1.05);
+  pointer-events: none;
 }
 
 body.theme-synth .mesh-gradient {
@@ -294,6 +310,19 @@ body.theme-synth .nav-btn.active {
   color: #ffffff !important;
   border-color: #ff007f !important;
   box-shadow: 0 0 15px rgba(255, 0, 127, 0.5) !important;
+}
+
+/* Mode Switcher Button overrides for Synthwave Theme to remove default button outline clashes */
+body.theme-synth .mode-switcher button,
+body.theme-synth .switcher-btn {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-secondary) !important;
+}
+
+body.theme-synth .switcher-btn.active {
+  color: #ffffff !important;
 }
 
 /* --- Theme-Specific select dropdowns styling overrides --- */

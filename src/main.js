@@ -3840,6 +3840,180 @@ function drawRgbSpectrum(ctx, width, height, dataArray, bufferLength) {
   }
 }
 
+function drawSynthwaveSunset(ctx, width, height, dataArray, bufferLength) {
+  // Clear canvas with a solid black/dark-purple background
+  ctx.fillStyle = '#0a0516';
+  ctx.fillRect(0, 0, width, height);
+
+  const cx = width / 2;
+  const horizon = height * 0.62;
+
+  // 1. Extract frequency bands
+  // Bass (first 8% of bins)
+  let bass = 0;
+  const bassBins = Math.max(1, Math.floor(bufferLength * 0.08));
+  for (let i = 0; i < bassBins; i++) {
+    bass += dataArray[i];
+  }
+  bass = bass / bassBins / 255;
+
+  // Mids (middle 25% of bins)
+  let mids = 0;
+  const midStart = Math.floor(bufferLength * 0.1);
+  const midEnd = Math.floor(bufferLength * 0.35);
+  for (let i = midStart; i < midEnd; i++) {
+    mids += dataArray[i];
+  }
+  mids = mids / (midEnd - midStart) / 255;
+
+  // Treble (upper 30% of bins)
+  let treble = 0;
+  const trebleStart = Math.floor(bufferLength * 0.6);
+  for (let i = trebleStart; i < bufferLength; i++) {
+    treble += dataArray[i];
+  }
+  treble = treble / (bufferLength - trebleStart) / 255;
+
+  // 2. Draw space stars
+  if (!window.synthwaveStars || window.synthwaveStars.length === 0) {
+    window.synthwaveStars = [];
+    for (let i = 0; i < 60; i++) {
+      window.synthwaveStars.push({
+        x: Math.random(),
+        y: Math.random() * horizon,
+        size: 0.5 + Math.random() * 1.5,
+        speed: 0.05 + Math.random() * 0.05
+      });
+    }
+  }
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+  window.synthwaveStars.forEach(star => {
+    // twinkle stars with treble
+    const x = star.x * width;
+    const size = star.size * (1 + treble * 1.8);
+    ctx.beginPath();
+    ctx.arc(x, star.y, size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 3. Draw Sliced Neon Sun
+  ctx.save();
+  const sunRadius = Math.min(width, height) * 0.23 * (1 + bass * 0.15);
+  const sunY = horizon - 5;
+
+  // Create gradient
+  const sunGrad = ctx.createLinearGradient(cx, sunY - sunRadius, cx, sunY);
+  sunGrad.addColorStop(0, '#ffe600'); // Neon bright yellow at top
+  sunGrad.addColorStop(0.4, '#ff007f'); // Hot pink in middle
+  sunGrad.addColorStop(1, '#3b0066'); // Deep dark purple at bottom
+
+  ctx.fillStyle = sunGrad;
+  ctx.shadowBlur = 25;
+  ctx.shadowColor = '#ff007f';
+
+  // Slicing algorithm
+  const sliceHeight = Math.max(2, Math.floor(height * 0.007));
+  const maxGap = Math.max(4, Math.floor(height * 0.015));
+
+  for (let y = sunY - sunRadius; y < sunY + sunRadius; y += sliceHeight + 1.5) {
+    // Gap size gets larger as we go down the sun (closer to horizon)
+    const distFromTop = y - (sunY - sunRadius);
+    const progress = distFromTop / (sunRadius * 2); // 0 at top, 1 at bottom
+    const gap = progress * maxGap;
+
+    // Width of sun at this vertical coordinate y
+    const dy = Math.abs(y - sunY);
+    const halfWidth = Math.sqrt(Math.max(0, sunRadius * sunRadius - dy * dy));
+
+    if (halfWidth > 0) {
+      const actualSliceHeight = Math.max(1, sliceHeight - (gap * 0.8));
+      ctx.fillRect(cx - halfWidth, y, halfWidth * 2, actualSliceHeight);
+    }
+  }
+  ctx.restore();
+
+  // 4. Draw distant mountains silhouette (reacting to mids)
+  ctx.fillStyle = '#0f051c';
+  ctx.strokeStyle = '#ff007f';
+  ctx.lineWidth = 2.5;
+  ctx.shadowBlur = 12;
+  ctx.shadowColor = '#ff007f';
+
+  // Left mountain peaks
+  ctx.beginPath();
+  ctx.moveTo(0, horizon);
+  const leftPeak1Y = horizon - (35 + mids * 65);
+  const leftPeak2Y = horizon - (20 + treble * 40);
+  ctx.lineTo(width * 0.15, leftPeak1Y);
+  ctx.lineTo(width * 0.28, leftPeak2Y);
+  ctx.lineTo(width * 0.42, horizon);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Right mountain peaks
+  ctx.beginPath();
+  ctx.moveTo(width, horizon);
+  const rightPeak1Y = horizon - (40 + mids * 55);
+  const rightPeak2Y = horizon - (15 + bass * 35);
+  ctx.lineTo(width * 0.82, rightPeak1Y);
+  ctx.lineTo(width * 0.68, rightPeak2Y);
+  ctx.lineTo(width * 0.53, horizon);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // 5. Draw 3D wireframe floor grid
+  // Draw horizon boundary
+  ctx.strokeStyle = '#00ffff';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(0, horizon);
+  ctx.lineTo(width, horizon);
+  ctx.stroke();
+
+  // Draw perspective radial lines
+  ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)';
+  ctx.lineWidth = 1.5;
+  const numGridLines = 18;
+  for (let i = 0; i <= numGridLines; i++) {
+    const ratio = i / numGridLines;
+    const bottomX = width * (-0.25 + ratio * 1.5);
+    ctx.beginPath();
+    ctx.moveTo(cx, horizon);
+    ctx.lineTo(bottomX, height);
+    ctx.stroke();
+  }
+
+  // Draw scrolling horizontal grid lines
+  if (typeof window.gridScrollOffset === 'undefined') {
+    window.gridScrollOffset = 0;
+  }
+  // Scroll speed scales with bass hits
+  const speed = 1.2 + bass * 7.5;
+  window.gridScrollOffset = (window.gridScrollOffset + speed) % 100;
+
+  const floorHeight = height - horizon;
+  const numHorizLines = 11;
+  for (let i = 0; i < numHorizLines; i++) {
+    // Exponential curve for 3D perspective spacing
+    const lineProgress = (i + window.gridScrollOffset / 100) / numHorizLines;
+    const curve = Math.pow(lineProgress, 2.5); // lines get closer as they approach the horizon
+    const y = horizon + curve * floorHeight;
+
+    // Glow and thickness increase as they get closer to bottom
+    const opacity = 0.15 + curve * 0.75;
+    ctx.strokeStyle = `rgba(0, 255, 255, ${opacity})`;
+    ctx.lineWidth = 1 + curve * 3;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+}
+
 function startVisualizerDrawing() {
   const canvas = document.getElementById('preview-audio-canvas');
   if (!canvas) return;
@@ -3879,6 +4053,8 @@ function startVisualizerDrawing() {
 
     if (preset === 'glow-bars-wave') {
       drawGlowBars(ctx, width, height, dataArray, bufferLength, activeColor, activeGlow);
+    } else if (preset === 'synthwave-sunset') {
+      drawSynthwaveSunset(ctx, width, height, dataArray, bufferLength);
     } else if (preset === 'retro-wormhole') {
       drawRetroWormhole(ctx, width, height, dataArray, bufferLength, activeColor);
     } else if (preset === 'hyper-starfield') {
