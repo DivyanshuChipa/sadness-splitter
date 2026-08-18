@@ -185,6 +185,36 @@ body.theme-win98 .subtext {
   color: #505050 !important;
 }
 
+/* Win98 Segmented Toolkit Switcher */
+body.theme-win98 .mode-switcher {
+  background: #ffffff !important;
+  border: 2px inset #ffffff !important;
+  border-radius: 0px !important;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-win98 .switcher-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #000000 !important;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif !important;
+  font-weight: bold !important;
+  border-radius: 0px !important;
+}
+
+body.theme-win98 .switcher-btn.active {
+  color: #ffffff !important;
+}
+
+body.theme-win98 .switcher-slider {
+  background: #000080 !important; /* Windows 98 Navy Blue */
+  border: 1px solid #ffffff !important;
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+
+
 /* --- 2. Windows XP Theme --- */
 body.theme-winxp {
   --bg-color: #245edb;
@@ -299,7 +329,8 @@ body.theme-winxp select {
 }
 
 body.theme-winxp .btn.action {
-  background: linear-gradient(to bottom, #388e3c 0%, #2e7d32 100%) !important; /* Iconic XP Green Start Button */
+  background: linear-gradient(to bottom, #388e3c 0%, #2e7d32 100%) !important;
+  /* Iconic XP Green Start Button */
   border: 1px solid #1b5e20 !important;
   border-radius: 4px !important;
   color: #ffffff !important;
@@ -2393,7 +2424,8 @@ input:checked+.ios-slider:before {
 .settings-modal-content {
   width: 90% !important;
   max-width: 760px !important;
-  background: #1e202c !important; /* Solid modern slate dark */
+  background: #1e202c !important;
+  /* Solid modern slate dark */
   border: 1px solid rgba(255, 255, 255, 0.09) !important;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 1px 1px rgba(255, 255, 255, 0.05) !important;
   border-radius: 14px !important;
@@ -2410,6 +2442,7 @@ input:checked+.ios-slider:before {
     opacity: 0;
     transform: scale(0.94) translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -2825,7 +2858,8 @@ input:checked+.ios-slider:before {
 .theme-preview-card.active {
   border: 2px solid var(--accent) !important;
   box-shadow: 0 0 0 1px var(--accent), 0 4px 16px var(--accent-glow) !important;
-  transform: none !important; /* Prevents edge-cutting bug completely */
+  transform: none !important;
+  /* Prevents edge-cutting bug completely */
 }
 
 .theme-card-label {
@@ -2845,6 +2879,7 @@ input:checked+.ios-slider:before {
 .theme-card-modern {
   background: linear-gradient(145deg, #131722 0%, #1e293b 100%);
 }
+
 .theme-card-modern .mock-titlebar {
   background: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -2852,22 +2887,34 @@ input:checked+.ios-slider:before {
   display: flex;
   align-items: center;
 }
+
 .mock-dot-group {
   display: flex;
   gap: 3px;
 }
+
 .mock-dot {
   width: 4px;
   height: 4px;
   border-radius: 50%;
 }
-.dot-red { background: #ff5f56; }
-.dot-yellow { background: #ffbd2e; }
-.dot-green { background: #27c93f; }
+
+.dot-red {
+  background: #ff5f56;
+}
+
+.dot-yellow {
+  background: #ffbd2e;
+}
+
+.dot-green {
+  background: #27c93f;
+}
 
 .theme-card-win98 {
   background: #c0c0c0;
 }
+
 .theme-card-win98 .mock-titlebar {
   background: #000080;
   color: #ffffff;
@@ -2879,6 +2926,7 @@ input:checked+.ios-slider:before {
   font-size: 0.45rem;
   font-weight: bold;
 }
+
 .mock-win98-btn {
   background: #c0c0c0;
   color: #000;
@@ -2891,6 +2939,7 @@ input:checked+.ios-slider:before {
 .theme-card-winxp {
   background: #ece9d8;
 }
+
 .theme-card-winxp .mock-titlebar {
   background: linear-gradient(to right, #0053e1 0%, #3a82fc 100%);
   color: #ffffff;
@@ -2902,6 +2951,7 @@ input:checked+.ios-slider:before {
   font-size: 0.45rem;
   font-weight: bold;
 }
+
 .mock-xp-btn {
   background: #e04300;
   color: #fff;
@@ -2915,6 +2965,7 @@ input:checked+.ios-slider:before {
 .theme-card-synth {
   background: linear-gradient(145deg, #2b083d 0%, #0c0211 100%);
 }
+
 .theme-card-synth .mock-titlebar {
   background: rgba(255, 0, 127, 0.15);
   border-bottom: 1px solid #ff007f;
@@ -2927,6 +2978,7 @@ input:checked+.ios-slider:before {
   font-size: 0.45rem;
   font-weight: bold;
 }
+
 .mock-synth-dot {
   color: #00ffff;
 }
@@ -2938,6 +2990,7 @@ input:checked+.ios-slider:before {
   justify-content: center;
   height: calc(100% - 14px);
 }
+
 .mock-preview-screen {
   width: 100%;
   height: 100%;
@@ -2947,6 +3000,7 @@ input:checked+.ios-slider:before {
   justify-content: center;
   gap: 3px;
 }
+
 .theme-card-modern .mock-circle-ring {
   width: 14px;
   height: 14px;
@@ -2954,6 +3008,7 @@ input:checked+.ios-slider:before {
   border: 1.5px solid #3b82f6;
   background: rgba(59, 130, 246, 0.2);
 }
+
 .theme-card-win98 .mock-circle-ring {
   width: 14px;
   height: 14px;
@@ -2961,6 +3016,7 @@ input:checked+.ios-slider:before {
   border: 1.5px solid #000;
   background: #000;
 }
+
 .theme-card-winxp .mock-circle-ring {
   width: 14px;
   height: 14px;
@@ -2968,6 +3024,7 @@ input:checked+.ios-slider:before {
   border: 1.5px solid #003399;
   background: #000;
 }
+
 .theme-card-synth .mock-circle-ring {
   width: 14px;
   height: 14px;
@@ -2976,18 +3033,22 @@ input:checked+.ios-slider:before {
   background: #000;
   box-shadow: 0 0 5px #ff007f;
 }
+
 .mock-playbar {
   width: 60%;
   height: 2px;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 2px;
 }
+
 .theme-card-win98 .mock-playbar {
   background: #808080;
 }
+
 .theme-card-winxp .mock-playbar {
   background: #0053e1;
 }
+
 .theme-card-synth .mock-playbar {
   background: #00ffff;
   box-shadow: 0 0 3px #00ffff;
@@ -3914,7 +3975,7 @@ input:checked+.ios-slider:before {
   position: absolute !important;
   top: 12% !important;
   width: 78% !important;
-  height: 30% !important;
+  height: 58% !important;
   object-fit: cover !important;
   border-radius: 4px !important;
   z-index: 2 !important;
@@ -3994,7 +4055,8 @@ body.theme-winxp .settings-modal-header h2 i {
 }
 
 body.theme-winxp .settings-close-btn {
-  background: #e04300 !important; /* Iconic Red XP Close Button */
+  background: #e04300 !important;
+  /* Iconic Red XP Close Button */
   border: 1px solid #ffffff !important;
   border-radius: 3px !important;
   color: #ffffff !important;
@@ -4031,11 +4093,13 @@ body.theme-winxp .settings-tab-btn.active {
   background: #ffffff !important;
   color: #003399 !important;
   border: 1px solid #7f9db9 !important;
-  border-left: 4px solid #388e3c !important; /* Iconic XP Green Accent */
+  border-left: 4px solid #388e3c !important;
+  /* Iconic XP Green Accent */
 }
 
 body.theme-winxp .settings-tab-btn.active::before {
-  background: #388e3c !important; /* XP Green Accent bar */
+  background: #388e3c !important;
+  /* XP Green Accent bar */
   box-shadow: 0 0 6px #388e3c !important;
 }
 
@@ -4089,7 +4153,8 @@ body.theme-winxp .settings-modal-footer {
 }
 
 body.theme-winxp #settings-save-btn {
-  background: linear-gradient(to bottom, #388e3c 0%, #2e7d32 100%) !important; /* Iconic XP Green Start Button style */
+  background: linear-gradient(to bottom, #388e3c 0%, #2e7d32 100%) !important;
+  /* Iconic XP Green Start Button style */
   color: #ffffff !important;
   border: 1px solid #1b5e20 !important;
   box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2) !important;
@@ -4103,6 +4168,10 @@ body.theme-winxp .theme-card-label {
 body.theme-winxp .theme-preset-item:has(.theme-preview-card.active) .theme-card-label {
   color: #003399 !important;
   font-weight: bold !important;
+}
+
+body.theme-winxp .about-footer {
+  color: rgb(38, 83, 12) !important;
 }
 
 /* =========================================================
@@ -4208,5 +4277,9 @@ body.theme-win98 #settings-save-btn {
 }
 
 body.theme-win98 .theme-card-label {
+  color: #000000 !important;
+}
+
+body.theme-win98 .about-footer {
   color: #000000 !important;
 }
