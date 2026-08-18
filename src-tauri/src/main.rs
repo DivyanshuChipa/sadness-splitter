@@ -15,6 +15,16 @@ use warp::{Filter, Reply};
 #[cfg(target_os = "windows")]
 use wmi::{COMLibrary, WMIConnection};
 
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
+fn create_command<S: AsRef<std::ffi::OsStr>>(program: S) -> Command {
+    let mut cmd = Command::new(program);
+    #[cfg(windows)]
+    cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+    cmd
+}
+
 #[cfg(target_os = "windows")]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -170,7 +180,7 @@ fn pair_from_commands(
 }
 
 fn command_succeeds(command: &Path, args: &[&str]) -> bool {
-    Command::new(command)
+    create_command(command)
         .args(args)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -180,7 +190,7 @@ fn command_succeeds(command: &Path, args: &[&str]) -> bool {
 }
 
 fn read_ffmpeg_version(command: &Path) -> Option<String> {
-    let output = Command::new(command).arg("-version").output().ok()?;
+    let output = create_command(command).arg("-version").output().ok()?;
     if !output.status.success() {
         return None;
     }
@@ -249,7 +259,7 @@ fn get_video_duration(
     custom_ffmpeg_path: Option<String>,
 ) -> f64 {
     let cmd = resolved_command_path(&app, "ffprobe", &custom_ffmpeg_path);
-    let output = Command::new(cmd)
+    let output = create_command(cmd)
         .args([
             "-v",
             "error",
@@ -270,6 +280,74 @@ fn get_video_duration(
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+struct VideoMetadata {
+    width: Option<u32>,
+    height: Option<u32>,
+    has_audio: bool,
+    duration: f64,
+}
+
+#[tauri::command]
+fn get_video_metadata(
+    app: AppHandle,
+    file_path: String,
+    custom_ffmpeg_path: Option<String>,
+) -> Result<VideoMetadata, String> {
+    let cmd = resolved_command_path(&app, "ffprobe", &custom_ffmpeg_path);
+    let output = create_command(cmd)
+        .args([
+            "-v",
+            "error",
+            "-show_entries",
+            "stream=width,height,codec_type",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "json",
+            &file_path,
+        ])
+        .output()
+        .map_err(|e| format!("Failed to execute ffprobe: {e}"))?;
+
+    if !output.status.success() {
+        let err_msg = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("ffprobe exited with error: {err_msg}"));
+    }
+
+    let json_str = String::from_utf8_lossy(&output.stdout);
+    let parsed: serde_json::Value = serde_json::from_str(&json_str)
+        .map_err(|e| format!("Failed to parse ffprobe JSON: {e}"))?;
+
+    let duration_str = parsed["format"]["duration"].as_str().unwrap_or("0");
+    let duration: f64 = duration_str.parse().unwrap_or(0.0);
+
+    let mut width = None;
+    let mut height = None;
+    let mut has_audio = false;
+
+    if let Some(streams) = parsed["streams"].as_array() {
+        for stream in streams {
+            if let Some(codec_type) = stream["codec_type"].as_str() {
+                if codec_type == "video" {
+                    width = stream["width"].as_u64().map(|w| w as u32);
+                    height = stream["height"].as_u64().map(|h| h as u32);
+                } else if codec_type == "audio" {
+                    has_audio = true;
+                }
+            }
+        }
+    }
+
+    Ok(VideoMetadata {
+        width,
+        height,
+        has_audio,
+        duration,
+    })
+}
+
 #[tauri::command]
 fn process_video(
     window: Window,
@@ -280,7 +358,7 @@ fn process_video(
     let app = window.app_handle().clone();
     std::thread::spawn(move || {
         let cmd = resolved_command_path(&app, "ffmpeg", &custom_ffmpeg_path);
-        let mut child = match Command::new(cmd)
+        let mut child = match create_command(cmd)
             .args(&args)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -355,7 +433,7 @@ fn generate_thumbnail(
     let cmd = resolved_command_path(&app, "ffmpeg", &custom_ffmpeg_path);
 
     // ffmpeg -i input -ss 00:00:01 -vframes 1 -q:v 2 output.jpg
-    let _ = Command::new(cmd)
+    let _ = create_command(cmd)
         .args([
             "-i", &file_path, "-ss", "00:00:01", "-vframes", "1", "-q:v", "2", "-y", thumb_str,
         ])
@@ -394,6 +472,8 @@ struct SystemMetricsPayload {
 
 // We use an AtomicU32 to store f32 as bits to avoid Mutex overhead
 static GPU_USAGE: AtomicU32 = AtomicU32::new(0);
+static CPU_USAGE: AtomicU32 = AtomicU32::new(0);
+static RAM_USAGE: AtomicU32 = AtomicU32::new(0);
 
 #[cfg(target_os = "windows")]
 fn start_gpu_monitor() {
@@ -472,6 +552,30 @@ fn get_gpu_usage() -> f32 {
     f32::from_bits(GPU_USAGE.load(Ordering::Relaxed))
 }
 
+fn start_system_monitor() {
+    std::thread::spawn(move || {
+        let mut sys = System::new_all();
+        loop {
+            sys.refresh_memory();
+            sys.refresh_cpu();
+
+            let total_mem = sys.total_memory();
+            let used_mem = sys.used_memory();
+            let ram_percent = if total_mem > 0 {
+                ((used_mem as f64 / total_mem as f64) * 100.0) as f32
+            } else {
+                0.0
+            };
+            let cpu_percent = sys.global_cpu_info().cpu_usage();
+
+            CPU_USAGE.store(cpu_percent.to_bits(), Ordering::Relaxed);
+            RAM_USAGE.store(ram_percent.to_bits(), Ordering::Relaxed);
+
+            std::thread::sleep(std::time::Duration::from_millis(1000));
+        }
+    });
+}
+
 static MEDIA_PORT: AtomicU16 = AtomicU16::new(0);
 
 #[tauri::command]
@@ -537,22 +641,8 @@ fn start_media_server(handle: tauri::AppHandle) {
 
 #[tauri::command]
 fn get_system_metrics() -> Result<SystemMetricsPayload, String> {
-    let mut sys = System::new_all();
-    sys.refresh_memory();
-    sys.refresh_cpu();
-    std::thread::sleep(std::time::Duration::from_millis(120));
-    sys.refresh_cpu();
-
-    let total_mem = sys.total_memory();
-    let used_mem = sys.used_memory();
-
-    let ram_percent = if total_mem > 0 {
-        ((used_mem as f64 / total_mem as f64) * 100.0) as f32
-    } else {
-        0.0
-    };
-
-    let cpu_percent = sys.global_cpu_info().cpu_usage();
+    let cpu_percent = f32::from_bits(CPU_USAGE.load(Ordering::Relaxed));
+    let ram_percent = f32::from_bits(RAM_USAGE.load(Ordering::Relaxed));
     let gpu_percent = get_gpu_usage();
 
     Ok(SystemMetricsPayload {
@@ -711,7 +801,7 @@ struct YtdlpResolveResult {
 }
 
 fn query_ytdlp_version(path: &Path) -> Option<String> {
-    let output = Command::new(path).arg("--version").output().ok()?;
+    let output = create_command(path).arg("--version").output().ok()?;
     if output.status.success() {
         let version_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
         if !version_str.is_empty() {
@@ -999,7 +1089,7 @@ fn download_youtube(
             url.clone(),
         ]);
 
-        let mut filename_cmd = Command::new(&ytdlp_res.path);
+        let mut filename_cmd = create_command(&ytdlp_res.path);
         #[cfg(target_os = "windows")]
         {
             use std::os::windows::process::CommandExt;
@@ -1055,7 +1145,7 @@ fn download_youtube(
             url.clone(),
         ]);
 
-        let mut download_cmd = Command::new(&ytdlp_res.path);
+        let mut download_cmd = create_command(&ytdlp_res.path);
         #[cfg(target_os = "windows")]
         {
             use std::os::windows::process::CommandExt;
@@ -1430,7 +1520,7 @@ fn send_native_notification(title: String, body: String) {
             r#"[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms"); $objNotification = New-Object System.Windows.Forms.NotifyIcon; $objNotification.Icon = [System.Drawing.SystemIcons]::Information; $objNotification.BalloonTipText = "{}"; $objNotification.BalloonTipTitle = "{}"; $objNotification.Visible = $True; $objNotification.ShowBalloonTip(5000); Start-Sleep -s 6; $objNotification.Dispose();"#,
             safe_body, safe_title
         );
-        let _ = Command::new("powershell")
+        let _ = create_command("powershell")
             .args(["-NoProfile", "-Command", &ps_script])
             .spawn();
     }
@@ -1443,12 +1533,12 @@ fn send_native_notification(title: String, body: String) {
             "display notification \"{}\" with title \"{}\"",
             safe_body, safe_title
         );
-        let _ = Command::new("osascript").args(["-e", &osa_script]).spawn();
+        let _ = create_command("osascript").args(["-e", &osa_script]).spawn();
     }
 
     #[cfg(target_os = "linux")]
     {
-        let _ = Command::new("notify-send").args([&title, &body]).spawn();
+        let _ = create_command("notify-send").args([&title, &body]).spawn();
     }
 }
 
@@ -1458,6 +1548,7 @@ fn main() {
     std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
 
     start_gpu_monitor();
+    start_system_monitor();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
@@ -1481,7 +1572,8 @@ fn main() {
             get_media_server_port,
             get_ytdlp_status,
             install_managed_ytdlp,
-            download_youtube
+            download_youtube,
+            get_video_metadata
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

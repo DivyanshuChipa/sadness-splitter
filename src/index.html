@@ -133,14 +133,14 @@
             <label>Input Video</label>
             <div class="input-group">
               <input type="text" id="global-input-path" readonly placeholder="No video selected">
-              <button id="browse-input-btn" class="btn primary">Browse</button>
+              <button id="browse-input-btn" class="btn primary"><i data-lucide="film"></i> Browse</button>
             </div>
           </div>
           <div class="file-picker">
             <label>Output Folder</label>
             <div class="input-group">
               <input type="text" id="global-output-path" readonly placeholder="No output folder selected">
-              <button id="browse-output-btn" class="btn secondary">Select Folder</button>
+              <button id="browse-output-btn" class="btn secondary"><i data-lucide="folder"></i> Select Folder</button>
             </div>
           </div>
         </section>
@@ -451,7 +451,7 @@
             <ul id="batch-list" class="batch-list empty">
               <li class="empty-msg">No files in batch.</li>
             </ul>
-            <button id="run-batch-btn" class="btn action">▶️ RUN BATCH</button>
+            <button id="run-batch-btn" class="btn action"><i data-lucide="play"></i> RUN BATCH</button>
           </section>
 
           <!-- SLOWED + REVERB TOOL -->
@@ -666,6 +666,9 @@
           <canvas id="preview-audio-canvas"
             style="display: none; width: 100%; height: 100%; min-height: 180px; border-radius: 8px;"></canvas>
 
+          <!-- CRT Monitor Frame Overlay -->
+          <img id="crt-monitor-overlay" class="crt-monitor-overlay" src="theme-asset-xp-98/old-monitor.svg" alt="Retro Monitor" style="display: none;">
+
           <!-- Fullscreen overlay button -->
           <button id="preview-fullscreen-trigger-btn" class="preview-fs-btn-overlay"
             title="Open Media Player Fullscreen" style="display: none;">
@@ -875,7 +878,7 @@
           </div>
 
           <div class="about-footer">
-            APP VERSION v2.0.0-beta &bull; CREATED WITH <span class="heart">💛</span> BY Divyanshu_Shopra
+            APP VERSION v2.0.1-beta &bull; CREATED WITH <span class="heart">💛</span> BY Divyanshu_Shopra
           </div>
         </div>
       </div>
@@ -885,50 +888,43 @@
 
 
   <!-- SETTINGS MODAL -->
-  <div id="settings-modal" class="modal-overlay" style="display: none;">
-    <div class="modal-content settings-modal-content glass-panel"
-      style="width: 90%; max-width: 750px; text-align: left; padding: 25px !important; display: flex; flex-direction: column; gap: 15px; border-radius: 16px;">
-      <div class="settings-modal-header"
-        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px; margin-bottom: 5px;">
-        <h2
-          style="font-size: 1.25rem; font-weight: 600; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-          <i data-lucide="settings" style="width: 20px; height: 20px; color: var(--accent);"></i> Control Panel
+  <div id="settings-modal" class="modal-overlay settings-modal-overlay" style="display: none;">
+    <div class="modal-content settings-modal-content">
+      <div class="settings-modal-header">
+        <h2>
+          <i data-lucide="settings"></i> Control Panel
         </h2>
-        <button id="settings-close-btn" class="close-btn" title="Close"
-          style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: background 0.2s, color 0.2s;">
-          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        <button id="settings-close-btn" class="settings-close-btn" title="Close">
+          <i data-lucide="x"></i>
         </button>
       </div>
 
-      <div class="settings-modal-body"
-        style="display: grid; grid-template-columns: 200px 1fr; gap: 40px; min-height: 380px;">
+      <div class="settings-modal-body">
         <!-- Left Side Tab Nav -->
-        <aside class="settings-tabs"
-          style="display: flex; flex-direction: column; gap: 8px; border-right: 1px solid rgba(255, 255, 255, 0.08); padding-right: 15px;">
-          <button class="settings-tab-btn active" data-tab="general"
-            style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s;">
-            <i data-lucide="sliders" style="width: 16px; height: 16px;"></i> General
+        <aside class="settings-tabs">
+          <button class="settings-tab-btn active" data-tab="general">
+            <i data-lucide="sliders"></i>
+            <span>General</span>
           </button>
-          <button class="settings-tab-btn" data-tab="themes"
-            style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s;">
-            <i data-lucide="palette" style="width: 16px; height: 16px;"></i> Themes Hub
+          <button class="settings-tab-btn" data-tab="themes">
+            <i data-lucide="palette"></i>
+            <span>Themes Hub</span>
           </button>
-          <button class="settings-tab-btn" data-tab="engine"
-            style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s;">
-            <i data-lucide="cpu" style="width: 16px; height: 16px;"></i> Engine Config
+          <button class="settings-tab-btn" data-tab="engine">
+            <i data-lucide="cpu"></i>
+            <span>Engine Config</span>
           </button>
         </aside>
 
         <!-- Right Side Panel Contents -->
-        <div class="settings-panels"
-          style="display: flex; flex-direction: column; overflow-y: auto; max-height: 400px; padding-right: 5px;">
+        <div class="settings-panels">
 
           <!-- GENERAL TAB PANEL -->
           <div id="settings-general-panel" class="settings-panel-view active">
-            <h3 style="font-size: 1.05rem; font-weight: 600; margin: 0 0 4px 0; color: var(--text-primary);">General
-              Settings</h3>
-            <p class="panel-subtext" style="font-size: 0.75rem; color: var(--text-secondary); margin: 0 0 20px 0;">
-              Manage overall interface options and output behavior.</p>
+            <div class="panel-header-block">
+              <h3>General Settings</h3>
+              <p class="panel-subtext">Manage overall interface options and output behavior.</p>
+            </div>
 
             <div class="settings-form-group" style="display: flex; flex-direction: column; gap: 15px;">
 
@@ -1058,23 +1054,18 @@
 
           <!-- THEMES & NOSTALGIA TAB PANEL -->
           <div id="settings-themes-panel" class="settings-panel-view" style="display: none;">
-            <h3 style="font-size: 1.05rem; font-weight: 600; margin: 0 0 2px 0; color: var(--text-primary);">Themes &
-              Nostalgia Hub</h3>
-            <p class="panel-subtext" style="font-size: 0.75rem; color: var(--text-secondary); margin: 0 0 20px 0;">
-              Revive nostalgia! Switch presets and toggle mascot interactions.</p>
+            <div class="panel-header-block">
+              <h3>Themes & Nostalgia Hub</h3>
+              <p class="panel-subtext">Revive nostalgia! Switch presets and toggle mascot interactions.</p>
+            </div>
 
-            <div class="settings-form-group" style="display: flex; flex-direction: column; gap: 30px;">
+            <div class="settings-form-group" style="display: flex; flex-direction: column; gap: 20px;">
 
               <!-- Aura Mascot emotes toggle -->
-              <div class="settings-form-row"
-                style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px;">
-                <div class="settings-info-col" style="flex: 1; padding-right: 15px;">
-                  <span class="settings-option-title"
-                    style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Aura
-                    Mascot Interactive Speeches</span>
-                  <span class="settings-option-desc"
-                    style="display: block; font-size: 0.7rem; color: var(--text-secondary);">Disable reactive emojis,
-                    bubble talks and expressions to reduce distractions.</span>
+              <div class="settings-form-row">
+                <div class="settings-info-col">
+                  <span class="settings-option-title">Aura Mascot Interactive Speeches</span>
+                  <span class="settings-option-desc">Disable reactive emojis, bubble talks and expressions to reduce distractions.</span>
                 </div>
                 <div class="settings-control-col">
                   <label class="ios-toggle">
@@ -1084,110 +1075,92 @@
                 </div>
               </div>
 
-              <!-- Themes Grid -->
-              <div class="theme-presets-title"
-                style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px;">
-                Premium Visual Preset Cards</div>
-              <div class="theme-preset-cards-grid"
-                style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px;">
+              <!-- Themes Grid Section -->
+              <div class="theme-presets-section">
+                <div class="theme-presets-title">Editor Theme Preset</div>
+                <p class="theme-presets-subtext">Select a visual aura style for the player and interface.</p>
+                <div class="theme-preset-cards-grid">
 
-                <!-- Modern Theme Card -->
-                <div class="theme-preview-card theme-card-modern" data-preset="theme-modern"
-                  style="background: linear-gradient(135deg, rgba(15, 17, 21, 0.7) 0%, rgba(30, 40, 55, 0.7) 100%); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 6px 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; backdrop-filter: blur(12px);">
-                  <div class="card-mock-window" style="font-family: 'Poppins', sans-serif; color: #fff;">
-                    <div class="mock-titlebar"
-                      style="background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 2px 5px; font-size: 0.45rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-radius: 5px 5px 0 0;">
-                      <span
-                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50px;">Sadness</span>
-                      <div class="mock-window-buttons" style="display: flex; gap: 2px; align-items: center;">
-                        <span
-                          style="background: #ff5f56; width: 5px; height: 5px; border-radius: 50%; display: inline-block;"></span>
-                        <span
-                          style="background: #ffbd2e; width: 5px; height: 5px; border-radius: 50%; display: inline-block;"></span>
-                        <span
-                          style="background: #27c93f; width: 5px; height: 5px; border-radius: 50%; display: inline-block;"></span>
+                  <!-- Modern Theme Card -->
+                  <div class="theme-preset-item">
+                    <div class="theme-preview-card theme-card-modern" data-preset="theme-modern" title="Modern Glass Aura">
+                      <div class="card-mock-window">
+                        <div class="mock-titlebar">
+                          <span class="mock-dot-group">
+                            <span class="mock-dot dot-red"></span>
+                            <span class="mock-dot dot-yellow"></span>
+                            <span class="mock-dot dot-green"></span>
+                          </span>
+                        </div>
+                        <div class="mock-body">
+                          <div class="mock-preview-screen">
+                            <div class="mock-circle-ring"></div>
+                            <div class="mock-playbar"></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div class="mock-body"
-                      style="padding: 6px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                      <div class="mock-circle-ring"
-                        style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #3b82f6; background: rgba(59, 130, 246, 0.2); box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);">
-                      </div>
-                      <span class="mock-text"
-                        style="font-size: 0.65rem; font-weight: bold; background: linear-gradient(90deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Modern
-                        Glass</span>
-                    </div>
+                    <span class="theme-card-label">Modern Glass</span>
                   </div>
-                </div>
 
-                <!-- Windows 98 Card -->
-                <div class="theme-preview-card theme-card-win98" data-preset="theme-win98"
-                  style="background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; border-radius: 4px; padding: 6px 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative;">
-                  <div class="card-mock-window"
-                    style="font-family: 'MS Sans Serif', 'Courier New', monospace; color: #000;">
-                    <div class="mock-titlebar"
-                      style="background: #000080; color: #fff; padding: 2px 5px; font-size: 0.45rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-radius: 2px;">
-                      <span
-                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50px;">Sad.exe</span>
-                      <div class="mock-window-buttons" style="display: flex; gap: 2px;"><span
-                          style="background: #c0c0c0; border: 1px solid #fff; padding: 0 2px; font-size: 0.5rem; line-height: 1;">X</span>
+                  <!-- Windows 98 Card -->
+                  <div class="theme-preset-item">
+                    <div class="theme-preview-card theme-card-win98" data-preset="theme-win98" title="Windows 98 Classic">
+                      <div class="card-mock-window">
+                        <div class="mock-titlebar">
+                          <span class="mock-win-title">Sad.exe</span>
+                          <span class="mock-win98-btn">×</span>
+                        </div>
+                        <div class="mock-body">
+                          <div class="mock-preview-screen">
+                            <div class="mock-circle-ring"></div>
+                            <div class="mock-playbar"></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div class="mock-body"
-                      style="padding: 6px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                      <div class="mock-circle-ring"
-                        style="width: 20px; height: 20px; border-radius: 50%; border: 2px double #000; background: #000;">
-                      </div>
-                      <span class="mock-text" style="font-size: 0.65rem; font-weight: bold;">Windows 98</span>
-                    </div>
+                    <span class="theme-card-label">Windows 98</span>
                   </div>
-                </div>
 
-                <!-- Windows XP Card -->
-                <div class="theme-preview-card theme-card-winxp" data-preset="theme-winxp"
-                  style="background: linear-gradient(180deg, #7abcff 0%, #2577df 100%); border: 2px solid #0053e1; border-radius: 8px; padding: 6px 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative;">
-                  <div class="card-mock-window" style="font-family: 'Tahoma', sans-serif; color: #fff;">
-                    <div class="mock-titlebar"
-                      style="background: linear-gradient(to right, #0053e1 0%, #3a82fc 100%); color: #fff; padding: 2px 5px; font-size: 0.45rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-radius: 5px 5px 0 0;">
-                      <span
-                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45px;">SadXP</span>
-                      <div class="mock-window-buttons XP" style="display: flex; gap: 2px;"><span
-                          style="background: #e04300; width: 8px; height: 8px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; border: 1px solid #fff;">x</span>
+                  <!-- Windows XP Card -->
+                  <div class="theme-preset-item">
+                    <div class="theme-preview-card theme-card-winxp" data-preset="theme-winxp" title="Windows XP Luna">
+                      <div class="card-mock-window">
+                        <div class="mock-titlebar">
+                          <span class="mock-win-title">SadXP</span>
+                          <span class="mock-xp-btn">×</span>
+                        </div>
+                        <div class="mock-body">
+                          <div class="mock-preview-screen">
+                            <div class="mock-circle-ring"></div>
+                            <div class="mock-playbar"></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div class="mock-body"
-                      style="padding: 6px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #ece9d8; color: #000; border-radius: 0 0 4px 4px; border: 1px solid #0053e1; border-top: none;">
-                      <div class="mock-circle-ring"
-                        style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #003399; background: #000;">
-                      </div>
-                      <span class="mock-text" style="font-size: 0.65rem; font-weight: bold;">Windows XP</span>
-                    </div>
+                    <span class="theme-card-label">Windows XP</span>
                   </div>
-                </div>
 
-                <!-- Synthwave Card -->
-                <div class="theme-preview-card theme-card-synth" data-preset="theme-synth"
-                  style="background: linear-gradient(135deg, #2b083d 0%, #0c0211 100%); border: 2px solid #ff007f; border-radius: 8px; padding: 6px 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; box-shadow: 0 0 10px rgba(255, 0, 127, 0.25);">
-                  <div class="card-mock-window"
-                    style="font-family: 'Poppins', sans-serif; color: #ff007f; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);">
-                    <div class="mock-titlebar"
-                      style="background: rgba(255, 0, 127, 0.1); border-bottom: 1px solid #ff007f; padding: 2px 5px; font-size: 0.45rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
-                      <span
-                        style="color: #00ffff; text-shadow: 0 0 5px #00ffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 55px;">SYNTH</span>
-                      <div class="mock-window-buttons" style="display: flex; gap: 2px;"><span
-                          style="color: #00ffff;">•</span></div>
-                    </div>
-                    <div class="mock-body"
-                      style="padding: 6px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                      <div class="mock-circle-ring"
-                        style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ff007f; background: #000; box-shadow: 0 0 8px #ff007f;">
+                  <!-- Synthwave Card -->
+                  <div class="theme-preset-item">
+                    <div class="theme-preview-card theme-card-synth" data-preset="theme-synth" title="Outrun Synthwave 1984">
+                      <div class="card-mock-window">
+                        <div class="mock-titlebar">
+                          <span class="mock-win-title">SYNTH</span>
+                          <span class="mock-synth-dot">•</span>
+                        </div>
+                        <div class="mock-body">
+                          <div class="mock-preview-screen">
+                            <div class="mock-circle-ring"></div>
+                            <div class="mock-playbar"></div>
+                          </div>
+                        </div>
                       </div>
-                      <span class="mock-text" style="font-size: 0.65rem; font-weight: bold; color: #ff007f;">Synthwave
-                        Preset</span>
                     </div>
+                    <span class="theme-card-label">Synthwave</span>
                   </div>
-                </div>
 
+                </div>
               </div>
             </div>
 
@@ -1195,10 +1168,10 @@
 
           <!-- ENGINE CONFIG TAB PANEL -->
           <div id="settings-engine-panel" class="settings-panel-view" style="display: none;">
-            <h3 style="font-size: 1.05rem; font-weight: 600; margin: 0 0 4px 0; color: var(--text-primary);">Engine
-              Configuration</h3>
-            <p class="panel-subtext" style="font-size: 0.75rem; color: var(--text-secondary); margin: 0 0 20px 0;">
-              Configure backend FFmpeg binaries and execute connection checks.</p>
+            <div class="panel-header-block">
+              <h3>Engine Configuration</h3>
+              <p class="panel-subtext">Configure backend FFmpeg binaries and execute connection checks.</p>
+            </div>
 
             <div class="settings-form-group" style="display: flex; flex-direction: column; gap: 15px;">
 

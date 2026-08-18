@@ -1704,8 +1704,9 @@ document.getElementById('clear-batch-list-btn').addEventListener('click', () => 
 
 // --- HELPER: Execute FFmpeg Task ---
 async function executeFFmpegTask(taskName, args, customDuration = null) {
-  if (!globalInputPath || !globalOutputPath) {
-    alert("Please select input video and output folder.");
+  const isMerge = (taskName === "Video Merging");
+  if ((!isMerge && !globalInputPath) || !globalOutputPath) {
+    alert(isMerge ? "Please select output folder." : "Please select input video and output folder.");
     return;
   }
 
@@ -1917,23 +1918,72 @@ document.getElementById('run-merge-btn').addEventListener('click', async () => {
   if (batchList.length < 2) { alert("Please add at least 2 videos in the Batch Processor tab."); return; }
   if (!globalOutputPath) { alert("Please select an output folder."); return; }
 
-  const outName = document.getElementById('merge-filename').value || "merged_video.mp4";
+  let outName = document.getElementById('merge-filename').value || "merged_video.mp4";
+  if (!outName.includes('.')) {
+    outName += ".mp4";
+  }
   const output = `${globalOutputPath}/${outName}`;
 
-  let inputArgs = [];
-  let filterStr = "";
+  updateStatus("Analyzing batch videos stream properties... 📊");
+  
+  const runMergeBtn = document.getElementById('run-merge-btn');
+  if (runMergeBtn) runMergeBtn.disabled = true;
 
-  batchList.forEach((li, index) => {
-    inputArgs.push("-i", li.dataset.path);
-    filterStr += `[${index}:v][${index}:a]`;
-  });
+  try {
+    const metadataList = [];
+    const customFfmpeg = localStorage.getItem('ffmpeg-custom-path') || null;
 
-  filterStr += `concat=n=${batchList.length}:v=1:a=1[v][a]`;
+    for (const li of batchList) {
+      const path = li.dataset.path;
+      try {
+        const meta = await invoke('get_video_metadata', { filePath: path, customFfmpegPath: customFfmpeg });
+        metadataList.push(meta);
+      } catch (err) {
+        console.error(`Failed to read metadata for ${path}:`, err);
+        metadataList.push({
+          width: 1920,
+          height: 1080,
+          hasAudio: true,
+          duration: 10.0
+        });
+      }
+    }
 
-  const args = [...inputArgs, "-filter_complex", filterStr, "-map", "[v]", "-map", "[a]", "-y", output];
+    let inputArgs = [];
+    let filterStr = "";
+    let concatInputs = "";
 
-  // Note: Duration estimation for merge is tricky, we'll just set it to 0 to show indefinite progress
-  executeFFmpegTask("Video Merging", args);
+    const targetW = metadataList[0].width || 1920;
+    const targetH = metadataList[0].height || 1080;
+
+    batchList.forEach((li, i) => {
+      inputArgs.push("-i", li.dataset.path);
+      
+      const meta = metadataList[i];
+      
+      filterStr += `[${i}:v]scale=${targetW}:${targetH}:force_original_aspect_ratio=decrease,pad=${targetW}:${targetH}:(ow-iw)/2:(oh-ih)/2,setsar=1[v_${i}];`;
+
+      if (meta.hasAudio) {
+        filterStr += `[${i}:a]aformat=sample_rates=44100:channel_layouts=stereo[a_${i}];`;
+      } else {
+        const dur = meta.duration || 10.0;
+        filterStr += `anullsrc=channel_layout=stereo:sample_rate=44100,atrim=end=${dur},asetpts=PTS-STARTPTS[a_${i}];`;
+      }
+
+      concatInputs += `[v_${i}][a_${i}]`;
+    });
+
+    filterStr += `${concatInputs}concat=n=${batchList.length}:v=1:a=1[v][a]`;
+
+    const args = [...inputArgs, "-filter_complex", filterStr, "-map", "[v]", "-map", "[a]", "-y", output];
+
+    executeFFmpegTask("Video Merging", args);
+  } catch (err) {
+    console.error("Failed to build video merge task:", err);
+    updateStatus("Failed to initiate video merging.");
+  } finally {
+    if (runMergeBtn) runMergeBtn.disabled = false;
+  }
 });
 
 // --- Video Stabilizer Tool ---
@@ -2514,6 +2564,18 @@ function setTheme(themeName) {
   );
   body.classList.add(targetTheme);
 
+  const previewContainer = document.querySelector('.preview-container');
+  const crtOverlay = document.getElementById('crt-monitor-overlay');
+  if (previewContainer && crtOverlay) {
+    if (['theme-win98', 'theme-winxp'].includes(targetTheme)) {
+      previewContainer.classList.add('crt-mode');
+      crtOverlay.style.display = 'block';
+    } else {
+      previewContainer.classList.remove('crt-mode');
+      crtOverlay.style.display = 'none';
+    }
+  }
+
   // Update active state in UI for circles
   themeCircles.forEach(c => {
     if (c.dataset.theme === targetTheme) c.classList.add('active');
@@ -2954,6 +3016,7 @@ function initSettingsModal() {
     triggerBtn.addEventListener('click', () => {
       if (modal) {
         modal.style.display = 'flex';
+        if (window.lucide) window.lucide.createIcons();
         // Force refresh tab contents visual cards active highlight
         const currentTheme = localStorage.getItem('app-theme') || 'theme-blue';
         setTheme(currentTheme);
@@ -3848,6 +3911,9 @@ function drawSynthwaveSunset(ctx, width, height, dataArray, bufferLength) {
   const cx = width / 2;
   const horizon = height * 0.62;
 
+  // To prevent horizontal stretching on wide screens, limit the scene's logical width
+  const sceneWidth = Math.min(width, height * 2.5);
+
   // 1. Extract frequency bands
   // Bass (first 8% of bins)
   let bass = 0;
@@ -3945,9 +4011,9 @@ function drawSynthwaveSunset(ctx, width, height, dataArray, bufferLength) {
   ctx.moveTo(0, horizon);
   const leftPeak1Y = horizon - (35 + mids * 65);
   const leftPeak2Y = horizon - (20 + treble * 40);
-  ctx.lineTo(width * 0.15, leftPeak1Y);
-  ctx.lineTo(width * 0.28, leftPeak2Y);
-  ctx.lineTo(width * 0.42, horizon);
+  ctx.lineTo(cx - sceneWidth * 0.35, leftPeak1Y);
+  ctx.lineTo(cx - sceneWidth * 0.22, leftPeak2Y);
+  ctx.lineTo(cx - sceneWidth * 0.08, horizon);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
@@ -3957,9 +4023,9 @@ function drawSynthwaveSunset(ctx, width, height, dataArray, bufferLength) {
   ctx.moveTo(width, horizon);
   const rightPeak1Y = horizon - (40 + mids * 55);
   const rightPeak2Y = horizon - (15 + bass * 35);
-  ctx.lineTo(width * 0.82, rightPeak1Y);
-  ctx.lineTo(width * 0.68, rightPeak2Y);
-  ctx.lineTo(width * 0.53, horizon);
+  ctx.lineTo(cx + sceneWidth * 0.32, rightPeak1Y);
+  ctx.lineTo(cx + sceneWidth * 0.18, rightPeak2Y);
+  ctx.lineTo(cx + sceneWidth * 0.03, horizon);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
@@ -3980,7 +4046,7 @@ function drawSynthwaveSunset(ctx, width, height, dataArray, bufferLength) {
   const numGridLines = 18;
   for (let i = 0; i <= numGridLines; i++) {
     const ratio = i / numGridLines;
-    const bottomX = width * (-0.25 + ratio * 1.5);
+    const bottomX = cx + sceneWidth * (-0.75 + ratio * 1.5);
     ctx.beginPath();
     ctx.moveTo(cx, horizon);
     ctx.lineTo(bottomX, height);
