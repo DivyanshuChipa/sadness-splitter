@@ -1993,10 +1993,13 @@ document.getElementById('run-stabilize-btn').addEventListener('click', async () 
   const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
   const output = `${globalOutputPath}/stabilized_${filename}.mp4`;
   const trfPath = `${globalOutputPath}/transforms.trf`;
+  
+  // Escape backslashes and colons in the path for the FFmpeg filter syntax
+  const escapedTrfPath = trfPath.replace(/\\/g, '/').replace(/:/g, '\\:');
 
   // Pass 1: Detect shakiness
   updateStatus("Pass 1: Detecting shakiness... 📊");
-  const args1 = ["-i", globalInputPath, "-vf", `vidstabdetect=shake=${shake}:result='${trfPath}'`, "-f", "null", "-"];
+  const args1 = ["-i", globalInputPath, "-vf", `vidstabdetect=shakiness=${shake}:result='${escapedTrfPath}'`, "-f", "null", "-"];
 
   try {
     // Run Pass 1
@@ -2007,7 +2010,7 @@ document.getElementById('run-stabilize-btn').addEventListener('click', async () 
 
     // Pass 2: Apply stabilization
     updateStatus("Pass 2: Smoothing memories... ✨");
-    const args2 = ["-i", globalInputPath, "-vf", `vidstabtransform=smoothing=${smooth}:input='${trfPath}'`, "-y", output];
+    const args2 = ["-i", globalInputPath, "-vf", `vidstabtransform=smoothing=${smooth}:input='${escapedTrfPath}'`, "-y", output];
     executeFFmpegTask("Stabilization", args2);
   } catch (err) {
     updateStatus(`Error in Pass 1: ${err}`);
