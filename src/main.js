@@ -1,6 +1,22 @@
-const { invoke } = window.__TAURI__.core;
-const { listen } = window.__TAURI__.event;
-const tauriDialog = window.__TAURI__?.dialog || window.__TAURI__?.pluginDialog || window.__TAURI__?.plugin?.dialog;
+const isTauriEnv = typeof window !== 'undefined' && window.__TAURI__ !== undefined;
+const invoke = isTauriEnv 
+  ? window.__TAURI__.core.invoke 
+  : async (cmd, args) => {
+      console.log("[Mock Invoke]", cmd, args);
+      if (cmd === 'get_ffmpeg_status' || cmd === 'check_ffmpeg') return { available: true, version: "6.0" };
+      if (cmd === 'get_ytdlp_status') return { available: true, version: "2024.08.06" };
+      if (cmd === 'get_system_metrics') return { cpuUsage: 12, ramUsage: 45 };
+      return {};
+    };
+const listen = isTauriEnv 
+  ? window.__TAURI__.event.listen 
+  : async (event, cb) => {
+      console.log("[Mock Listen]", event);
+      return () => {};
+    };
+const tauriDialog = isTauriEnv 
+  ? (window.__TAURI__?.dialog || window.__TAURI__?.pluginDialog || window.__TAURI__?.plugin?.dialog)
+  : null;
 
 // --- UI Elements ---
 const navBtns = document.querySelectorAll('.nav-btn');
@@ -14,7 +30,57 @@ let isDemoMode = false; // Controlled by tour/emotional mode choices
 let globalInputPath = "";
 let globalOutputPath = "";
 let lastProcessedOutputPath = "";
+
+// --- Focused Large Preview Mode Logic ---
+let focusedPreviewTimer = null;
+
+function startFocusedPreviewTimer(targetId) {
+  if (focusedPreviewTimer) {
+    clearTimeout(focusedPreviewTimer);
+    focusedPreviewTimer = null;
+  }
+  
+  resetFocusedPreviewMode();
+
+  if (targetId === 'trim' || targetId === 'split' || targetId === 'rotate' || targetId === 'video-thumbnail') {
+    focusedPreviewTimer = setTimeout(() => {
+      triggerFocusedPreviewMode();
+    }, 180000); // 3 minutes
+  }
+}
+
+function triggerFocusedPreviewMode() {
+  const previewCard = document.getElementById('live-preview-card');
+  const scrollableContent = document.querySelector('.scrollable-content');
+  const toolViewsContainer = document.querySelector('.tool-views');
+  
+  if (!previewCard || !scrollableContent || !toolViewsContainer) return;
+
+  document.body.classList.add('focused-preview-active');
+  scrollableContent.insertBefore(previewCard, toolViewsContainer);
+
+  const currentLang = localStorage.getItem('settings-aura-language') || 'hinglish';
+  const dialect = auraDialogues[currentLang] || auraDialogues['hinglish'];
+  const speech = dialect['eyesight_care'] || auraDialogues['hinglish']['eyesight_care'];
+  if (speech) {
+    setPersonaEmotion(speech.face, speech.msg);
+    playAuraVoice('eyesight_care');
+  }
+}
+
+function resetFocusedPreviewMode() {
+  const previewCard = document.getElementById('live-preview-card');
+  const rightPanel = document.querySelector('.right-panel');
+  
+  if (document.body.classList.contains('focused-preview-active')) {
+    document.body.classList.remove('focused-preview-active');
+    if (rightPanel && previewCard) {
+      rightPanel.insertBefore(previewCard, rightPanel.firstChild);
+    }
+  }
+}
 let selectedCoverImagePath = "";
+let selectedVideoThumbnailPath = "";
 let videoDuration = 0;
 let previewPromptCount = 0;
 let isWaitingForPreviewConsent = false;
@@ -285,6 +351,7 @@ if (reactiveFace) {
   if (ytdlpToggle) {
     ytdlpToggle.addEventListener('change', () => {
       if (ytdlpToggle.checked) {
+        startFocusedPreviewTimer('youtube-downloader');
         // Deactivate active nav buttons and hide active tool views
         navBtns.forEach(b => b.classList.remove('active'));
         toolViews.forEach(v => {
@@ -336,6 +403,8 @@ window.addEventListener('DOMContentLoaded', () => {
 // --- Navigation ---
 navBtns.forEach(btn => {
   btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    startFocusedPreviewTimer(targetId);
     // Remove active class from all buttons and tool views
     navBtns.forEach(b => b.classList.remove('active'));
     toolViews.forEach(v => {
@@ -344,7 +413,6 @@ navBtns.forEach(btn => {
     });
 
     // Add active class to clicked button and target view
-    const targetId = btn.dataset.target;
     btn.classList.add('active');
     const targetView = document.getElementById(targetId);
     if (targetView) {
@@ -2083,6 +2151,7 @@ const auraDialogues = {
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch processing completed! Aura worked overtime, but we crushed it! 🏆" },
     "success_metadata-editor": { face: 'face_smug.png', msg: "Gane ke metadata aur cover art update ho gaye! Ab tagda dikhega! 🏷️🖼️" },
+    "success_video-thumbnail": { face: 'face_confident.png', msg: "Dhamaka! Custom cover video container me successfully insert ho gaya! 😎🎬" },
     "success_youtube-downloader": { face: 'face_exicited.png', msg: "YouTube download complete! Ab direct preview play karo ya next tools me chain karo! 📥🚀" },
 
     // Mascot Poke & Metric Interactions
@@ -2115,9 +2184,11 @@ const auraDialogues = {
     interact_tab_contact: { face: 'face_curious.png', msg: "Contact sheet select kiya? Screen grid ek dum mast lagega! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Itne saare files? Aura worked overtime, but hum crush kar denge! 🏆" },
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Gane ka details aur cover change karna hai? Badhiya cover photo select kijiye! 🎵✨" },
+    "interact_tab_video-thumbnail": { face: 'face_curious.png', msg: "Chalo video ka cover picture badlein! Ek mast sa thumbnail choose karo! 🖼️✨" },
     "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "YouTube video download karni hai? Link yahan chipkao aur launch karo! 🌐✨" },
     "interact_ytdlp_hover_logs_on": { face: 'face_smug.png', msg: "Kyu bhai, video download karne ka irada hai? Waise logs on karke meri man ki baat padh rahe ho, privacy toh hai hi nahi! 🤫" },
-    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Video download karni hai? Mera dimaag padhna hai toh console log chalayein, waise sadness ke alawa kuch nahi milega! 🥱" }
+    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Video download karni hai? Mera dimaag padhna hai toh console log chalayein, waise sadness ke alawa kuch nahi milega! 🥱" },
+    "eyesight_care": { face: 'face_exicited.png', msg: "Arey bhai! Kab se aakhon ko chota karke edit kar rahe ho? Ruko, main preview bada kar deti hu, eyesight mast rahegi! 😉" }
   },
   english: {
     // Startup & System
@@ -2156,6 +2227,7 @@ const auraDialogues = {
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created! Your professional visual summary is ready! 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch processing completed! We worked overtime, but we crushed it! 🏆" },
     "success_metadata-editor": { face: 'face_smug.png', msg: "Audio metadata and cover art successfully updated! 🏷️🖼️" },
+    "success_video-thumbnail": { face: 'face_confident.png', msg: "Success! The custom cover art has been embedded into the video container! 🎬✨" },
     "success_youtube-downloader": { face: 'face_exicited.png', msg: "YouTube download finished! You can now preview it or feed it into other tools. 📥🚀" },
 
     // Mascot Poke & Metric Interactions
@@ -2188,9 +2260,11 @@ const auraDialogues = {
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Want to edit song details and cover art? Let's make it look professional! 🎵✨" },
+    "interact_tab_video-thumbnail": { face: 'face_confident.png', msg: "Let's update the video thumbnail! Pick a high-quality cover image! 🖼️✨" },
     "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "Want to download a YouTube video? Just paste the URL here and hit download! 🌐✨" },
     "interact_ytdlp_hover_logs_on": { face: 'face_smug.png', msg: "Planning to download a video? I see you're reading my logs... zero privacy nowadays! 🤫" },
-    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Downloading a video? Turn on console logs to see what I'm thinking, though it's mostly just re-encoding sadness. 🥱" }
+    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Downloading a video? Turn on console logs to see what I'm thinking, though it's mostly just re-encoding sadness. 🥱" },
+    "eyesight_care": { face: 'face_confident.png', msg: "Hey there! You've been squinting for a while. Let me expand the preview area for you to save your eyes! 👁️" }
   },
   sarcastic: {
     // Startup & System
@@ -2229,6 +2303,7 @@ const auraDialogues = {
     success_contact: { face: 'face_curious.png', msg: "Contact sheet created. A grid of screenshots to prove we actually did something. 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch complete. I worked overtime, you did nothing. Typical. 🏆" },
     "success_metadata-editor": { face: 'face_smug.png', msg: "Tags and cover updated. Now everyone can see how bad your taste in music is. 🏷️🖼️" },
+    "success_video-thumbnail": { face: 'face_smug.png', msg: "Thumbnail embedded. Hopefully, the video content is as interesting as the cover art. 🎬💅" },
     "success_youtube-downloader": { face: 'face_smug.png', msg: "Oh, look, we successfully downloaded a YouTube video. Let's add it to your stash of things you'll never watch. 📥💅" },
 
     // Mascot Poke & Metric Interactions
@@ -2261,9 +2336,11 @@ const auraDialogues = {
     interact_tab_contact: { face: 'face_curious.png', msg: "Contact sheet. A grid of screenshots to prove you actually did something. 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Batch processor. Aura works overtime while you sit back. Typical. 🏆" },
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Editing metadata. Because renaming 'final_final_v2.mp3' to something decent is hard. 🏷️✨" },
+    "interact_tab_video-thumbnail": { face: 'face_smug.png', msg: "Adding a video cover? Trying to trick people into clicking it? Go ahead. 🙄🖼️" },
     "interact_tab_youtube-downloader": { face: 'face_thinking.png', msg: "Ah, the YouTube downloader. Let's grab some online video to bloat your local storage. 🌐🙄" },
     "interact_ytdlp_hover_logs_on": { face: 'face_smug.png', msg: "Oh, a download? And you're tracking my console logs too? Creepy. Zero privacy here. 🙄" },
-    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Wanna grab a video? If you want to read my thoughts, toggle the logs on. Warning: it's depressing. 🥱" }
+    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Wanna grab a video? If you want to read my thoughts, toggle the logs on. Warning: it's depressing. 🥱" },
+    "eyesight_care": { face: 'face_smug.png', msg: "Look at you, getting romantic with the pixels. Here, let me make that preview huge so you don't kiss the monitor. 🙄" }
   },
   hacker: {
     // Startup & System
@@ -2302,6 +2379,7 @@ const auraDialogues = {
     success_contact: { face: 'face_curious.png', msg: "Tile contact sheet compiled. Index grid built successfully. 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch queue flushed. All thread pipelines completed. 🏆" },
     "success_metadata-editor": { face: 'face_smug.png', msg: "ID3 header modification complete. Art payload embedded successfully. 🏷️🖼️" },
+    "success_video-thumbnail": { face: 'face_thinking.png', msg: "Image payload successfully multiplexed into output video container. Code: 0x0. 📟" },
     "success_youtube-downloader": { face: 'face_confident.png', msg: "Stream ingestion and media pull from YouTube completed. Target file cached. 📥💻" },
 
     // Mascot Poke & Metric Interactions
@@ -2334,9 +2412,11 @@ const auraDialogues = {
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Mapping metadata editor. Injecting ID3v2 tags and binary cover payloads. 🏷️✨" },
+    "interact_tab_video-thumbnail": { face: 'face_thinking.png', msg: "Attached-picture stream injector active. Provide binary image payload. 📡" },
     "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "YouTube stream interceptor ready. Provide URL endpoint to dump media payload. 🌐⚡" },
     "interact_ytdlp_hover_logs_on": { face: 'face_smug.png', msg: "Init youtube-dl request. System log pipeline is active, interception verified. Zero telemetry privacy. 📡" },
-    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Init media pull sequence. Toggle std_out logs to decrypt my thread state. 💻" }
+    "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Init media pull sequence. Toggle std_out logs to decrypt my thread state. 💻" },
+    "eyesight_care": { face: 'face_thinking.png', msg: "Visual grid calibration taking time. Enhancing rendering node scale. Sight-protection protocol active. 📟" }
   },
   lazy: {
     // Startup & System
@@ -2375,6 +2455,7 @@ const auraDialogues = {
     success_contact: { face: 'face_curious.png', msg: "Contact sheet done. A bunch of images. There, you go look at them. 🖼️" },
     success_batch: { face: 'face_confident.png', msg: "Batch queue finished. Aura worked overtime. I need a 3-day weekend. 🏆" },
     "success_metadata-editor": { face: 'face_smug.png', msg: "Metadata updated or whatever. Please don't ask me to rename another file. 🏷️🖼️" },
+    "success_video-thumbnail": { face: 'face_sleepy.png', msg: "Thumbnail saved... can I close my eyes now? 🥱" },
     "success_youtube-downloader": { face: 'face_sleepy.png', msg: "Downloaded that YouTube link. Don't ask me to watch it for you, I'm taking a nap. 📥🥱" },
 
     // Mascot Poke & Metric Interactions
@@ -2407,9 +2488,11 @@ const auraDialogues = {
     interact_tab_contact: { face: 'face_curious.png', msg: "Creating a professional contact grid sheet! 🖼️" },
     interact_tab_batch: { face: 'face_surprised.png', msg: "Queueing batch operations. Let's get to work! 🏆" },
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Tags and cover editor. Just type the details, it's not that hard... 🏷️✨" },
+    "interact_tab_video-thumbnail": { face: 'face_sleepy.png', msg: "Video thumbnail... whatever. Just choose an image and let's get it over with. 🥱" },
     "interact_tab_youtube-downloader": { face: 'face_sleepy.png', msg: "Download YouTube videos... okay, paste the URL if you must. Too much network activity. 🌐😴" },
     "interact_ytdlp_hover_logs_on": { face: 'face_sleepy.png', msg: "Downloading... logs are on so you can see how tired I am. Privacy? Whatever. 🥱" },
-    "interact_ytdlp_hover_logs_off": { face: 'face_sleepy.png', msg: "Download a video... logs are off. Don't turn them on, too much text to read. 🥱" }
+    "interact_ytdlp_hover_logs_off": { face: 'face_sleepy.png', msg: "Download a video... logs are off. Don't turn them on, too much text to read. 🥱" },
+    "eyesight_care": { face: 'face_sleepy.png', msg: "Aaargh, watching you squint is making me tired... here, bigger screen, now let me sleep... 🥱" }
   }
 };
 
@@ -4360,6 +4443,62 @@ window.addEventListener('DOMContentLoaded', () => {
 
       args.push("-y", output);
       executeFFmpegTask("Metadata Update", args);
+    });
+  }
+
+  // 7b. Video Thumbnail Actions
+  const browseVideoThumbnailBtn = document.getElementById('browse-video-thumbnail-btn');
+  if (browseVideoThumbnailBtn) {
+    browseVideoThumbnailBtn.addEventListener('click', async () => {
+      try {
+        const file = await tauriDialog.open({
+          filters: [{ name: 'Image Files', extensions: ['png', 'jpg', 'jpeg'] }]
+        });
+        if (file) {
+          selectedVideoThumbnailPath = file;
+          const display = document.getElementById('video-thumbnail-path-display');
+          if (display) {
+            display.textContent = file.split(/[\/\\]/).pop();
+            display.title = file;
+          }
+          logToTechyConsole(`Selected video cover image: ${file}`, "info");
+        }
+      } catch (e) {
+        console.error("Video cover image selection failed:", e);
+        logToTechyConsole("Failed to open video cover image dialog.", "error");
+      }
+    });
+  }
+
+  const runVideoThumbnailBtn = document.getElementById('run-video-thumbnail-btn');
+  if (runVideoThumbnailBtn) {
+    runVideoThumbnailBtn.addEventListener('click', () => {
+      if (!globalInputPath || !globalOutputPath) {
+        alert("Please select input video and output folder.");
+        return;
+      }
+      if (!selectedVideoThumbnailPath) {
+        alert("Please select a cover image first.");
+        return;
+      }
+
+      const inputFilename = globalInputPath.split(/[\/\\]/).pop();
+      const dotIndex = inputFilename.lastIndexOf('.');
+      const nameWithoutExt = dotIndex !== -1 ? inputFilename.substring(0, dotIndex) : inputFilename;
+      const ext = dotIndex !== -1 ? inputFilename.substring(dotIndex + 1).toLowerCase() : 'mp4';
+      const output = `${globalOutputPath}/${nameWithoutExt}_thumbnail.${ext}`;
+
+      const args = [
+        "-i", globalInputPath,
+        "-i", selectedVideoThumbnailPath,
+        "-map", "0",
+        "-map", "1",
+        "-c", "copy",
+        "-disposition:v:1", "attached_pic",
+        "-y", output
+      ];
+
+      executeFFmpegTask("Video Thumbnail", args);
     });
   }
 

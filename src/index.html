@@ -86,6 +86,7 @@
         <button class="nav-btn" data-target="stabilize"><i data-lucide="wind"></i> Video Stabilizer</button>
         <button class="nav-btn" data-target="contact"><i data-lucide="grid"></i> Contact Sheet</button>
         <button class="nav-btn" data-target="batch"><i data-lucide="package"></i> Batch Processor</button>
+        <button class="nav-btn" data-target="video-thumbnail"><i data-lucide="image"></i> Video Thumbnail</button>
       </nav>
 
       <nav class="nav-list" id="audio-nav-list" style="display: none;">
@@ -597,6 +598,27 @@
             </div>
 
             <button id="run-metadata-btn" class="btn action">Save Tags & Cover</button>
+          </section>
+
+          <!-- VIDEO THUMBNAIL EDITOR -->
+          <section id="video-thumbnail" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Video Thumbnail</h3>
+              <p>Embed a custom cover image or thumbnail directly into your video container.</p>
+            </div>
+
+            <div class="control-group">
+              <label>Select Cover Image (.jpg / .png)</label>
+              <div class="file-input-wrapper" style="display: flex; gap: 10px; align-items: center;">
+                <button id="browse-video-thumbnail-btn" class="btn-small secondary" style="margin-top: 0; width: auto;">
+                  <i data-lucide="image"></i> Select Image
+                </button>
+                <span id="video-thumbnail-path-display" class="path-display"
+                  style="font-size: 0.85em; opacity: 0.8; word-break: break-all;">No image selected</span>
+              </div>
+            </div>
+
+            <button id="run-video-thumbnail-btn" class="btn action">Save Video Thumbnail</button>
           </section>
 
           <!-- YOUTUBE DOWNLOADER -->
