@@ -477,7 +477,7 @@ window.addEventListener('DOMContentLoaded', () => {
     'emotional-icon': 'Hearts.png',
     'video-preview-icon': 'Generic Media.png',
     'console-logs-icon': 'Command Prompt.png',
-    'yt-downloader-icon': 'Whistler - Windows Media Player 7.png'
+    'yt-downloader-icon': 'youtube_logo.png'
   };
 
   const retroKeyElements = document.querySelectorAll('[data-retro-key]');
@@ -492,6 +492,7 @@ window.addEventListener('DOMContentLoaded', () => {
       img.style.marginRight = '8px';
       img.style.display = 'none';
       img.alt = key;
+      el.parentNode.insertBefore(img, el);
     }
   });
 });
