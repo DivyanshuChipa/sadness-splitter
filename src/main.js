@@ -81,6 +81,7 @@ function resetFocusedPreviewMode() {
 }
 let selectedCoverImagePath = "";
 let selectedVideoThumbnailPath = "";
+let selectedWaveformBgPath = "";
 let videoDuration = 0;
 let previewPromptCount = 0;
 let isWaitingForPreviewConsent = false;
@@ -427,7 +428,8 @@ window.addEventListener('DOMContentLoaded', () => {
     'mode-audio-btn': 'Generic Audio.png',
     'settings-trigger-btn': 'Tweak UI.png',
     'browse-input-btn': 'Generic Media.png',
-    'browse-output-btn': 'Folder Opened.png'
+    'browse-output-btn': 'Folder Opened.png',
+    waveform: 'Audio CD.png'
   };
 
   navBtns.forEach(btn => {
@@ -477,7 +479,8 @@ window.addEventListener('DOMContentLoaded', () => {
     'emotional-icon': 'Hearts.png',
     'video-preview-icon': 'Generic Media.png',
     'console-logs-icon': 'Command Prompt.png',
-    'yt-downloader-icon': 'youtube_logo.png'
+    'yt-downloader-icon': 'youtube_logo.png',
+    'image-select-icon': 'My Pictures.png'
   };
 
   const retroKeyElements = document.querySelectorAll('[data-retro-key]');
@@ -2823,6 +2826,7 @@ function initPreviewPlayer(filePath) {
   const previewControls = document.getElementById('preview-controls');
   const previewPlayBtn = document.getElementById('preview-play-btn');
   const previewTrimPlayBtn = document.getElementById('preview-trim-play-btn');
+  const previewCanvas = document.getElementById('preview-audio-canvas');
 
   if (!previewVideo) return;
 
@@ -2830,6 +2834,11 @@ function initPreviewPlayer(filePath) {
   const previewOutBtn = document.getElementById('preview-output-btn');
   if (previewOutBtn) {
     previewOutBtn.style.display = 'none';
+  }
+
+  // Hide the audio visualizer canvas when loading video
+  if (previewCanvas) {
+    previewCanvas.style.display = 'none';
   }
 
   // Stop any active playback loops
@@ -4615,6 +4624,113 @@ window.addEventListener('DOMContentLoaded', () => {
         console.error("Video cover image selection failed:", e);
         logToTechyConsole("Failed to open video cover image dialog.", "error");
       }
+    });
+  }
+
+  // 7c. Audio Waveform Generator Actions
+  const waveformBgBtn = document.getElementById('waveform-bg-btn');
+  if (waveformBgBtn) {
+    waveformBgBtn.addEventListener('click', async () => {
+      try {
+        const file = await tauriDialog.open({
+          filters: [{ name: 'Image Files', extensions: ['png', 'jpg', 'jpeg'] }]
+        });
+        if (file) {
+          selectedWaveformBgPath = file;
+          const display = document.getElementById('waveform-bg-path-display');
+          if (display) {
+            display.textContent = file.split(/[\/\\]/).pop();
+            display.title = file;
+          }
+          logToTechyConsole(`Selected waveform background: ${file}`, "info");
+        }
+      } catch (e) {
+        console.error("Waveform background selection failed:", e);
+        logToTechyConsole("Failed to open background image dialog.", "error");
+      }
+    });
+  }
+
+  const wfHeightSlider = document.getElementById('waveform-height');
+  const wfHeightVal = document.getElementById('waveform-height-val');
+  if (wfHeightSlider && wfHeightVal) {
+    wfHeightSlider.addEventListener('input', () => {
+      wfHeightVal.textContent = `${wfHeightSlider.value}px`;
+    });
+  }
+
+  const wfYPosSlider = document.getElementById('waveform-y-pos');
+  const wfYPosVal = document.getElementById('waveform-y-pos-val');
+  if (wfYPosSlider && wfYPosVal) {
+    wfYPosSlider.addEventListener('input', () => {
+      const val = wfYPosSlider.value;
+      let label = `${val}%`;
+      if (val === '0') label += ' (Top)';
+      else if (val === '50') label += ' (Center)';
+      else if (val === '100') label += ' (Bottom)';
+      wfYPosVal.textContent = label;
+    });
+  }
+
+  const runWaveformBtn = document.getElementById('run-waveform-btn');
+  if (runWaveformBtn) {
+    runWaveformBtn.addEventListener('click', () => {
+      if (!globalInputPath || !globalOutputPath) {
+        alert("Please select input audio first.");
+        return;
+      }
+
+      const style = document.getElementById('waveform-style').value;
+      const res = document.getElementById('waveform-res').value;
+      const color = document.getElementById('waveform-color').value;
+      const waveHeight = document.getElementById('waveform-height').value;
+      const yPos = document.getElementById('waveform-y-pos').value;
+
+      // Parse resolution width and height
+      const resParts = res.split('x');
+      const resW = resParts[0];
+      const resH = resParts[1];
+
+      // Convert color from #hex to 0xhex format for FFmpeg compatibility
+      const cleanColor = color.replace('#', '0x');
+
+      const inputFilename = globalInputPath.split(/[\/\\]/).pop();
+      const dotIndex = inputFilename.lastIndexOf('.');
+      const nameWithoutExt = dotIndex !== -1 ? inputFilename.substring(0, dotIndex) : inputFilename;
+      const output = `${globalOutputPath}/${nameWithoutExt}_waveform.mp4`;
+
+      let args = [];
+
+      if (selectedWaveformBgPath) {
+        // Case B: Background Image Loop & Overlay
+        args = [
+          "-i", globalInputPath,
+          "-loop", "1",
+          "-i", selectedWaveformBgPath,
+          "-filter_complex", `[0:a]showwaves=s=${resW}x${waveHeight}:mode=${style}:colors=${cleanColor}@0.8[wave];[1:v]scale=${resW}:${resH}[bg];[bg][wave]overlay=x=(W-w)/2:y=(H-h)*(${yPos}/100):shortest=1[v]`,
+          "-map", "[v]",
+          "-map", "0:a",
+          "-c:v", "libx264",
+          "-pix_fmt", "yuv420p",
+          "-shortest",
+          "-y", output
+        ];
+      } else {
+        // Case A: Solid Black Background
+        // Generate a solid black color background dynamically and overlay the wave on it
+        args = [
+          "-i", globalInputPath,
+          "-filter_complex", `color=c=black:s=${resW}x${resH}[bg];[0:a]showwaves=s=${resW}x${waveHeight}:mode=${style}:colors=${cleanColor}[wave];[bg][wave]overlay=x=(W-w)/2:y=(H-h)*(${yPos}/100):shortest=1[v]`,
+          "-map", "[v]",
+          "-map", "0:a",
+          "-c:v", "libx264",
+          "-pix_fmt", "yuv420p",
+          "-shortest",
+          "-y", output
+        ];
+      }
+
+      executeFFmpegTask("Waveform Generation", args);
     });
   }
 

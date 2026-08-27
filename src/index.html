@@ -97,6 +97,7 @@
         <button class="nav-btn" data-target="audio-extractor"><i data-lucide="headphones"></i> Audio Extractor</button>
         <button class="nav-btn" data-target="audio-convert"><i data-lucide="refresh-cw"></i> Format Converter</button>
         <button class="nav-btn" data-target="metadata-editor"><i data-lucide="edit-3"></i> Tags & Cover Editor</button>
+        <button class="nav-btn" data-target="waveform"><i data-lucide="music"></i> Waveform Gen</button>
       </nav>
 
       <!-- Sidebar Status Footer (Moved from middle panel) -->
@@ -632,13 +633,77 @@
               <label>Album Art / Cover Image</label>
               <div class="file-input-wrapper" style="display: flex; gap: 10px; align-items: center;">
                 <button id="browse-cover-btn" class="btn-small secondary" style="margin-top: 0; width: auto;"><i
-                    data-lucide="image"></i> Select Image</button>
+                    data-lucide="image" data-retro-key="image-select-icon"></i> Select Image</button>
                 <span id="cover-path-display" class="path-display"
                   style="font-size: 0.85em; opacity: 0.8; word-break: break-all;">No image selected</span>
               </div>
             </div>
 
             <button id="run-metadata-btn" class="btn action">Save Tags & Cover</button>
+          </section>
+
+          <!-- AUDIO WAVEFORM GENERATOR -->
+          <section id="waveform" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Audio Waveform Generator</h3>
+              <p>Create a beautiful reactive video waveform (.mp4) from any audio track.</p>
+            </div>
+
+            <div class="control-group">
+              <label>Background Cover Image (Optional)</label>
+              <div class="file-input-wrapper" style="display: flex; gap: 10px; align-items: center;">
+                <button id="waveform-bg-btn" class="btn-small secondary" style="margin-top: 0; width: auto;"><i
+                    data-lucide="image" data-retro-key="image-select-icon"></i> Select Background</button>
+                <span id="waveform-bg-path-display" class="path-display"
+                  style="font-size: 0.85em; opacity: 0.8; word-break: break-all;">No image selected (Default: Solid Black)</span>
+              </div>
+            </div>
+
+            <div class="checkbox-group-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+              <div class="control-group">
+                <label>Waveform Style</label>
+                <select id="waveform-style">
+                  <option value="cline">Centered Sound Bar (Solid)</option>
+                  <option value="line" selected>Classic Wave Lines</option>
+                  <option value="point">Retro Bouncing Dots</option>
+                  <option value="p2p">Point to Point</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label>Video Resolution</label>
+                <select id="waveform-res">
+                  <option value="1280x720" selected>1280x720 (16:9 Landscape)</option>
+                  <option value="1920x1080">1920x1080 (16:9 Landscape)</option>
+                  <option value="720x1280">720x1280 (9:16 Portrait)</option>
+                  <option value="1080x1920">1080x1920 (9:16 Portrait)</option>
+                  <option value="720x720">720x720 (1:1 Square)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="control-group" style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="margin-bottom: 0;">Waveform Height</label>
+                <span id="waveform-height-val" class="subtext monospace" style="font-size: 0.8em; color: var(--accent);">200px</span>
+              </div>
+              <input type="range" id="waveform-height" min="50" max="600" value="200" style="width: 100%; cursor: pointer;">
+            </div>
+
+            <div class="control-group" style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="margin-bottom: 0;">Vertical Position (Top to Bottom)</label>
+                <span id="waveform-y-pos-val" class="subtext monospace" style="font-size: 0.8em; color: var(--accent);">50% (Center)</span>
+              </div>
+              <input type="range" id="waveform-y-pos" min="0" max="100" value="50" style="width: 100%; cursor: pointer;">
+            </div>
+
+            <div class="control-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+              <label style="margin-bottom: 0;">Waveform Color:</label>
+              <input type="color" id="waveform-color" value="#00f2fe" style="width: 50px; height: 35px; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; background: none; cursor: pointer; padding: 0;">
+            </div>
+
+            <button id="run-waveform-btn" class="btn action">Generate Waveform Video</button>
           </section>
 
           <!-- VIDEO THUMBNAIL EDITOR -->
@@ -652,7 +717,7 @@
               <label>Select Cover Image (.jpg / .png)</label>
               <div class="file-input-wrapper" style="display: flex; gap: 10px; align-items: center;">
                 <button id="browse-video-thumbnail-btn" class="btn-small secondary" style="margin-top: 0; width: auto;">
-                  <i data-lucide="image"></i> Select Image
+                  <i data-lucide="image" data-retro-key="image-select-icon"></i> Select Image
                 </button>
                 <span id="video-thumbnail-path-display" class="path-display"
                   style="font-size: 0.85em; opacity: 0.8; word-break: break-all;">No image selected</span>

@@ -237,9 +237,9 @@ body.theme-winxp .metrics-card,
 body.theme-winxp .settings-card,
 body.theme-winxp .engine-card,
 body.theme-winxp .about-card {
-  border: 3px solid #003df5 !important;
-  border-radius: 8px 8px 4px 4px !important;
-  background: #ece9d8 !important;
+  border: 16px solid #7297ed !important;
+  border-radius: 20px 2px 20px 2px !important;
+  background: #fafbffd9 !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   color: #000000 !important;
@@ -469,12 +469,12 @@ body.theme-win98 select option {
   font-family: 'Tahoma', 'MS Sans Serif', Geneva, sans-serif !important;
 }
 
-/* Windows XP: Classic Luna control dropdowns, white background, solid XP blue borders (#7f9db9) */
+/* Windows XP: Classic Luna control dropdowns, green gradient background, solid XP blue borders (#7f9db9) */
 body.theme-winxp select {
-  background: #ffffff !important;
-  color: #000000 !important;
+  background: linear-gradient(to bottom, #38c13b, #1b7b1e) !important;
+  color: #ffffff !important;
   border: 1px solid #7f9db9 !important;
-  border-radius: 2px !important;
+  border-radius: 5px !important;
   font-family: 'Tahoma', Geneva, sans-serif !important;
   box-shadow: none !important;
 }
@@ -3974,6 +3974,7 @@ input:checked+.ios-slider:before {
 .preview-container.crt-mode canvas {
   position: absolute !important;
   top: 12% !important;
+  left: 11% !important;
   width: 78% !important;
   height: 58% !important;
   object-fit: cover !important;
@@ -3986,6 +3987,7 @@ input:checked+.ios-slider:before {
 .preview-container.crt-mode .preview-warning {
   position: absolute !important;
   top: 12% !important;
+  left: 11% !important;
   width: 78% !important;
   height: 60% !important;
   border-radius: 4px !important;
@@ -3993,7 +3995,7 @@ input:checked+.ios-slider:before {
   box-sizing: border-box !important;
   padding: 10px !important;
   font-size: 0.75rem !important;
-  background: rgba(0, 0, 0, 0.8) !important;
+  background: rgb(255 255 255 / 80%) !important;
 }
 
 /* Fullscreen expanded mode disables the CRT frame overlay entirely */
