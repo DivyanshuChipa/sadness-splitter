@@ -1,20 +1,20 @@
 const isTauriEnv = typeof window !== 'undefined' && window.__TAURI__ !== undefined;
-const invoke = isTauriEnv 
-  ? window.__TAURI__.core.invoke 
+const invoke = isTauriEnv
+  ? window.__TAURI__.core.invoke
   : async (cmd, args) => {
-      console.log("[Mock Invoke]", cmd, args);
-      if (cmd === 'get_ffmpeg_status' || cmd === 'check_ffmpeg') return { available: true, version: "6.0" };
-      if (cmd === 'get_ytdlp_status') return { available: true, version: "2024.08.06" };
-      if (cmd === 'get_system_metrics') return { cpuUsage: 12, ramUsage: 45 };
-      return {};
-    };
-const listen = isTauriEnv 
-  ? window.__TAURI__.event.listen 
+    console.log("[Mock Invoke]", cmd, args);
+    if (cmd === 'get_ffmpeg_status' || cmd === 'check_ffmpeg') return { available: true, version: "6.0" };
+    if (cmd === 'get_ytdlp_status') return { available: true, version: "2024.08.06" };
+    if (cmd === 'get_system_metrics') return { cpuUsage: 12, ramUsage: 45 };
+    return {};
+  };
+const listen = isTauriEnv
+  ? window.__TAURI__.event.listen
   : async (event, cb) => {
-      console.log("[Mock Listen]", event);
-      return () => {};
-    };
-const tauriDialog = isTauriEnv 
+    console.log("[Mock Listen]", event);
+    return () => { };
+  };
+const tauriDialog = isTauriEnv
   ? (window.__TAURI__?.dialog || window.__TAURI__?.pluginDialog || window.__TAURI__?.plugin?.dialog)
   : null;
 
@@ -39,7 +39,7 @@ function startFocusedPreviewTimer(targetId) {
     clearTimeout(focusedPreviewTimer);
     focusedPreviewTimer = null;
   }
-  
+
   resetFocusedPreviewMode();
 
   if (targetId === 'trim' || targetId === 'split' || targetId === 'rotate' || targetId === 'video-thumbnail') {
@@ -53,7 +53,7 @@ function triggerFocusedPreviewMode() {
   const previewCard = document.getElementById('live-preview-card');
   const scrollableContent = document.querySelector('.scrollable-content');
   const toolViewsContainer = document.querySelector('.tool-views');
-  
+
   if (!previewCard || !scrollableContent || !toolViewsContainer) return;
 
   document.body.classList.add('focused-preview-active');
@@ -71,7 +71,7 @@ function triggerFocusedPreviewMode() {
 function resetFocusedPreviewMode() {
   const previewCard = document.getElementById('live-preview-card');
   const rightPanel = document.querySelector('.right-panel');
-  
+
   if (document.body.classList.contains('focused-preview-active')) {
     document.body.classList.remove('focused-preview-active');
     if (rightPanel && previewCard) {
@@ -313,7 +313,7 @@ if (reactiveFace) {
     metricsCard.addEventListener('mouseenter', () => {
       metricsHoverCount++;
       const isEmotional = typeof window.isEmotionalModeActive === 'function' && window.isEmotionalModeActive();
-      
+
       if (metricsHoverCount <= 2) {
         const speech = getAuraSpeech('interact_metrics_blush');
         setPersonaEmotion(speech.face, speech.msg);
@@ -395,9 +395,105 @@ if (reactiveFace) {
   }
 }
 
-// Initialize Lucide Icons
+// Initialize Lucide Icons & Inject Retro Icons
 window.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
+
+  // Inject retro icons for Windows XP themes
+  const xpIconMap = {
+    compress: 'Zip folder.png',
+    split: 'Cut.png',
+    trim: 'Checklist.png',
+    rotate: 'Display Properties.png',
+    audio: 'Volume.png',
+    convert: 'Synchronize.png',
+    subtitle: 'Fonts.png',
+    speed: 'Performance.png',
+    gif: 'GIF.png',
+    merger: 'Bridged Connection.png',
+    stabilize: 'Battery Backup.png',
+    contact: 'Icon View.png',
+    batch: 'Command Prompt.png',
+    'video-thumbnail': 'My Pictures.png',
+    ytdlp: 'youtube_logo.png',
+    'slowed-reverb': 'Generic Audio.png',
+    'lofi-cassette': 'Hearts.png',
+    'vocal-isolation': 'Mute.png',
+    nightcore: 'Antenna.png',
+    'audio-extractor': 'Volume.png',
+    'audio-convert': 'Synchronize.png',
+    'metadata-editor': 'Notepad.png',
+    'mode-video-btn': 'Generic Media.png',
+    'mode-audio-btn': 'Generic Audio.png',
+    'settings-trigger-btn': 'Tweak UI.png',
+    'browse-input-btn': 'Generic Media.png',
+    'browse-output-btn': 'Folder Opened.png'
+  };
+
+  navBtns.forEach(btn => {
+    const targetId = btn.dataset.target;
+    if (targetId && xpIconMap[targetId]) {
+      const img = document.createElement('img');
+      img.className = 'retro-icon';
+      img.src = `theme-asset-xp-98/xp_iconpack/${xpIconMap[targetId]}`;
+      img.style.width = '22px';
+      img.style.height = '22px';
+      img.style.marginRight = '8px';
+      img.style.display = 'none';
+      img.alt = targetId;
+      btn.insertBefore(img, btn.firstChild);
+    }
+  });
+
+  const extraRetroElements = [
+    { el: document.getElementById('mode-video-btn'), id: 'mode-video-btn' },
+    { el: document.getElementById('mode-audio-btn'), id: 'mode-audio-btn' },
+    { el: document.getElementById('settings-trigger-btn'), id: 'settings-trigger-btn' },
+    { el: document.getElementById('browse-input-btn'), id: 'browse-input-btn' },
+    { el: document.getElementById('browse-output-btn'), id: 'browse-output-btn' }
+  ];
+
+  extraRetroElements.forEach(item => {
+    if (item.el && xpIconMap[item.id]) {
+      const img = document.createElement('img');
+      img.className = 'retro-icon';
+      img.src = `theme-asset-xp-98/xp_iconpack/${xpIconMap[item.id]}`;
+      img.style.width = '22px';
+      img.style.height = '22px';
+      img.style.marginRight = '8px';
+      img.style.display = 'none';
+      img.alt = item.id;
+      item.el.insertBefore(img, item.el.firstChild);
+    }
+  });
+
+  // Inject retro icons by data-retro-key (right panel list items, headers, controls)
+  const xpKeyIconMap = {
+    'console-bento-header': 'Command Prompt.png',
+    'live-preview-header': 'Generic Media.png',
+    'play-icon': 'Play.png',
+    'play-circle-icon': 'Play.png',
+    'modes-header': 'Appearance.png',
+    'emotional-icon': 'Hearts.png',
+    'video-preview-icon': 'Generic Media.png',
+    'console-logs-icon': 'Command Prompt.png',
+    'yt-downloader-icon': 'Whistler - Windows Media Player 7.png'
+  };
+
+  const retroKeyElements = document.querySelectorAll('[data-retro-key]');
+  retroKeyElements.forEach(el => {
+    const key = el.getAttribute('data-retro-key');
+    if (key && xpKeyIconMap[key]) {
+      const img = document.createElement('img');
+      img.className = 'retro-icon';
+      img.src = `theme-asset-xp-98/xp_iconpack/${xpKeyIconMap[key]}`;
+      img.style.width = '18px';
+      img.style.height = '18px';
+      img.style.marginRight = '8px';
+      img.style.display = 'none';
+      img.alt = key;
+    }
+  });
 });
 
 // --- Navigation ---
@@ -973,7 +1069,7 @@ window.addEventListener('DOMContentLoaded', () => {
         consoleBento.style.display = 'block';
         localStorage.setItem('settings-techy-console', 'true');
         logToTechyConsole("Console Logs active. Real-time operations stream online.", "system");
-        
+
         // Force reflow and auto-scroll
         const consoleLogs = document.getElementById('techy-console-logs');
         if (consoleLogs) consoleLogs.scrollTop = consoleLogs.scrollHeight;
@@ -986,7 +1082,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // --- Drag & Drop Fullscreen Glass Overlay Logic ---
   const dragOverlay = document.getElementById('drag-drop-overlay');
-  
+
   if (dragOverlay) {
     // Listen to Tauri native drag events
     listen('tauri://drag-enter', () => {
@@ -1325,7 +1421,7 @@ listen('backend-log', (event) => {
 listen('finished', (event) => {
   progressFill.classList.remove('indeterminate');
   const activeTab = document.querySelector('.nav-btn.active')?.dataset.target;
-  
+
   if (event.payload.success) {
     logToTechyConsole(`Task finished successfully. Stream compile return OK.`, "system");
     displayedProgress = Math.max(displayedProgress, 99);
@@ -1341,7 +1437,7 @@ listen('finished', (event) => {
     if (previewOutBtn && lastProcessedOutputPath) {
       previewOutBtn.style.display = 'inline-flex';
     }
-    
+
     const reaction = getAuraSpeech('success_' + activeTab);
     if (reaction && reaction.msg !== "Ready to process emotional baggage.") {
       setPersonaEmotion(reaction.face, reaction.msg);
@@ -1371,7 +1467,7 @@ listen('finished', (event) => {
       }).catch(err => console.error("Notification error:", err));
     }
   }
-  
+
   setTimeout(() => {
     progressContainer.style.display = 'none';
     progressFill.classList.remove('indeterminate');
@@ -1447,7 +1543,7 @@ if (splitSliderEl && splitTimeInputEl) {
         return;
       }
     }
-    
+
     if (val.length >= 8) {
       splitTimeInputEl.classList.add('invalid-input');
       const runSplitBtn = document.getElementById('run-split-btn');
@@ -1493,7 +1589,7 @@ if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
     trimLabelStartEl.textContent = formattedStart;
     trimTimeStartEl.value = formattedStart;
     trimTimeStartEl.classList.remove('invalid-input');
-    
+
     if (!trimTimeEndEl.classList.contains('invalid-input')) {
       const runTrimBtn = document.getElementById('run-trim-btn');
       if (runTrimBtn) {
@@ -1515,7 +1611,7 @@ if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
     trimLabelEndEl.textContent = formattedEnd;
     trimTimeEndEl.value = formattedEnd;
     trimTimeEndEl.classList.remove('invalid-input');
-    
+
     if (!trimTimeStartEl.classList.contains('invalid-input')) {
       const runTrimBtn = document.getElementById('run-trim-btn');
       if (runTrimBtn) {
@@ -1529,7 +1625,7 @@ if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
   trimTimeStartEl.addEventListener('input', () => {
     const val = trimTimeStartEl.value.trim();
     const endVal = trimTimeEndEl.value.trim();
-    
+
     if (isValidTimeFormat(val) && isValidTimeFormat(endVal)) {
       const startSecs = timeToSeconds(val);
       const endSecs = timeToSeconds(endVal);
@@ -1537,7 +1633,7 @@ if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
         trimSliderStartEl.value = startSecs;
         trimLabelStartEl.textContent = val;
         trimTimeStartEl.classList.remove('invalid-input');
-        
+
         if (!trimTimeEndEl.classList.contains('invalid-input')) {
           const runTrimBtn = document.getElementById('run-trim-btn');
           if (runTrimBtn) {
@@ -1549,7 +1645,7 @@ if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
         return;
       }
     }
-    
+
     if (val.length >= 8) {
       trimTimeStartEl.classList.add('invalid-input');
       const runTrimBtn = document.getElementById('run-trim-btn');
@@ -1567,7 +1663,7 @@ if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
     if (!isValidTimeFormat(val) || timeToSeconds(val) >= endSecs || timeToSeconds(val) < 0) {
       trimTimeStartEl.value = formatTime(trimSliderStartEl.value);
       trimTimeStartEl.classList.remove('invalid-input');
-      
+
       if (!trimTimeEndEl.classList.contains('invalid-input')) {
         const runTrimBtn = document.getElementById('run-trim-btn');
         if (runTrimBtn) {
@@ -1582,7 +1678,7 @@ if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
   trimTimeEndEl.addEventListener('input', () => {
     const val = trimTimeEndEl.value.trim();
     const startVal = trimTimeStartEl.value.trim();
-    
+
     if (isValidTimeFormat(val) && isValidTimeFormat(startVal)) {
       const endSecs = timeToSeconds(val);
       const startSecs = timeToSeconds(startVal);
@@ -1590,7 +1686,7 @@ if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
         trimSliderEndEl.value = endSecs;
         trimLabelEndEl.textContent = val;
         trimTimeEndEl.classList.remove('invalid-input');
-        
+
         if (!trimTimeStartEl.classList.contains('invalid-input')) {
           const runTrimBtn = document.getElementById('run-trim-btn');
           if (runTrimBtn) {
@@ -1602,7 +1698,7 @@ if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
         return;
       }
     }
-    
+
     if (val.length >= 8) {
       trimTimeEndEl.classList.add('invalid-input');
       const runTrimBtn = document.getElementById('run-trim-btn');
@@ -1621,7 +1717,7 @@ if (trimSliderStartEl && trimSliderEndEl && trimTimeStartEl && trimTimeEndEl) {
     if (!isValidTimeFormat(val) || timeToSeconds(val) <= startSecs || timeToSeconds(val) > maxSecs) {
       trimTimeEndEl.value = formatTime(trimSliderEndEl.value);
       trimTimeEndEl.classList.remove('invalid-input');
-      
+
       if (!trimTimeStartEl.classList.contains('invalid-input')) {
         const runTrimBtn = document.getElementById('run-trim-btn');
         if (runTrimBtn) {
@@ -1993,7 +2089,7 @@ document.getElementById('run-merge-btn').addEventListener('click', async () => {
   const output = `${globalOutputPath}/${outName}`;
 
   updateStatus("Analyzing batch videos stream properties... 📊");
-  
+
   const runMergeBtn = document.getElementById('run-merge-btn');
   if (runMergeBtn) runMergeBtn.disabled = true;
 
@@ -2026,9 +2122,9 @@ document.getElementById('run-merge-btn').addEventListener('click', async () => {
 
     batchList.forEach((li, i) => {
       inputArgs.push("-i", li.dataset.path);
-      
+
       const meta = metadataList[i];
-      
+
       filterStr += `[${i}:v]scale=${targetW}:${targetH}:force_original_aspect_ratio=decrease,pad=${targetW}:${targetH}:(ow-iw)/2:(oh-ih)/2,setsar=1[v_${i}];`;
 
       if (meta.hasAudio) {
@@ -2061,7 +2157,7 @@ document.getElementById('run-stabilize-btn').addEventListener('click', async () 
   const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
   const output = `${globalOutputPath}/stabilized_${filename}.mp4`;
   const trfPath = `${globalOutputPath}/transforms.trf`;
-  
+
   // Escape backslashes and colons in the path for the FFmpeg filter syntax
   const escapedTrfPath = trfPath.replace(/\\/g, '/').replace(/:/g, '\\:');
 
@@ -2543,17 +2639,17 @@ function playAuraVoice(eventKey) {
     // URL-encode path segments to handle spaces, exclamation marks and emojis correctly in HTML5 Audio
     const encodedSegments = audioPath.split('/').map(encodeURIComponent).join('/');
     let fullPath = `emotive-ani-voice/${encodedSegments}`;
-    
+
     const isLinux = navigator.userAgent.toLowerCase().includes('linux');
     if (isLinux && window.MEDIA_PORT) {
       fullPath = `http://127.0.0.1:${window.MEDIA_PORT}/app-assets/emotive-ani-voice/${encodedSegments}`;
     }
-    
+
     logToTechyConsole(`Voice trigger: ${eventKey} -> ${fullPath}`, "system");
-    
+
     auraVoicePlayer = new Audio(fullPath);
     auraVoicePlayer.volume = 0.85;
-    
+
     auraVoicePlayer.play().then(() => {
       logToTechyConsole(`Audio played successfully: ${eventKey}`, "system");
     }).catch(err => {
@@ -2571,7 +2667,7 @@ function getAuraSpeech(key) {
   const currentLang = localStorage.getItem('settings-aura-language') || 'hinglish';
   const dialect = auraDialogues[currentLang] || auraDialogues['hinglish'];
   const speech = dialect[key] || auraDialogues['hinglish'][key] || { face: 'face_neutral.png', msg: "Ready to process emotional baggage." };
-  
+
   // Dynamic audio voiceover playback triggered instantly
   playAuraVoice(key);
 
@@ -2584,18 +2680,18 @@ function logToTechyConsole(message, type = "info") {
 
   const now = new Date();
   const timestamp = `[${now.toTimeString().split(' ')[0]}]`;
-  
+
   const line = document.createElement('div');
   line.className = `terminal-line ${type}`;
   line.textContent = `${timestamp} ${message}`;
-  
+
   consoleLogs.appendChild(line);
-  
+
   // Cap at 100 lines to prevent memory leaks
   while (consoleLogs.children.length > 100) {
     consoleLogs.removeChild(consoleLogs.firstChild);
   }
-  
+
   // Auto scroll
   consoleLogs.scrollTop = consoleLogs.scrollHeight;
 }
@@ -2604,7 +2700,7 @@ themeCircles.forEach(circle => {
   circle.addEventListener('click', () => {
     const theme = circle.dataset.theme;
     setTheme(theme);
-    
+
     // Mascot reacts to manual theme pick
     const key = 'theme_' + theme.replace('theme-', '');
     const speech = getAuraSpeech(key);
@@ -2618,7 +2714,7 @@ retroBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     const theme = btn.dataset.retro;
     setTheme(theme);
-    
+
     // Mascot reacts to retro preset pick
     const key = 'theme_' + theme.replace('theme-', '');
     const speech = getAuraSpeech(key);
@@ -2630,7 +2726,7 @@ retroBtns.forEach(btn => {
 
 function setTheme(themeName) {
   let targetTheme = themeName;
-  
+
   if (themeName === 'theme-modern') {
     targetTheme = localStorage.getItem('last-standard-theme') || 'theme-blue';
   } else if (['theme-blue', 'theme-red', 'theme-green', 'theme-purple', 'theme-gold', 'theme-pink', 'theme-white', 'theme-yellow'].includes(themeName)) {
@@ -2779,7 +2875,7 @@ function initPreviewPlayer(filePath) {
     previewPlaceholder.style.display = 'none';
     previewCompatWarning.style.display = 'none';
     previewControls.style.display = 'flex';
-    
+
     const fsTriggerBtn = document.getElementById('preview-fullscreen-trigger-btn');
     if (fsTriggerBtn) fsTriggerBtn.style.display = 'flex';
 
@@ -2806,14 +2902,14 @@ function initPreviewPlayer(filePath) {
     previewPlaceholder.style.display = 'none';
     previewCompatWarning.style.display = 'flex';
     previewControls.style.display = 'none';
-    
+
     const fsTriggerBtn = document.getElementById('preview-fullscreen-trigger-btn');
     if (fsTriggerBtn) fsTriggerBtn.style.display = 'none';
 
     previewVideo.removeAttribute('src');
     previewVideo.src = '';
   }
-  
+
   // Reinitialize Lucide Icons for buttons inside the preview card
   if (window.lucide) {
     window.lucide.createIcons();
@@ -2934,7 +3030,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (previewPlayBtn) {
     previewPlayBtn.addEventListener('click', () => {
       if (!previewVideo || (!previewVideo.getAttribute('src') && !previewVideo.src)) return;
-      
+
       const wasPaused = previewVideo.paused;
       if (isPlayingTrimRange) {
         stopTrimRangePlayback();
@@ -3012,11 +3108,11 @@ function initSettingsModal() {
   const closeBtn = document.getElementById('settings-close-btn');
   const saveBtn = document.getElementById('settings-save-btn');
   const modal = document.getElementById('settings-modal');
-  
+
   // Tab Navigation Elements
   const tabBtns = document.querySelectorAll('.settings-tab-btn');
   const panels = document.querySelectorAll('.settings-panel-view');
-  
+
   // General Tab Controls
   const dirDisplay = document.getElementById('settings-default-dir-display');
   const changeDirBtn = document.getElementById('settings-change-dir-btn');
@@ -3025,11 +3121,11 @@ function initSettingsModal() {
   const auraLanguageSelect = document.getElementById('settings-aura-language');
   const notificationsToggle = document.getElementById('settings-notifications-toggle');
   const voiceoversToggle = document.getElementById('settings-voiceovers-toggle');
-  
+
   // Themes & Nostalgia Controls
   const auraToggle = document.getElementById('settings-aura-toggle');
   const previewCards = document.querySelectorAll('.theme-preview-card');
-  
+
   // Engine Controls
   const ffmpegPathInput = document.getElementById('settings-ffmpeg-path');
   const browseFfmpegBtn = document.getElementById('settings-browse-ffmpeg-btn');
@@ -3042,7 +3138,7 @@ function initSettingsModal() {
     dirDisplay.textContent = savedDir ? savedDir.split(/[\/\\]/).pop() || savedDir : "No default path set";
     dirDisplay.title = savedDir;
   }
-  
+
   // Auto load output path if not manually set
   if (savedDir && !globalOutputPath) {
     globalOutputPath = savedDir;
@@ -3096,7 +3192,7 @@ function initSettingsModal() {
   }
 
   // --- TRIGGERS ---
-  
+
   // Open Modal
   if (triggerBtn) {
     triggerBtn.addEventListener('click', () => {
@@ -3106,7 +3202,7 @@ function initSettingsModal() {
         // Force refresh tab contents visual cards active highlight
         const currentTheme = localStorage.getItem('app-theme') || 'theme-blue';
         setTheme(currentTheme);
-        
+
         // Check engine status when opened
         checkEngineStatus();
       }
@@ -3187,7 +3283,7 @@ function initSettingsModal() {
           localStorage.setItem('ffmpeg-custom-path', file);
           if (ffmpegPathInput) ffmpegPathInput.value = file;
           updateStatus(`Custom FFmpeg path selected.`);
-          
+
           // Re-verify instantly
           checkEngineStatus();
         }
@@ -3203,7 +3299,7 @@ function initSettingsModal() {
       localStorage.removeItem('ffmpeg-custom-path');
       if (ffmpegPathInput) ffmpegPathInput.value = "";
       updateStatus("Custom FFmpeg path reset.");
-      
+
       // Re-verify instantly
       checkEngineStatus();
     });
@@ -3279,7 +3375,7 @@ function initSettingsModal() {
           const payload = event.payload;
           if (stageSpan) stageSpan.textContent = payload.stage;
           if (sizeSpan) {
-            const sizeDisplay = payload.totalBytes > 0 
+            const sizeDisplay = payload.totalBytes > 0
               ? `${(payload.downloadedBytes / 1024 / 1024).toFixed(1)}MB / ${(payload.totalBytes / 1024 / 1024).toFixed(1)}MB`
               : `${(payload.downloadedBytes / 1024 / 1024).toFixed(1)}MB`;
             sizeSpan.textContent = sizeDisplay;
@@ -3325,7 +3421,7 @@ function initSettingsModal() {
         const activeStandardTheme = localStorage.getItem('last-standard-theme') || 'theme-blue';
         key = 'theme_' + activeStandardTheme.replace('theme-', '');
       }
-      
+
       const speech = getAuraSpeech(key);
       if (speech) {
         setPersonaEmotion(speech.face, speech.msg);
@@ -3344,7 +3440,7 @@ function initSettingsModal() {
         icon.style.transform = "rotate(360deg)";
         setTimeout(() => { icon.style.transform = "none"; }, 1000);
       }
-      
+
       await checkEngineStatus();
     });
   }
@@ -3378,7 +3474,7 @@ function initSettingsModal() {
       if (auraToggle) {
         const isSilenced = !auraToggle.checked;
         localStorage.setItem('settings-aura-silenced', isSilenced ? 'true' : 'false');
-        
+
         // Trigger UI changes instantly
         const auraSpeechContainer = document.getElementById('aura-speech-container');
         if (isSilenced) {
@@ -3473,16 +3569,16 @@ function syncMediaPlayerUI() {
   const hudSeekSlider = document.getElementById('hud-seek-slider');
   const hudTimeCurrent = document.getElementById('hud-time-current');
   const hudTimeTotal = document.getElementById('hud-time-total');
-  
+
   if (!activeEl) return;
-  
+
   const currentTime = activeEl.currentTime || 0;
   const duration = activeEl.duration || 0;
-  
+
   if (hudTimeCurrent) {
     hudTimeCurrent.textContent = formatTime(currentTime);
   }
-  
+
   if (hudTimeTotal && !isNaN(duration) && duration > 0) {
     hudTimeTotal.textContent = formatTime(duration);
     if (hudSeekSlider) {
@@ -3500,7 +3596,7 @@ function syncMediaPlayerUI() {
 function updatePlayButtons(isPlaying) {
   const previewPlayBtn = document.getElementById('preview-play-btn');
   const hudPlayBtn = document.getElementById('hud-play-btn');
-  
+
   if (previewPlayBtn) {
     previewPlayBtn.innerHTML = isPlaying ? '<i data-lucide="pause"></i> Pause' : '<i data-lucide="play"></i> Play';
   }
@@ -3513,7 +3609,7 @@ function updatePlayButtons(isPlaying) {
 function updateVolumeButtonsState(volume, isMuted) {
   const volBtn = document.getElementById('hud-volume-btn');
   if (!volBtn) return;
-  
+
   if (isMuted || volume === 0) {
     volBtn.innerHTML = '<i data-lucide="volume-x"></i>';
   } else if (volume < 0.5) {
@@ -3539,7 +3635,7 @@ function toggleMute() {
   const activeEl = getActivePreviewElement();
   const volSlider = document.getElementById('hud-volume-slider');
   if (!activeEl) return;
-  
+
   const currentlyMuted = activeEl.muted || activeEl.volume === 0;
   if (currentlyMuted) {
     const lastVol = parseFloat(localStorage.getItem('preview-volume')) || 1.0;
@@ -3629,27 +3725,27 @@ function initFullscreenMediaPlayer() {
     const isFullscreen = (document.fullscreenElement === card);
     const hud = document.getElementById('fullscreen-media-hud');
     const normalControls = document.getElementById('preview-controls');
-    
+
     if (isFullscreen) {
       if (hud) hud.style.display = 'flex';
       if (normalControls) normalControls.style.display = 'none';
-      
+
       const isAudioActive = visualizerAudio && (visualizerAudio.getAttribute('src') || visualizerAudio.src);
       const hudSelect = document.getElementById('hud-visualizer-select');
       if (hudSelect) {
         hudSelect.style.display = isAudioActive ? 'block' : 'none';
       }
-      
+
       applyPersistedVolume();
     } else {
       if (hud) hud.style.display = 'none';
-      
+
       const activeEl = getActivePreviewElement();
       if (activeEl && normalControls) {
         normalControls.style.display = 'flex';
       }
     }
-    
+
     if (window.lucide) window.lucide.createIcons();
   });
 }
@@ -4355,6 +4451,14 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // 6. Audio Converter Action
+  const audioConvertAdvancedToggle = document.getElementById('audio-convert-advanced-toggle');
+  const audioConvertAdvancedPanel = document.getElementById('audio-convert-advanced-panel');
+  if (audioConvertAdvancedToggle && audioConvertAdvancedPanel) {
+    audioConvertAdvancedToggle.addEventListener('change', (e) => {
+      audioConvertAdvancedPanel.classList.toggle('show', e.target.checked);
+    });
+  }
+
   const runAudioConvertBtn = document.getElementById('run-audio-convert-btn');
   if (runAudioConvertBtn) {
     runAudioConvertBtn.addEventListener('click', () => {
@@ -4365,7 +4469,50 @@ window.addEventListener('DOMContentLoaded', () => {
       const format = document.getElementById('audio-convert-format').value;
       const filename = globalInputPath.split(/[\/\\]/).pop().split('.')[0];
       const output = `${globalOutputPath}/${filename}_converted.${format}`;
-      const args = ["-i", globalInputPath, "-q:a", "0", "-y", output];
+
+      const args = ["-i", globalInputPath];
+
+      const isAdvanced = audioConvertAdvancedToggle && audioConvertAdvancedToggle.checked;
+      const isLossy = ['mp3', 'aac', 'ogg', 'opus'].includes(format);
+
+      if (format === 'opus') {
+        args.push("-c:a", "libopus");
+      }
+
+      if (isAdvanced) {
+        if (isLossy) {
+          const bitrate = document.getElementById('audio-convert-bitrate').value;
+          if (bitrate !== 'keep') {
+            args.push("-b:a", bitrate);
+          } else if (format !== 'opus') {
+            args.push("-q:a", "0");
+          }
+        }
+
+        const channels = document.getElementById('audio-convert-channels').value;
+        if (channels !== 'keep') {
+          args.push("-ac", channels);
+        }
+
+        let sampleRate = document.getElementById('audio-convert-sample-rate').value;
+        if (sampleRate !== 'keep') {
+          if (format === 'opus') {
+            // Opus only supports: 48000, 24000, 16000, 12000, 8000
+            if (sampleRate === '44100' || sampleRate === '32000') {
+              sampleRate = '48000';
+            } else if (sampleRate === '22050') {
+              sampleRate = '24000';
+            }
+          }
+          args.push("-ar", sampleRate);
+        }
+      } else {
+        if (isLossy && format !== 'opus') {
+          args.push("-q:a", "0");
+        }
+      }
+
+      args.push("-y", output);
       executeFFmpegTask("Audio Conversion", args);
     });
   }
@@ -4513,7 +4660,7 @@ window.addEventListener('DOMContentLoaded', () => {
       try {
         logToTechyConsole(`Previewing processed file: ${lastProcessedOutputPath}`, "system");
         await loadVideoFile(lastProcessedOutputPath);
-        
+
         // Auto-play the file
         const extension = lastProcessedOutputPath.split('.').pop().toLowerCase();
         const isAudio = ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a'].includes(extension);
@@ -4543,7 +4690,7 @@ window.addEventListener('DOMContentLoaded', () => {
         alert("Please select default output folder first.");
         return;
       }
-      
+
       const url = document.getElementById('ytdlp-url').value.trim();
       if (!url) {
         alert("Please enter a valid YouTube link.");
@@ -4557,7 +4704,7 @@ window.addEventListener('DOMContentLoaded', () => {
       displayedProgress = 0;
       progressFill.classList.add('indeterminate');
       updateStatus("Downloading from YouTube... Please wait.");
-      
+
       logToTechyConsole(`Initiating YouTube download command: yt-dlp ${url} into ${globalOutputPath}`, "command");
 
       try {

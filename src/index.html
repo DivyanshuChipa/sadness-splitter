@@ -560,8 +560,49 @@
                 <option value="flac">FLAC (Lossless Compressed)</option>
                 <option value="aac">AAC</option>
                 <option value="ogg">OGG (Vorbis)</option>
+                <option value="opus">OPUS (Highly Efficient)</option>
               </select>
             </div>
+
+            <div class="checkbox-group" style="margin-top: 15px; margin-bottom: 10px;">
+              <input type="checkbox" id="audio-convert-advanced-toggle">
+              <label for="audio-convert-advanced-toggle">Show Advanced Settings</label>
+            </div>
+
+            <div id="audio-convert-advanced-panel"
+              style="display: none; flex-direction: column; gap: 15px; margin-top: 10px; margin-bottom: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 15px;">
+              <div class="control-group">
+                <label>Audio Bitrate</label>
+                <select id="audio-convert-bitrate">
+                  <option value="keep">Keep Source Bitrate</option>
+                  <option value="320k">320 kbps (Extreme Quality)</option>
+                  <option value="192k">192 kbps (High Quality)</option>
+                  <option value="128k">128 kbps (Standard Quality)</option>
+                  <option value="96k">96 kbps (Low Quality)</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label>Audio Channels</label>
+                <select id="audio-convert-channels">
+                  <option value="keep">Keep Source Channels</option>
+                  <option value="2">Stereo (2 Channels)</option>
+                  <option value="1">Mono (1 Channel)</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label>Sample Rate</label>
+                <select id="audio-convert-sample-rate">
+                  <option value="keep">Keep Source Sample Rate</option>
+                  <option value="48000">48,000 Hz (Studio Quality)</option>
+                  <option value="44100">44,100 Hz (CD Quality)</option>
+                  <option value="32000">32,000 Hz</option>
+                  <option value="22050">22,050 Hz</option>
+                </select>
+              </div>
+            </div>
+
             <button id="run-audio-convert-btn" class="btn action">Convert Audio Format</button>
           </section>
 
@@ -682,7 +723,7 @@
       <div class="settings-card glass-panel preview-card" id="live-preview-card">
         <div class="settings-header">
           <h3>Live Video Preview</h3>
-          <i data-lucide="video"></i>
+          <i data-lucide="video" data-retro-key="live-preview-header"></i>
         </div>
         <div class="preview-container">
           <!-- Video Player -->
@@ -693,7 +734,8 @@
             style="display: none; width: 100%; height: 100%; min-height: 170px; border-radius: 8px;"></canvas>
 
           <!-- CRT Monitor Frame Overlay -->
-          <img id="crt-monitor-overlay" class="crt-monitor-overlay" src="theme-asset-xp-98/old-monitor.svg" alt="Retro Monitor" style="display: none;">
+          <img id="crt-monitor-overlay" class="crt-monitor-overlay" src="theme-asset-xp-98/old-monitor.svg"
+            alt="Retro Monitor" style="display: none;">
 
           <!-- Fullscreen overlay button -->
           <button id="preview-fullscreen-trigger-btn" class="preview-fs-btn-overlay"
@@ -761,11 +803,12 @@
 
         <!-- Custom Controls -->
         <div id="preview-controls" class="preview-controls" style="display: none;">
-          <button id="preview-play-btn" class="btn-small secondary"><i data-lucide="play"></i> Play</button>
+          <button id="preview-play-btn" class="btn-small secondary"><i data-lucide="play"
+              data-retro-key="play-icon"></i> Play</button>
           <button id="preview-trim-play-btn" class="btn-small primary" style="display: none;"><i
-              data-lucide="play-circle"></i> Play Trim Selection</button>
-          <button id="preview-output-btn" class="btn-small success" style="display: none;"><i
-              data-lucide="play-circle"></i> Preview Work</button>
+              data-lucide="play-circle" data-retro-key="play-circle-icon"></i> Play Trim Selection</button>
+          <button id="preview-output-btn" class="btn-small success" style="display: none;"><i data-lucide="play-circle"
+              data-retro-key="play-circle-icon"></i> Preview Work</button>
         </div>
       </div>
 
@@ -773,12 +816,12 @@
       <div class="settings-card glass-panel">
         <div class="settings-header">
           <h3>Modes & Preview</h3>
-          <i data-lucide="sliders"></i>
+          <i data-lucide="sliders" data-retro-key="modes-header"></i>
         </div>
         <div class="settings-list">
           <div class="settings-item">
             <div class="settings-item-left">
-              <i data-lucide="heart" style="color: #ec4899;"></i>
+              <i data-lucide="heart" style="color: #ec4899;" data-retro-key="emotional-icon"></i>
               <span>Emotional Mode</span>
             </div>
             <label class="ios-toggle">
@@ -788,7 +831,7 @@
           </div>
           <div class="settings-item" id="preview-settings-item">
             <div class="settings-item-left">
-              <i data-lucide="video" style="color: var(--accent);"></i>
+              <i data-lucide="video" style="color: var(--accent);" data-retro-key="video-preview-icon"></i>
               <span>Video Preview</span>
             </div>
             <label class="ios-toggle">
@@ -798,7 +841,7 @@
           </div>
           <div class="settings-item">
             <div class="settings-item-left">
-              <i data-lucide="terminal" style="color: var(--accent);"></i>
+              <i data-lucide="terminal" style="color: var(--accent);" data-retro-key="console-logs-icon"></i>
               <span>Console Logs</span>
             </div>
             <label class="ios-toggle">
@@ -808,7 +851,7 @@
           </div>
           <div class="settings-item" id="ytdlp-settings-item">
             <div class="settings-item-left">
-              <i data-lucide="download" style="color: var(--accent);"></i>
+              <i data-lucide="download" style="color: var(--accent);" data-retro-key="yt-downloader-icon"></i>
               <span>YT Downloader</span>
             </div>
             <label class="ios-toggle">
@@ -1091,7 +1134,8 @@
               <div class="settings-form-row">
                 <div class="settings-info-col">
                   <span class="settings-option-title">Aura Mascot Interactive Speeches</span>
-                  <span class="settings-option-desc">Disable reactive emojis, bubble talks and expressions to reduce distractions.</span>
+                  <span class="settings-option-desc">Disable reactive emojis, bubble talks and expressions to reduce
+                    distractions.</span>
                 </div>
                 <div class="settings-control-col">
                   <label class="ios-toggle">
@@ -1109,7 +1153,8 @@
 
                   <!-- Modern Theme Card -->
                   <div class="theme-preset-item">
-                    <div class="theme-preview-card theme-card-modern" data-preset="theme-modern" title="Modern Glass Aura">
+                    <div class="theme-preview-card theme-card-modern" data-preset="theme-modern"
+                      title="Modern Glass Aura">
                       <div class="card-mock-window">
                         <div class="mock-titlebar">
                           <span class="mock-dot-group">
@@ -1131,7 +1176,8 @@
 
                   <!-- Windows 98 Card -->
                   <div class="theme-preset-item">
-                    <div class="theme-preview-card theme-card-win98" data-preset="theme-win98" title="Windows 98 Classic">
+                    <div class="theme-preview-card theme-card-win98" data-preset="theme-win98"
+                      title="Windows 98 Classic">
                       <div class="card-mock-window">
                         <div class="mock-titlebar">
                           <span class="mock-win-title">Sad.exe</span>
@@ -1169,7 +1215,8 @@
 
                   <!-- Synthwave Card -->
                   <div class="theme-preset-item">
-                    <div class="theme-preview-card theme-card-synth" data-preset="theme-synth" title="Outrun Synthwave 1984">
+                    <div class="theme-preview-card theme-card-synth" data-preset="theme-synth"
+                      title="Outrun Synthwave 1984">
                       <div class="card-mock-window">
                         <div class="mock-titlebar">
                           <span class="mock-win-title">SYNTH</span>

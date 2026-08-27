@@ -4361,4 +4361,42 @@ body.focused-preview-active .btn.action {
     opacity: 1;
     transform: translateY(0);
   }
-}
+}
+
+/* Audio Format Converter Advanced Settings Panel */
+#audio-convert-advanced-panel.show {
+  display: flex !important;
+  animation: slideDownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hide standard Lucide icons & show retro icons when Windows XP theme is active */
+body.theme-winxp .nav-btn svg,
+body.theme-winxp .switcher-btn svg,
+body.theme-winxp .settings-gear-btn svg,
+body.theme-winxp #browse-input-btn svg,
+body.theme-winxp #browse-output-btn svg,
+body.theme-winxp [data-retro-key],
+body.theme-winxp #console-pulse-dot {
+  display: none !important;
+}
+
+body.theme-winxp img.retro-icon {
+  display: inline-block !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 8px !important;
+  vertical-align: middle !important;
+}
+
+body.theme-winxp .nav-btn img.retro-icon,
+body.theme-winxp .switcher-btn img.retro-icon,
+body.theme-winxp #browse-input-btn img.retro-icon,
+body.theme-winxp #browse-output-btn img.retro-icon {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+body.theme-winxp .settings-gear-btn img.retro-icon {
+  margin-right: 0 !important;
+}
+
