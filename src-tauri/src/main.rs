@@ -1067,6 +1067,7 @@ fn download_youtube(
     output_dir: String,
     custom_ytdlp_path: Option<String>,
     custom_ffmpeg_path: Option<String>,
+    cookies_browser: String,
 ) {
     let app = window.app_handle().clone();
     std::thread::spawn(move || {
@@ -1086,6 +1087,13 @@ fn download_youtube(
             .map(|pair| pair.ffmpeg.to_string_lossy().to_string());
 
         let mut filename_args = Vec::new();
+        if cookies_browser != "none" {
+            filename_args.extend(vec![
+                "--cookies-from-browser".to_string(),
+                cookies_browser.clone(),
+            ]);
+        }
+
         if format == "mp3" {
             filename_args.extend(vec![
                 "-f".to_string(),
@@ -1144,6 +1152,13 @@ fn download_youtube(
         });
 
         let mut download_args = Vec::new();
+        if cookies_browser != "none" {
+            download_args.extend(vec![
+                "--cookies-from-browser".to_string(),
+                cookies_browser.clone(),
+            ]);
+        }
+
         if format == "mp3" {
             download_args.extend(vec![
                 "-f".to_string(),

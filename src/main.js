@@ -3197,6 +3197,16 @@ function initSettingsModal() {
     ytdlpPathInput.value = customYtdlpPath;
   }
 
+  // Load Saved Cookies Browser Settings
+  const cookiesBrowserSelect = document.getElementById('settings-ytdlp-cookies-browser');
+  if (cookiesBrowserSelect) {
+    cookiesBrowserSelect.value = localStorage.getItem('settings-ytdlp-cookies-browser') || 'none';
+    cookiesBrowserSelect.addEventListener('change', () => {
+      localStorage.setItem('settings-ytdlp-cookies-browser', cookiesBrowserSelect.value);
+      updateStatus(`Cookies browser source set to: ${cookiesBrowserSelect.value}`);
+    });
+  }
+
   // Aura silence on start check
   const auraSpeechContainer = document.getElementById('aura-speech-container');
   if (localStorage.getItem('settings-aura-silenced') === 'true') {
@@ -4939,7 +4949,8 @@ window.addEventListener('DOMContentLoaded', () => {
           format,
           outputDir: globalOutputPath,
           customYtdlpPath: customPath,
-          customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null
+          customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null,
+          cookiesBrowser: localStorage.getItem('settings-ytdlp-cookies-browser') || 'none'
         });
       } catch (err) {
         console.error("YouTube Download command failed:", err);

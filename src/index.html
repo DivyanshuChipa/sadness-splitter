@@ -1485,6 +1485,25 @@
                 </div>
               </div>
 
+              <!-- yt-dlp Browser Cookies Source -->
+              <div class="settings-ytdlp-cookies-wrapper"
+                style="padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; margin-top: 10px;">
+                <label class="settings-input-label"
+                  style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">YouTube Downloader Cookies Source</label>
+                <span class="settings-option-desc"
+                  style="display: block; font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 8px;">Reads cookies from your local browser to bypass YouTube's download block (403 Forbidden errors).</span>
+                <div class="input-group" style="display: flex; gap: 8px;">
+                  <select id="settings-ytdlp-cookies-browser" class="winxp-select"
+                    style="flex: 1; font-size: 0.75rem; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); outline: none;">
+                    <option value="none">None (Anonymous / No Cookies)</option>
+                    <option value="chrome">Google Chrome</option>
+                    <option value="edge">Microsoft Edge</option>
+                    <option value="firefox">Mozilla Firefox</option>
+                    <option value="brave">Brave Browser</option>
+                  </select>
+                </div>
+              </div>
+
               <!-- yt-dlp Engine Status Area -->
               <div class="settings-ytdlp-status-area"
                 style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; margin-top: 5px; gap: 15px; flex-wrap: wrap;">
