@@ -27,4 +27,6 @@ build/
 
 # Temporary files
 *.tmp
+# binaries
+/src-tauri/binaries/*.exe
 *.log

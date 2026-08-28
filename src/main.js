@@ -125,7 +125,8 @@ const toolReactions = {
   'contact': { face: 'face_curious.png', msg: "Want to see everything at once? Let’s go! 🖼️" },
   'batch': { face: 'face_surprised.png', msg: "So many files? Looks like you’ve got me working overtime…" },
   'metadata-editor': { face: 'face_curious.png', msg: "Want to customize your song metadata and cover art? Aura is ready! 🎵✨" },
-  'youtube-downloader': { face: 'face_curious.png', msg: "Paste a YouTube URL and let's download the sadness directly! 🎬📥" }
+  'youtube-downloader': { face: 'face_curious.png', msg: "Paste a YouTube URL and let's download the sadness directly! 🎬📥" },
+  'retro-filters': { face: 'face_smug.png', msg: "Retro vibes! Let’s add some VHS tape glitches! 📼📺" }
 };
 
 const emoteThemeMap = {
@@ -429,7 +430,8 @@ window.addEventListener('DOMContentLoaded', () => {
     'settings-trigger-btn': 'Tweak UI.png',
     'browse-input-btn': 'Generic Media.png',
     'browse-output-btn': 'Folder Opened.png',
-    waveform: 'Audio CD.png'
+    waveform: 'Audio CD.png',
+    'retro-filters': 'Windows Media Encoder.png'
   };
 
   navBtns.forEach(btn => {
@@ -2253,6 +2255,7 @@ const auraDialogues = {
     "success_metadata-editor": { face: 'face_smug.png', msg: "Gane ke metadata aur cover art update ho gaye! Ab tagda dikhega! 🏷️🖼️" },
     "success_video-thumbnail": { face: 'face_confident.png', msg: "Dhamaka! Custom cover video container me successfully insert ho gaya! 😎🎬" },
     "success_youtube-downloader": { face: 'face_exicited.png', msg: "YouTube download complete! Ab direct preview play karo ya next tools me chain karo! 📥🚀" },
+    "success_retro-filters": { face: 'face_confident.png', msg: "Balle balle! Vintage VHS tape effect successfully apply ho gaya! 📼📺" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "HEY! Stop poking me and focus on your work! 💢" },
@@ -2329,6 +2332,7 @@ const auraDialogues = {
     "success_metadata-editor": { face: 'face_smug.png', msg: "Audio metadata and cover art successfully updated! 🏷️🖼️" },
     "success_video-thumbnail": { face: 'face_confident.png', msg: "Success! The custom cover art has been embedded into the video container! 🎬✨" },
     "success_youtube-downloader": { face: 'face_exicited.png', msg: "YouTube download finished! You can now preview it or feed it into other tools. 📥🚀" },
+    "success_retro-filters": { face: 'face_confident.png', msg: "Success! Vintage VHS tape effects and filters applied successfully! 📼📺" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "HEY! Stop poking me and focus on your work! 💢" },
@@ -2362,6 +2366,7 @@ const auraDialogues = {
     "interact_tab_metadata-editor": { face: 'face_curious.png', msg: "Want to edit song details and cover art? Let's make it look professional! 🎵✨" },
     "interact_tab_video-thumbnail": { face: 'face_confident.png', msg: "Let's update the video thumbnail! Pick a high-quality cover image! 🖼️✨" },
     "interact_tab_youtube-downloader": { face: 'face_curious.png', msg: "Want to download a YouTube video? Just paste the URL here and hit download! 🌐✨" },
+    "interact_tab_retro-filters": { face: 'face_curious.png', msg: "Retro filters selected! Let's make your video look like a classic 80s/90s tape! 📼📺" },
     "interact_ytdlp_hover_logs_on": { face: 'face_smug.png', msg: "Planning to download a video? I see you're reading my logs... zero privacy nowadays! 🤫" },
     "interact_ytdlp_hover_logs_off": { face: 'face_curious.png', msg: "Downloading a video? Turn on console logs to see what I'm thinking, though it's mostly just re-encoding sadness. 🥱" },
     "eyesight_care": { face: 'face_confident.png', msg: "Hey there! You've been squinting for a while. Let me expand the preview area for you to save your eyes! 👁️" }
@@ -4672,6 +4677,19 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const wfDensitySlider = document.getElementById('waveform-density');
+  const wfDensityVal = document.getElementById('waveform-density-val');
+  if (wfDensitySlider && wfDensityVal) {
+    wfDensitySlider.addEventListener('input', () => {
+      const val = wfDensitySlider.value;
+      let desc = 'Bars';
+      if (val < 60) desc += ' (Blocky)';
+      else if (val < 150) desc += ' (Chunky)';
+      else desc += ' (Fine)';
+      wfDensityVal.textContent = `${val} ${desc}`;
+    });
+  }
+
   const runWaveformBtn = document.getElementById('run-waveform-btn');
   if (runWaveformBtn) {
     runWaveformBtn.addEventListener('click', () => {
@@ -4685,6 +4703,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const color = document.getElementById('waveform-color').value;
       const waveHeight = document.getElementById('waveform-height').value;
       const yPos = document.getElementById('waveform-y-pos').value;
+      const density = document.getElementById('waveform-density').value;
 
       // Parse resolution width and height
       const resParts = res.split('x');
@@ -4707,7 +4726,7 @@ window.addEventListener('DOMContentLoaded', () => {
           "-i", globalInputPath,
           "-loop", "1",
           "-i", selectedWaveformBgPath,
-          "-filter_complex", `[0:a]showwaves=s=${resW}x${waveHeight}:mode=${style}:colors=${cleanColor}@0.8[wave];[1:v]scale=${resW}:${resH}[bg];[bg][wave]overlay=x=(W-w)/2:y=(H-h)*(${yPos}/100):shortest=1[v]`,
+          "-filter_complex", `[0:a]aformat=channel_layouts=mono,showwaves=s=${density}x${waveHeight}:mode=${style}:colors=${cleanColor}[wave];[wave]scale=${resW}:${waveHeight}:flags=neighbor[scaledwave];[1:v]scale=${resW}:${resH}[bg];[bg][scaledwave]overlay=x=(W-w)/2:y=(H-h)*(${yPos}/100):shortest=1[v]`,
           "-map", "[v]",
           "-map", "0:a",
           "-c:v", "libx264",
@@ -4720,7 +4739,7 @@ window.addEventListener('DOMContentLoaded', () => {
         // Generate a solid black color background dynamically and overlay the wave on it
         args = [
           "-i", globalInputPath,
-          "-filter_complex", `color=c=black:s=${resW}x${resH}[bg];[0:a]showwaves=s=${resW}x${waveHeight}:mode=${style}:colors=${cleanColor}[wave];[bg][wave]overlay=x=(W-w)/2:y=(H-h)*(${yPos}/100):shortest=1[v]`,
+          "-filter_complex", `color=c=black:s=${resW}x${resH}[bg];[0:a]aformat=channel_layouts=mono,showwaves=s=${density}x${waveHeight}:mode=${style}:colors=${cleanColor}[wave];[wave]scale=${resW}:${waveHeight}:flags=neighbor[scaledwave];[bg][scaledwave]overlay=x=(W-w)/2:y=(H-h)*(${yPos}/100):shortest=1[v]`,
           "-map", "[v]",
           "-map", "0:a",
           "-c:v", "libx264",
@@ -4763,6 +4782,96 @@ window.addEventListener('DOMContentLoaded', () => {
       ];
 
       executeFFmpegTask("Video Thumbnail", args);
+    });
+  }
+
+  // 7d. Retro Filters Action
+  const vhsNoiseSlider = document.getElementById('vhs-noise');
+  const vhsNoiseVal = document.getElementById('vhs-noise-val');
+  if (vhsNoiseSlider && vhsNoiseVal) {
+    vhsNoiseSlider.addEventListener('input', () => {
+      const val = vhsNoiseSlider.value;
+      let label = val;
+      if (val === '0') label += ' (Clean)';
+      else if (val < 15) label += ' (Light)';
+      else if (val < 35) label += ' (Medium)';
+      else label += ' (Heavy)';
+      vhsNoiseVal.textContent = label;
+    });
+  }
+
+  const vhsBleedSlider = document.getElementById('vhs-bleed');
+  const vhsBleedVal = document.getElementById('vhs-bleed-val');
+  if (vhsBleedSlider && vhsBleedVal) {
+    vhsBleedSlider.addEventListener('input', () => {
+      const val = vhsBleedSlider.value;
+      vhsBleedVal.textContent = `${val}px`;
+    });
+  }
+
+  const runRetroFiltersBtn = document.getElementById('run-retro-filters-btn');
+  if (runRetroFiltersBtn) {
+    runRetroFiltersBtn.addEventListener('click', () => {
+      if (!globalInputPath || !globalOutputPath) {
+        alert("Please select input video first.");
+        return;
+      }
+
+      const noise = parseInt(document.getElementById('vhs-noise').value, 10);
+      const bleed = parseInt(document.getElementById('vhs-bleed').value, 10);
+      const audioMuffle = document.getElementById('vhs-audio-toggle').checked;
+      const vignette = document.getElementById('vhs-vignette-toggle').checked;
+      const lofi = document.getElementById('vhs-lofi-toggle').checked;
+
+      const inputFilename = globalInputPath.split(/[\/\\]/).pop();
+      const dotIndex = inputFilename.lastIndexOf('.');
+      const nameWithoutExt = dotIndex !== -1 ? inputFilename.substring(0, dotIndex) : inputFilename;
+      const ext = dotIndex !== -1 ? inputFilename.substring(dotIndex + 1).toLowerCase() : 'mp4';
+      const output = `${globalOutputPath}/${nameWithoutExt}_retro.${ext}`;
+
+      // Build video filter string
+      let vFilters = [];
+
+      // 1. Lo-Fi Scale down to 480p width
+      if (lofi) {
+        vFilters.push("scale=480:-1");
+        vFilters.push("setsar=1:1");
+      }
+
+      // 2. Vintage Saturation desaturation
+      vFilters.push("eq=saturation=0.8");
+
+      // 3. Chromatic Aberration channel shift
+      if (bleed > 0) {
+        // Shift red channels and blue channels to mimic misalignment
+        vFilters.push(`rgbashift=rh=${bleed}:rv=${Math.round(bleed/2)}:bh=-${bleed}:bv=-${Math.round(bleed/2)}`);
+      }
+
+      // 4. Analog Vignette dark corners
+      if (vignette) {
+        vFilters.push("vignette");
+      }
+
+      // 5. Tape Noise grain static
+      if (noise > 0) {
+        vFilters.push(`noise=alls=${noise}:allf=t+u`);
+      }
+
+      // Build arguments list
+      let args = ["-i", globalInputPath];
+
+      if (vFilters.length > 0) {
+        args.push("-vf", vFilters.join(","));
+      }
+
+      // Audio Filter String for VHS low-fidelity bandpass
+      if (audioMuffle) {
+        args.push("-af", "highpass=f=100,lowpass=f=3000");
+      }
+
+      args.push("-y", output);
+
+      executeFFmpegTask("Retro Filters", args);
     });
   }
 

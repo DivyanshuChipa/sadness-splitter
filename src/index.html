@@ -87,6 +87,7 @@
         <button class="nav-btn" data-target="contact"><i data-lucide="grid"></i> Contact Sheet</button>
         <button class="nav-btn" data-target="batch"><i data-lucide="package"></i> Batch Processor</button>
         <button class="nav-btn" data-target="video-thumbnail"><i data-lucide="image"></i> Video Thumbnail</button>
+        <button class="nav-btn" data-target="retro-filters"><i data-lucide="tv" data-retro-key="retro-filters-tab-icon"></i> Retro Filters</button>
       </nav>
 
       <nav class="nav-list" id="audio-nav-list" style="display: none;">
@@ -698,6 +699,14 @@
               <input type="range" id="waveform-y-pos" min="0" max="100" value="50" style="width: 100%; cursor: pointer;">
             </div>
 
+            <div class="control-group" style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="margin-bottom: 0;">Bar Density (Spacing)</label>
+                <span id="waveform-density-val" class="subtext monospace" style="font-size: 0.8em; color: var(--accent);">80 Bars (Chunky)</span>
+              </div>
+              <input type="range" id="waveform-density" min="20" max="300" value="80" style="width: 100%; cursor: pointer;">
+            </div>
+
             <div class="control-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
               <label style="margin-bottom: 0;">Waveform Color:</label>
               <input type="color" id="waveform-color" value="#00f2fe" style="width: 50px; height: 35px; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; background: none; cursor: pointer; padding: 0;">
@@ -725,6 +734,47 @@
             </div>
 
             <button id="run-video-thumbnail-btn" class="btn action">Save Video Thumbnail</button>
+          </section>
+
+          <!-- RETRO VIDEO FILTERS -->
+          <section id="retro-filters" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Retro Filters</h3>
+              <p>Apply classic analog VHS tape grain, color bleed, vignettes, and retro audio filters to your video.</p>
+            </div>
+
+            <div class="control-group" style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="margin-bottom: 0;">VHS Tape Noise (Grain)</label>
+                <span id="vhs-noise-val" class="subtext monospace" style="font-size: 0.8em; color: var(--accent);">20 (Medium)</span>
+              </div>
+              <input type="range" id="vhs-noise" min="0" max="60" value="20" style="width: 100%; cursor: pointer;">
+            </div>
+
+            <div class="control-group" style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="margin-bottom: 0;">Color Bleed (Chroma Shift)</label>
+                <span id="vhs-bleed-val" class="subtext monospace" style="font-size: 0.8em; color: var(--accent);">4px</span>
+              </div>
+              <input type="range" id="vhs-bleed" min="0" max="12" value="4" style="width: 100%; cursor: pointer;">
+            </div>
+
+            <div class="checkbox-group" style="margin-bottom: 15px;">
+              <input type="checkbox" id="vhs-audio-toggle" checked>
+              <label for="vhs-audio-toggle">Muffle Audio (Analog Bandpass Filter)</label>
+            </div>
+
+            <div class="checkbox-group" style="margin-bottom: 15px;">
+              <input type="checkbox" id="vhs-vignette-toggle" checked>
+              <label for="vhs-vignette-toggle">Add Vintage Vignette (Dark Corners)</label>
+            </div>
+
+            <div class="checkbox-group" style="margin-bottom: 25px;">
+              <input type="checkbox" id="vhs-lofi-toggle">
+              <label for="vhs-lofi-toggle">Lo-Fi Resolution Downscaling (480p Tape Fuzz)</label>
+            </div>
+
+            <button id="run-retro-filters-btn" class="btn action">Apply Retro Filters</button>
           </section>
 
           <!-- YOUTUBE DOWNLOADER -->
