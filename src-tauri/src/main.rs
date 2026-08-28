@@ -208,6 +208,17 @@ fn read_ffmpeg_version(command: &Path) -> Option<String> {
             .unwrap_or(first_line),
     )
 }
+fn get_exe_dir_sibling(name: &str) -> Option<PathBuf> {
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(parent) = exe_path.parent() {
+            let tool_path = parent.join(executable_name(name));
+            if tool_path.is_file() {
+                return Some(tool_path);
+            }
+        }
+    }
+    None
+}
 
 fn resolve_ffmpeg(app: &AppHandle, custom_ffmpeg_path: &Option<String>) -> Option<FfmpegPair> {
     if let Some(path) = custom_ffmpeg_path
@@ -216,6 +227,15 @@ fn resolve_ffmpeg(app: &AppHandle, custom_ffmpeg_path: &Option<String>) -> Optio
         .filter(|path| !path.is_empty())
     {
         if let Some(pair) = pair_from_ffmpeg_path(PathBuf::from(path), "custom") {
+            return Some(pair);
+        }
+    }
+
+    if let (Some(ffmpeg_path), Some(ffprobe_path)) = (
+        get_exe_dir_sibling("ffmpeg"),
+        get_exe_dir_sibling("ffprobe"),
+    ) {
+        if let Some(pair) = pair_from_commands(ffmpeg_path, ffprobe_path, "portable") {
             return Some(pair);
         }
     }
@@ -810,7 +830,6 @@ fn query_ytdlp_version(path: &Path) -> Option<String> {
     }
     None
 }
-
 fn resolve_ytdlp(app: &AppHandle, custom_ytdlp_path: &Option<String>) -> Option<YtdlpResolveResult> {
     if let Some(path_str) = custom_ytdlp_path
         .as_ref()
@@ -826,6 +845,16 @@ fn resolve_ytdlp(app: &AppHandle, custom_ytdlp_path: &Option<String>) -> Option<
                     version,
                 });
             }
+        }
+    }
+
+    if let Some(ytdlp_path) = get_exe_dir_sibling("yt-dlp") {
+        if let Some(version) = query_ytdlp_version(&ytdlp_path) {
+            return Some(YtdlpResolveResult {
+                path: ytdlp_path,
+                source: "portable",
+                version,
+            });
         }
     }
 

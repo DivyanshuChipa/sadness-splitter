@@ -12,7 +12,11 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": []
+    "externalBin": [
+      "binaries/ffmpeg",
+      "binaries/ffprobe",
+      "binaries/yt-dlp"
+    ]
   },
   "build": {
     "beforeDevCommand": "",
