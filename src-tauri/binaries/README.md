@@ -12,6 +12,10 @@ Tauri uses a conditional build system. When you compile the app:
    - If you want a small installer size, simply leave this folder empty (or disable sidecars in `tauri.conf.json`). 
    - The app will automatically fall back to using system-installed `ffmpeg` / `ffprobe` / `yt-dlp` from the user's `PATH`.
 
+      "binaries/ffmpeg",
+      "binaries/ffprobe",
+      "binaries/yt-dlp"
+
 ---
 
 ## 🏷️ Naming Convention
