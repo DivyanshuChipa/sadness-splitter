@@ -25,6 +25,22 @@ fn create_command<S: AsRef<std::ffi::OsStr>>(program: S) -> Command {
     cmd
 }
 
+fn normalize_cookies_browser(browser: &str) -> Option<String> {
+    let browser = browser.trim();
+    if browser.is_empty() || browser == "none" {
+        return None;
+    }
+
+    if browser.contains(':') {
+        return Some(browser.to_string());
+    }
+
+    match browser {
+        "chrome" | "edge" | "brave" | "firefox" => Some(format!("{browser}:Default")),
+        _ => Some(browser.to_string()),
+    }
+}
+
 #[cfg(target_os = "windows")]
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -1087,10 +1103,10 @@ fn download_youtube(
             .map(|pair| pair.ffmpeg.to_string_lossy().to_string());
 
         let mut filename_args = Vec::new();
-        if cookies_browser != "none" {
+        if let Some(browser) = normalize_cookies_browser(&cookies_browser) {
             filename_args.extend(vec![
                 "--cookies-from-browser".to_string(),
-                cookies_browser.clone(),
+                browser,
             ]);
         }
 
@@ -1152,10 +1168,10 @@ fn download_youtube(
         });
 
         let mut download_args = Vec::new();
-        if cookies_browser != "none" {
+        if let Some(browser) = normalize_cookies_browser(&cookies_browser) {
             download_args.extend(vec![
                 "--cookies-from-browser".to_string(),
-                cookies_browser.clone(),
+                browser,
             ]);
         }
 
@@ -1212,6 +1228,11 @@ fn download_youtube(
                 return;
             }
         };
+
+        let _ = window.emit("backend-log", LogPayload {
+            message: format!("yt-dlp args: {:?}", download_args),
+            log_type: "info".to_string(),
+        });
 
         let stdout = child.stdout.take().expect("Failed to open stdout");
         let reader = BufReader::new(stdout);
