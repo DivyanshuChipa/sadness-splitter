@@ -4089,6 +4089,132 @@ function drawOscilloscopeCircle(ctx, width, height, timeDomainArray, bufferLengt
   ctx.stroke();
 }
 
+let kaleidoscopeAngle = 0;
+let kaleidoscopeHue = 0;
+
+function drawKaleidoscopeVisualizer(ctx, width, height, timeDomainArray, dataArray, bufferLength, activeColor, activeGlow) {
+  // Semi-transparent dark background for smooth psychedelic light trails
+  ctx.fillStyle = 'rgba(10, 12, 20, 0.32)';
+  ctx.fillRect(0, 0, width, height);
+
+  const cx = width / 2;
+  const cy = height / 2;
+
+  // Calculate audio energy: low-end bass kick & mid/high frequencies
+  let bass = 0;
+  for (let i = 0; i < 8; i++) {
+    bass += (dataArray[i] || 0);
+  }
+  bass = bass / (8 * 255); // 0.0 to 1.0
+
+  let midHigh = 0;
+  for (let i = 8; i < 32; i++) {
+    midHigh += (dataArray[i] || 0);
+  }
+  midHigh = midHigh / (24 * 255);
+
+  // Dynamic zoom & rotation speed driven by audio beats
+  const baseRadius = Math.min(width, height) * 0.22 * (1 + bass * 0.42);
+  const innerRadius = baseRadius * 0.42;
+  kaleidoscopeAngle += 0.006 + (bass * 0.035);
+  kaleidoscopeHue = (kaleidoscopeHue + 0.4 + bass * 1.5) % 360;
+
+  const segments = 8; // 8-fold radial mandala symmetry
+  const segmentAngle = (2 * Math.PI) / segments;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // Layer 1: Central pulsing mandala core
+  ctx.save();
+  ctx.rotate(-kaleidoscopeAngle * 1.2);
+  ctx.strokeStyle = `hsla(${kaleidoscopeHue}, 90%, 65%, 0.85)`;
+  ctx.shadowColor = `hsla(${kaleidoscopeHue}, 100%, 60%, 0.9)`;
+  ctx.shadowBlur = 12 + bass * 25;
+  ctx.lineWidth = 2 + bass * 2;
+  ctx.beginPath();
+  for (let i = 0; i <= 6; i++) {
+    const a = (i / 6) * 2 * Math.PI;
+    const r = innerRadius * (0.85 + 0.3 * Math.sin(a * 3 + kaleidoscopeAngle * 2));
+    const x = Math.cos(a) * r;
+    const y = Math.sin(a) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+
+  // Layer 2: Main Kaleidoscope Waveform Petals (8-way reflection)
+  ctx.rotate(kaleidoscopeAngle);
+  ctx.shadowBlur = 16 + bass * 30;
+  ctx.shadowColor = `hsla(${(kaleidoscopeHue + 60) % 360}, 95%, 60%, 0.95)`;
+  ctx.lineWidth = 2.2 + bass * 2.5;
+
+  const sliceLen = Math.floor(bufferLength / segments);
+
+  for (let s = 0; s < segments; s++) {
+    ctx.save();
+    ctx.rotate(s * segmentAngle);
+
+    // Alternate petal hue for psychedelic depth
+    const petalHue = (kaleidoscopeHue + s * (360 / segments)) % 360;
+    ctx.strokeStyle = `hsla(${petalHue}, 90%, 62%, 0.9)`;
+
+    // Mirror alternate segments for pure kaleidoscope geometry
+    if (s % 2 === 1) {
+      ctx.scale(1, -1);
+    }
+
+    ctx.beginPath();
+    for (let i = 0; i < sliceLen; i++) {
+      const angle = (i / sliceLen) * segmentAngle;
+      const val = ((timeDomainArray[i] || 128) - 128) / 128.0;
+      const r = baseRadius + (val * baseRadius * (0.55 + bass * 0.35));
+
+      const x = Math.cos(angle) * r;
+      const y = Math.sin(angle) * r;
+
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Secondary subtle echo petal (outer ring on beat)
+    if (bass > 0.25) {
+      ctx.beginPath();
+      ctx.strokeStyle = `hsla(${(petalHue + 40) % 360}, 100%, 75%, ${0.3 + bass * 0.4})`;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < sliceLen; i += 2) {
+        const angle = (i / sliceLen) * segmentAngle;
+        const val = ((timeDomainArray[i] || 128) - 128) / 128.0;
+        const r = baseRadius * 1.35 + (val * baseRadius * 0.3);
+        const x = Math.cos(angle) * r;
+        const y = Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  // Outer ambient stardust sparkles reacting to high frequencies
+  if (midHigh > 0.15) {
+    ctx.fillStyle = `hsla(${(kaleidoscopeHue + 180) % 360}, 100%, 75%, 0.8)`;
+    for (let p = 0; p < 8; p++) {
+      const pAngle = (p / 8) * Math.PI * 2 + kaleidoscopeAngle * 2;
+      const pDist = baseRadius * (1.5 + midHigh * 0.4);
+      ctx.beginPath();
+      ctx.arc(Math.cos(pAngle) * pDist, Math.sin(pAngle) * pDist, 1.5 + midHigh * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+}
+
 function drawRgbSpectrum(ctx, width, height, dataArray, bufferLength) {
   ctx.clearRect(0, 0, width, height);
   const cx = width / 2;
@@ -4328,6 +4454,8 @@ function startVisualizerDrawing() {
       drawGlowBars(ctx, width, height, dataArray, bufferLength, activeColor, activeGlow);
     } else if (preset === 'synthwave-sunset') {
       drawSynthwaveSunset(ctx, width, height, dataArray, bufferLength);
+    } else if (preset === 'kaleidoscope-mandala') {
+      drawKaleidoscopeVisualizer(ctx, width, height, timeDomainArray, dataArray, bufferLength, activeColor, activeGlow);
     } else if (preset === 'retro-wormhole') {
       drawRetroWormhole(ctx, width, height, dataArray, bufferLength, activeColor);
     } else if (preset === 'hyper-starfield') {
@@ -4726,20 +4854,62 @@ window.addEventListener('DOMContentLoaded', () => {
       const inputFilename = globalInputPath.split(/[\/\\]/).pop();
       const dotIndex = inputFilename.lastIndexOf('.');
       const nameWithoutExt = dotIndex !== -1 ? inputFilename.substring(0, dotIndex) : inputFilename;
-      const output = `${globalOutputPath}/${nameWithoutExt}_waveform.mp4`;
+      const isKaleidoscope = (style === 'kaleidoscope');
+      const output = `${globalOutputPath}/${nameWithoutExt}_${isKaleidoscope ? 'kaleidoscope' : 'waveform'}.mp4`;
 
       let args = [];
 
-      if (selectedWaveformBgPath) {
+      if (isKaleidoscope) {
+        const minDim = Math.min(parseInt(resW), parseInt(resH));
+        const quadDim = Math.max(160, Math.floor(minDim * 0.42));
+        const kaleidoDim = Math.min(parseInt(resW), parseInt(resH));
+
+        const kaleidoFilter = `[0:a]aformat=channel_layouts=mono,showwaves=s=${quadDim}x${quadDim}:mode=line:colors=${cleanColor}:r=24[w];[w]split=4[q1][q2][q3][q4];[q2]hflip[q2f];[q3]vflip[q3f];[q4]hflip,vflip[q4f];[q1][q2f]hstack[top];[q3f][q4f]hstack[bot];[top][bot]vstack[mirrored];[mirrored]split[m1][m2];[m1]rotate=a='PI*t/6':ow=${kaleidoDim}:oh=${kaleidoDim}:c=none[r1];[m2]rotate=a='PI*t/6+PI/4':ow=${kaleidoDim}:oh=${kaleidoDim}:c=none[r2];[r1][r2]blend=all_mode=addition[star];[star]split[sharp][blur];[blur]gblur=sigma=10:steps=2,eq=saturation=2.5:contrast=1.3[glowing];[sharp][glowing]blend=all_mode=addition,hue=H='2*PI*t*0.08':s=2.5[neon];`;
+
+        if (selectedWaveformBgPath) {
+          args = [
+            "-i", globalInputPath,
+            "-loop", "1",
+            "-i", selectedWaveformBgPath,
+            "-filter_complex", `${kaleidoFilter}[1:v]scale=${resW}:${resH}[bg];[bg][neon]overlay=x=(W-w)/2:y=(H-h)/2:shortest=1[v]`,
+            "-map", "[v]",
+            "-map", "0:a",
+            "-c:v", "libx264",
+            "-preset", "veryfast",
+            "-threads", "0",
+            "-r", "24",
+            "-pix_fmt", "yuv420p",
+            "-shortest",
+            "-y", output
+          ];
+        } else {
+          args = [
+            "-i", globalInputPath,
+            "-filter_complex", `color=c=black:s=${resW}x${resH}[bg];${kaleidoFilter}[bg][neon]overlay=x=(W-w)/2:y=(H-h)/2:shortest=1[v]`,
+            "-map", "[v]",
+            "-map", "0:a",
+            "-c:v", "libx264",
+            "-preset", "veryfast",
+            "-threads", "0",
+            "-r", "24",
+            "-pix_fmt", "yuv420p",
+            "-shortest",
+            "-y", output
+          ];
+        }
+      } else if (selectedWaveformBgPath) {
         // Case B: Background Image Loop & Overlay
         args = [
           "-i", globalInputPath,
           "-loop", "1",
           "-i", selectedWaveformBgPath,
-          "-filter_complex", `[0:a]aformat=channel_layouts=mono,showwaves=s=${density}x${waveHeight}:mode=${style}:colors=${cleanColor}[wave];[wave]scale=${resW}:${waveHeight}:flags=neighbor[scaledwave];[1:v]scale=${resW}:${resH}[bg];[bg][scaledwave]overlay=x=(W-w)/2:y=(H-h)*(${yPos}/100):shortest=1[v]`,
+          "-filter_complex", `[0:a]aformat=channel_layouts=mono,showwaves=s=${density}x${waveHeight}:mode=${style}:colors=${cleanColor}:r=24[wave];[wave]scale=${resW}:${waveHeight}:flags=neighbor[scaledwave];[1:v]scale=${resW}:${resH}[bg];[bg][scaledwave]overlay=x=(W-w)/2:y=(H-h)*(${yPos}/100):shortest=1[v]`,
           "-map", "[v]",
           "-map", "0:a",
           "-c:v", "libx264",
+          "-preset", "veryfast",
+          "-threads", "0",
+          "-r", "24",
           "-pix_fmt", "yuv420p",
           "-shortest",
           "-y", output
@@ -4749,17 +4919,20 @@ window.addEventListener('DOMContentLoaded', () => {
         // Generate a solid black color background dynamically and overlay the wave on it
         args = [
           "-i", globalInputPath,
-          "-filter_complex", `color=c=black:s=${resW}x${resH}[bg];[0:a]aformat=channel_layouts=mono,showwaves=s=${density}x${waveHeight}:mode=${style}:colors=${cleanColor}[wave];[wave]scale=${resW}:${waveHeight}:flags=neighbor[scaledwave];[bg][scaledwave]overlay=x=(W-w)/2:y=(H-h)*(${yPos}/100):shortest=1[v]`,
+          "-filter_complex", `color=c=black:s=${resW}x${resH}[bg];[0:a]aformat=channel_layouts=mono,showwaves=s=${density}x${waveHeight}:mode=${style}:colors=${cleanColor}:r=24[wave];[wave]scale=${resW}:${waveHeight}:flags=neighbor[scaledwave];[bg][scaledwave]overlay=x=(W-w)/2:y=(H-h)*(${yPos}/100):shortest=1[v]`,
           "-map", "[v]",
           "-map", "0:a",
           "-c:v", "libx264",
+          "-preset", "veryfast",
+          "-threads", "0",
+          "-r", "24",
           "-pix_fmt", "yuv420p",
           "-shortest",
           "-y", output
         ];
       }
 
-      executeFFmpegTask("Waveform Generation", args);
+      executeFFmpegTask(isKaleidoscope ? "Neon Kaleidoscope Video Generation" : "Waveform Generation", args);
     });
   }
 
