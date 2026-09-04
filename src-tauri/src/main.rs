@@ -1182,6 +1182,8 @@ fn download_youtube(
                 "-x".to_string(),
                 "--audio-format".to_string(),
                 "mp3".to_string(),
+                "--embed-thumbnail".to_string(),
+                "--embed-metadata".to_string(),
             ]);
         } else {
             download_args.extend(vec![
@@ -1189,6 +1191,8 @@ fn download_youtube(
                 "bestvideo+bestaudio/best".to_string(),
                 "--merge-output-format".to_string(),
                 "mp4".to_string(),
+                "--embed-thumbnail".to_string(),
+                "--embed-metadata".to_string(),
             ]);
         }
 
