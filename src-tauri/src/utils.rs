@@ -1,3 +1,6 @@
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
 pub fn create_command<S: AsRef<std::ffi::OsStr>>(program: S) -> std::process::Command {
     #[allow(unused_mut)]
     let mut cmd = std::process::Command::new(program);
