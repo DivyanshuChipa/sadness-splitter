@@ -517,7 +517,7 @@ export function startFocusedPreviewTimer(targetId) {
   if (targetId === 'trim' || targetId === 'split' || targetId === 'rotate' || targetId === 'video-thumbnail') {
     focusedPreviewTimer = setTimeout(() => {
       triggerFocusedPreviewMode();
-    }, 180000);
+    }, 15000); // 15 seconds
   }
 }
 
