@@ -1,0 +1,243 @@
+/* ==========================================================================
+   VINTAGE RETRO THEMES (Step 1 Presets)
+   ========================================================================== */
+
+/* --- 1. Windows 98 Theme --- */
+body.theme-win98 {
+  --bg-color: #008080;
+  /* Teal desktop background */
+  --panel-bg: #c0c0c0;
+  /* Windows 98 steel gray window */
+  --panel-border: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #000080;
+  /* Classic title bar navy */
+  --accent: #000080;
+  --accent-hover: #1010a0;
+  --accent-glow: rgba(0, 0, 128, 0.2);
+  --btn-text: #ffffff;
+  --font-family: 'Tahoma', 'MS Sans Serif', Geneva, sans-serif !important;
+  --metric-ring-center: #c0c0c0;
+}
+
+/* Windows 98 Outset/Inset 3D overrides */
+body.theme-win98 .glass-panel,
+body.theme-win98 .sidebar,
+body.theme-win98 .metrics-card,
+body.theme-win98 .settings-card,
+body.theme-win98 .engine-card,
+body.theme-win98 .about-card {
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+  background: #c0c0c0 !important;
+  border-radius: 0px !important;
+  box-shadow: none !important;
+  color: #000000 !important;
+  backdrop-filter: none !important;
+}
+
+body.theme-win98 button,
+body.theme-win98 select,
+body.theme-win98 input {
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #404040 !important;
+  border-bottom: 2px solid #404040 !important;
+  background: #c0c0c0 !important;
+  border-radius: 0px !important;
+  box-shadow: none !important;
+  color: #000000 !important;
+  font-family: var(--font-family) !important;
+}
+
+body.theme-win98 button:active {
+  border-top: 2px solid #404040 !important;
+  border-left: 2px solid #404040 !important;
+  border-right: 2px solid #ffffff !important;
+  border-bottom: 2px solid #ffffff !important;
+}
+
+body.theme-win98 .nav-btn.active {
+  background: #000080 !important;
+  color: #ffffff !important;
+  border-top: 2px solid #505050 !important;
+  border-left: 2px solid #505050 !important;
+  border-right: 2px solid #ffffff !important;
+  border-bottom: 2px solid #ffffff !important;
+}
+
+body.theme-win98 h1,
+body.theme-win98 h2,
+body.theme-win98 h3,
+body.theme-win98 h4 {
+  color: #000080 !important;
+  font-weight: bold !important;
+}
+
+body.theme-win98 .brand h2 {
+  color: #000000 !important;
+}
+
+body.theme-win98 .subtext {
+  color: #505050 !important;
+}
+
+/* Win98 Segmented Toolkit Switcher */
+body.theme-win98 .mode-switcher {
+  background: #ffffff !important;
+  border: 2px inset #ffffff !important;
+  border-radius: 0px !important;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-win98 .switcher-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #000000 !important;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif !important;
+  font-weight: bold !important;
+  border-radius: 0px !important;
+}
+
+body.theme-win98 .switcher-btn.active {
+  color: #ffffff !important;
+}
+
+body.theme-win98 .switcher-slider {
+  background: #000080 !important; /* Windows 98 Navy Blue */
+  border: 1px solid #ffffff !important;
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+
+
+
+/* Windows 98: Solid white background, Tahoma/MS Sans Serif, inset 3D borders, zero border-radius */
+body.theme-win98 select {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-top: 2px solid #808080 !important;
+  border-left: 2px solid #808080 !important;
+  border-right: 2px solid #ffffff !important;
+  border-bottom: 2px solid #ffffff !important;
+  border-radius: 0px !important;
+  font-family: 'Tahoma', 'MS Sans Serif', Geneva, sans-serif !important;
+  box-shadow: none !important;
+}
+
+body.theme-win98 select option {
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-family: 'Tahoma', 'MS Sans Serif', Geneva, sans-serif !important;
+}
+
+
+body.theme-win98 .settings-modal-content {
+  background: #c0c0c0 !important;
+  border: 3px solid !important;
+  border-color: #ffffff #808080 #808080 #ffffff !important;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 0 #000000 !important;
+  color: #000000 !important;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif !important;
+}
+
+body.theme-win98 .settings-modal-header {
+  background: #000080 !important;
+  border-bottom: none !important;
+  padding: 4px 8px !important;
+}
+
+body.theme-win98 .settings-modal-header h2 {
+  color: #ffffff !important;
+  font-size: 0.85rem !important;
+  font-weight: bold !important;
+}
+
+body.theme-win98 .settings-close-btn {
+  background: #c0c0c0 !important;
+  border: 2px solid !important;
+  border-color: #ffffff #808080 #808080 #ffffff !important;
+  border-radius: 0 !important;
+  color: #000000 !important;
+  width: 18px !important;
+  height: 18px !important;
+  font-weight: bold !important;
+}
+
+body.theme-win98 .settings-modal-body {
+  background: #c0c0c0 !important;
+}
+
+body.theme-win98 .settings-tabs {
+  background: #c0c0c0 !important;
+  border-right: 2px solid #808080 !important;
+}
+
+body.theme-win98 .settings-tab-btn {
+  color: #000000 !important;
+  border-radius: 0 !important;
+}
+
+body.theme-win98 .settings-tab-btn.active {
+  background: #ffffff !important;
+  border: 2px solid !important;
+  border-color: #808080 #ffffff #ffffff #808080 !important;
+  font-weight: bold !important;
+}
+
+body.theme-win98 .settings-tab-btn.active::before {
+  display: none !important;
+}
+
+body.theme-win98 .panel-header-block h3,
+body.theme-win98 .settings-option-title,
+body.theme-win98 .theme-presets-title {
+  color: #000000 !important;
+}
+
+body.theme-win98 .panel-header-block .panel-subtext,
+body.theme-win98 .settings-option-desc,
+body.theme-win98 .theme-presets-subtext {
+  color: #444444 !important;
+}
+
+body.theme-win98 .settings-form-row {
+  background: #ffffff !important;
+  border: 2px inset #ffffff !important;
+  border-radius: 0 !important;
+}
+
+body.theme-win98 .settings-select-input,
+body.theme-win98 #settings-ffmpeg-path,
+body.theme-win98 #settings-ytdlp-path {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px inset #ffffff !important;
+  border-radius: 0 !important;
+}
+
+body.theme-win98 .settings-modal-footer {
+  background: #c0c0c0 !important;
+  border-top: 2px solid #ffffff !important;
+}
+
+body.theme-win98 #settings-save-btn {
+  background: #c0c0c0 !important;
+  color: #000000 !important;
+  border: 2px solid !important;
+  border-color: #ffffff #808080 #808080 #ffffff !important;
+  border-radius: 0 !important;
+  font-weight: bold !important;
+}
+
+body.theme-win98 .theme-card-label {
+  color: #000000 !important;
+}
+
+body.theme-win98 .about-footer {
+  color: #000000 !important;
+}

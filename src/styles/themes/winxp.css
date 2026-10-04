@@ -1,0 +1,338 @@
+/* --- 2. Windows XP Theme --- */
+body.theme-winxp {
+  --bg-color: #245edb;
+  /* Classic XP Blue */
+  --panel-bg: #ece9d8;
+  /* Beige window */
+  --panel-border: #003df5;
+  --text-primary: #000000;
+  --text-secondary: #006000;
+  --accent: #245edb;
+  --accent-hover: #1c4cb8;
+  --accent-glow: rgba(36, 94, 219, 0.3);
+  --btn-text: #ffffff;
+  --metric-ring-center: #ece9d8;
+}
+
+body.theme-winxp .glass-panel,
+body.theme-winxp .sidebar,
+body.theme-winxp .metrics-card,
+body.theme-winxp .settings-card,
+body.theme-winxp .engine-card,
+body.theme-winxp .about-card {
+  border: 16px solid #7297ed !important;
+  border-radius: 20px 2px 20px 2px !important;
+  background: #fafbffd9 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  color: #000000 !important;
+}
+
+body.theme-winxp button:not(.switcher-btn):not(.settings-gear-btn) {
+  background: linear-gradient(to bottom, #7cb3f1, #245edb) !important;
+  border: 1px solid #002c9a !important;
+  border-radius: 4px !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+body.theme-winxp button:not(.switcher-btn):not(.settings-gear-btn):hover {
+  background: linear-gradient(to bottom, #8dbef8, #3b70ec) !important;
+}
+
+body.theme-winxp .nav-btn {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: #003399 !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  font-family: 'Tahoma', sans-serif !important;
+  font-weight: 500 !important;
+}
+
+body.theme-winxp .nav-btn:hover {
+  background: rgba(255, 255, 255, 0.7) !important;
+  color: #000000 !important;
+  border-color: #7f9db9 !important;
+  transform: translateX(4px);
+}
+
+body.theme-winxp .nav-btn.active {
+  background: linear-gradient(to bottom, #357aec 0%, #1958b7 100%) !important;
+  border: 1px solid #002c9a !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 5px rgba(0, 50, 150, 0.3) !important;
+  font-weight: bold !important;
+}
+
+body.theme-winxp .nav-btn.active i {
+  color: #ffffff !important;
+}
+
+/* XP Luna Segmented Toolkit Switcher */
+body.theme-winxp .mode-switcher {
+  background: #ffffff !important;
+  border: 2px inset #ffffff !important;
+  border-radius: 99px !important;
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+body.theme-winxp .switcher-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #003399 !important;
+  font-weight: 600 !important;
+}
+
+body.theme-winxp .switcher-btn.active {
+  color: #ffffff !important;
+  font-weight: bold !important;
+}
+
+body.theme-winxp .switcher-slider {
+  background: linear-gradient(to bottom, #357aec 0%, #1958b7 100%) !important;
+  border: 1px solid #002c9a !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 99px !important;
+}
+
+body.theme-winxp .global-controls input {
+  background: #ffffff !important;
+  border: 1px solid #7f9db9 !important;
+  color: #000000 !important;
+  border-radius: 4px !important;
+}
+
+body.theme-winxp select {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #7f9db9 !important;
+  border-radius: 4px !important;
+}
+
+body.theme-winxp .btn.action {
+  background: linear-gradient(to bottom, #388e3c 0%, #2e7d32 100%) !important;
+  /* Iconic XP Green Start Button */
+  border: 1px solid #1b5e20 !important;
+  border-radius: 4px !important;
+  color: #ffffff !important;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.4), 0 3px 6px rgba(0, 0, 0, 0.25) !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 1px #0e3d11 !important;
+}
+
+body.theme-winxp .btn.action:hover {
+  background: linear-gradient(to bottom, #43a047 0%, #388e3c 100%) !important;
+}
+
+body.theme-winxp h1,
+body.theme-winxp h2,
+body.theme-winxp h3,
+body.theme-winxp h4 {
+  color: #003df5 !important;
+}
+
+body.theme-winxp .brand h2 {
+  color: #000000 !important;
+}
+
+
+/* Windows XP: Classic Luna control dropdowns, green gradient background, solid XP blue borders (#7f9db9) */
+body.theme-winxp select {
+  background: linear-gradient(to bottom, #38c13b, #1b7b1e) !important;
+  color: #ffffff !important;
+  border: 1px solid #7f9db9 !important;
+  border-radius: 5px !important;
+  font-family: 'Tahoma', Geneva, sans-serif !important;
+  box-shadow: none !important;
+}
+
+body.theme-winxp select option {
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-family: 'Tahoma', Geneva, sans-serif !important;
+}
+
+
+   ========================================================= */
+body.theme-winxp .settings-modal-content {
+  background: #ece9d8 !important;
+  border: 3px solid #0053e1 !important;
+  border-radius: 8px 8px 4px 4px !important;
+  box-shadow: 0 10px 30px rgba(0, 50, 150, 0.4), 0 0 0 1px #003399 !important;
+  color: #000000 !important;
+  font-family: 'Tahoma', sans-serif !important;
+}
+
+body.theme-winxp .settings-modal-header {
+  background: linear-gradient(to bottom, #0053e1 0%, #357aec 10%, #2572e4 50%, #1958b7 100%) !important;
+  border-bottom: 1px solid #003399 !important;
+  padding: 8px 14px !important;
+}
+
+body.theme-winxp .settings-modal-header h2 {
+  color: #ffffff !important;
+  font-size: 0.95rem !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 1px #002266 !important;
+}
+
+body.theme-winxp .settings-modal-header h2 i {
+  color: #ffffff !important;
+}
+
+body.theme-winxp .settings-close-btn {
+  background: #e04300 !important;
+  /* Iconic Red XP Close Button */
+  border: 1px solid #ffffff !important;
+  border-radius: 3px !important;
+  color: #ffffff !important;
+  width: 22px !important;
+  height: 22px !important;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.5), 1px 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.theme-winxp .settings-close-btn:hover {
+  background: #ff5500 !important;
+}
+
+body.theme-winxp .settings-modal-body {
+  background: #ece9d8 !important;
+}
+
+body.theme-winxp .settings-tabs {
+  background: #d6dff7 !important;
+  border-right: 2px solid #7f9db9 !important;
+}
+
+body.theme-winxp .settings-tab-btn {
+  color: #003399 !important;
+  font-family: 'Tahoma', sans-serif !important;
+  border-radius: 4px !important;
+}
+
+body.theme-winxp .settings-tab-btn:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+body.theme-winxp .settings-tab-btn.active {
+  background: #ffffff !important;
+  color: #003399 !important;
+  border: 1px solid #7f9db9 !important;
+  border-left: 4px solid #388e3c !important;
+  /* Iconic XP Green Accent */
+}
+
+body.theme-winxp .settings-tab-btn.active::before {
+  background: #388e3c !important;
+  /* XP Green Accent bar */
+  box-shadow: 0 0 6px #388e3c !important;
+}
+
+body.theme-winxp .settings-tab-btn.active i {
+  color: #388e3c !important;
+}
+
+body.theme-winxp .panel-header-block h3 {
+  color: #003399 !important;
+}
+
+body.theme-winxp .panel-header-block .panel-subtext,
+body.theme-winxp .settings-option-desc,
+body.theme-winxp .theme-presets-subtext {
+  color: #555555 !important;
+}
+
+body.theme-winxp .settings-option-title,
+body.theme-winxp .theme-presets-title {
+  color: #000000 !important;
+}
+
+body.theme-winxp .settings-form-row {
+  background: #ffffff !important;
+  border: 1px solid #d3d3d3 !important;
+  border-radius: 6px !important;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+body.theme-winxp .settings-form-row:hover {
+  border-color: #7f9db9 !important;
+}
+
+body.theme-winxp .settings-select-input,
+body.theme-winxp #settings-ffmpeg-path,
+body.theme-winxp #settings-ytdlp-path {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #7f9db9 !important;
+}
+
+body.theme-winxp .settings-path-display {
+  background: #ffffff !important;
+  color: #003399 !important;
+  border: 1px solid #7f9db9 !important;
+}
+
+body.theme-winxp .settings-modal-footer {
+  background: #d6dff7 !important;
+  border-top: 1px solid #7f9db9 !important;
+}
+
+body.theme-winxp #settings-save-btn {
+  background: linear-gradient(to bottom, #388e3c 0%, #2e7d32 100%) !important;
+  /* Iconic XP Green Start Button style */
+  color: #ffffff !important;
+  border: 1px solid #1b5e20 !important;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 4px !important;
+}
+
+body.theme-winxp .theme-card-label {
+  color: #333333 !important;
+}
+
+body.theme-winxp .theme-preset-item:has(.theme-preview-card.active) .theme-card-label {
+  color: #003399 !important;
+  font-weight: bold !important;
+}
+
+body.theme-winxp .about-footer {
+  color: rgb(38, 83, 12) !important;
+}
+
+/* =========================================================
+   WINDOWS 98 RETRO CONTROL PANEL OVERRIDES
+   ========================================================= */
+
+/* Hide standard Lucide icons & show retro icons when Windows XP theme is active */
+body.theme-winxp .nav-btn svg,
+body.theme-winxp .switcher-btn svg,
+body.theme-winxp .settings-gear-btn svg,
+body.theme-winxp #browse-input-btn svg,
+body.theme-winxp #browse-output-btn svg,
+body.theme-winxp [data-retro-key],
+body.theme-winxp #console-pulse-dot {
+  display: none !important;
+}
+
+body.theme-winxp img.retro-icon {
+  display: inline-block !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 8px !important;
+  vertical-align: middle !important;
+}
+
+body.theme-winxp .nav-btn img.retro-icon,
+body.theme-winxp .switcher-btn img.retro-icon,
+body.theme-winxp #browse-input-btn img.retro-icon,
+body.theme-winxp #browse-output-btn img.retro-icon {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+body.theme-winxp .settings-gear-btn img.retro-icon {
+  margin-right: 0 !important;
+}
