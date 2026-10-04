@@ -92,15 +92,27 @@ export function initSettingsModal() {
     if (auraSpeechContainer) auraSpeechContainer.style.display = 'block';
   }
 
+  const openModal = () => {
+    if (modal) {
+      modal.style.display = 'flex';
+      if (window.lucide) window.lucide.createIcons();
+      const currentTheme = localStorage.getItem('app-theme') || 'theme-blue';
+      setTheme(currentTheme);
+      checkEngineStatus();
+    }
+  };
+
   if (triggerBtn) {
-    triggerBtn.addEventListener('click', () => {
-      if (modal) {
-        modal.style.display = 'flex';
-        if (window.lucide) window.lucide.createIcons();
-        const currentTheme = localStorage.getItem('app-theme') || 'theme-blue';
-        setTheme(currentTheme);
-        checkEngineStatus();
-      }
+    triggerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openModal();
+    });
+  }
+
+  const settingsCardHeader = document.getElementById('settings-card-header');
+  if (settingsCardHeader) {
+    settingsCardHeader.addEventListener('click', () => {
+      openModal();
     });
   }
 

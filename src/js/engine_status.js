@@ -113,6 +113,22 @@ export function initFfmpegSetupControls() {
       openEngineSettings();
     }
   });
+  document.getElementById('engine-install-fix-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!latestFfmpegStatus?.available && latestFfmpegStatus?.platform === 'windows') {
+      showFfmpegInstallConfirmation();
+    } else {
+      openEngineSettings();
+    }
+  });
+  document.getElementById('ffmpeg-binary-badge')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openEngineSettings();
+  });
+  document.getElementById('ytdlp-binary-badge')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openEngineSettings();
+  });
   document.getElementById('settings-install-ffmpeg-btn')?.addEventListener('click', showFfmpegInstallConfirmation);
   document.getElementById('ffmpeg-confirm-install-btn')?.addEventListener('click', startManagedFfmpegInstall);
   document.getElementById('ffmpeg-cancel-install-btn')?.addEventListener('click', () => {
@@ -296,10 +312,30 @@ export async function checkEngineStatus() {
       setTheme('theme-blue');
     }
   }
+  updateBinariesInstallButton();
   checkYtdlpStatus();
 }
 
+export function updateBinariesInstallButton() {
+  const installBtn = document.getElementById('engine-install-fix-btn');
+  if (!installBtn) return;
+  const ffmpegOk = Boolean(latestFfmpegStatus?.available);
+  const ytdlpOk = Boolean(latestYtdlpStatus?.available);
+
+  if (ffmpegOk && ytdlpOk) {
+    installBtn.style.display = 'none';
+  } else {
+    installBtn.style.display = 'inline-flex';
+    const missing = [];
+    if (!ffmpegOk) missing.push('FFmpeg');
+    if (!ytdlpOk) missing.push('yt-dlp');
+    installBtn.title = `Install ${missing.join(' & ')}`;
+    if (window.lucide) window.lucide.createIcons();
+  }
+}
+
 export async function checkYtdlpStatus() {
+  const ytdlpDot = document.getElementById('ytdlp-dot');
   const settingsYtdlpDot = document.getElementById('settings-ytdlp-dot');
   const settingsYtdlpStatus = document.getElementById('settings-ytdlp-status-text');
   const settingsYtdlpVersion = document.getElementById('settings-ytdlp-version');
@@ -311,6 +347,7 @@ export async function checkYtdlpStatus() {
     latestYtdlpStatus = status;
 
     if (status.available) {
+      if (ytdlpDot) ytdlpDot.className = 'dot green';
       if (settingsYtdlpDot) {
         settingsYtdlpDot.className = 'dot green';
         settingsYtdlpDot.style.background = 'var(--success)';
@@ -326,6 +363,7 @@ export async function checkYtdlpStatus() {
         managedInstallCard.style.display = (status.source !== 'managed' && status.installSupported) ? 'block' : 'none';
       }
     } else {
+      if (ytdlpDot) ytdlpDot.className = 'dot red';
       if (settingsYtdlpDot) {
         settingsYtdlpDot.className = 'dot red';
         settingsYtdlpDot.style.background = 'var(--danger)';
@@ -341,6 +379,7 @@ export async function checkYtdlpStatus() {
   } catch (e) {
     console.error("yt-dlp status check failed:", e);
     latestYtdlpStatus = null;
+    if (ytdlpDot) ytdlpDot.className = 'dot red';
     if (settingsYtdlpDot) {
       settingsYtdlpDot.className = 'dot red';
       settingsYtdlpDot.style.background = 'var(--danger)';
@@ -349,4 +388,5 @@ export async function checkYtdlpStatus() {
     if (settingsYtdlpStatus) settingsYtdlpStatus.textContent = 'Status: Error';
     if (settingsYtdlpVersion) settingsYtdlpVersion.textContent = 'Version: Error';
   }
+  updateBinariesInstallButton();
 }

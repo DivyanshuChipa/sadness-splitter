@@ -110,17 +110,10 @@
             </div>
             <div class="progress-label" id="progress-label">Emotional Level: 0%</div>
           </div>
-          <div id="technical-log" class="sidebar-technical-log"
-            style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="dot" id="system-ready-dot"
-                style="background: var(--success); box-shadow: 0 0 5px var(--success);"></span>
-              Aura Status: <span id="aura-status-val">Ready</span>
-            </div>
-            <button id="settings-trigger-btn" class="settings-gear-btn" title="Control Panel"
-              style="background: none; border: none; padding: 4px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: color 0.3s, transform 0.3s;">
-              <i data-lucide="settings" style="width: 15px; height: 15px;"></i>
-            </button>
+          <div id="technical-log" class="sidebar-technical-log">
+            <span class="dot" id="system-ready-dot"
+              style="background: var(--success); box-shadow: 0 0 5px var(--success);"></span>
+            <span>Aura Status: <span id="aura-status-val">Ready</span></span>
           </div>
         </div>
       </div>
@@ -1002,24 +995,35 @@
         </div>
       </div>
 
-      <!-- Card 3: System Engine -->
-      <div class="engine-card glass-panel">
-        <div class="settings-header">
-          <h3>Engine</h3>
-          <i data-lucide="settings"></i>
-        </div>
-        <div class="status-indicator engine-status" style="padding:0; background:none;">
-          <div class="indicator-item">
-            <span class="dot" id="ffmpeg-dot"></span>
-            <div class="engine-info">
-              <span id="ffmpeg-status-text">FFmpeg Check...</span>
-              <small id="ffmpeg-version-text"
-                style="display:block; color:var(--text-secondary); font-size:0.7rem; margin-top:2px;">Version:
-                checking...</small>
-            </div>
+      <!-- Card 3: Settings & Engine Binaries -->
+      <div class="settings-card engine-card glass-panel" id="settings-card">
+        <div class="settings-card-header" id="settings-card-header" title="Open Settings">
+          <div class="settings-card-title">
+            <i data-lucide="settings" class="settings-card-icon"></i>
+            <h3>Settings</h3>
           </div>
-          <button id="ffmpeg-fix-link" type="button" class="subtext ffmpeg-fix-action" style="display: none;">Install
-            FFmpeg</button>
+          <button id="settings-trigger-btn" class="settings-gear-btn" title="Open Settings" type="button">
+            <i data-lucide="sliders-horizontal" style="width: 14px; height: 14px;"></i>
+          </button>
+        </div>
+        <div class="binaries-status-container">
+          <div class="binaries-label-wrap">
+            <span class="binaries-label">Binaries</span>
+          </div>
+          <div class="binaries-badges">
+            <div class="binary-badge" id="ffmpeg-binary-badge" title="FFmpeg Engine (Click for Settings)">
+              <span class="dot" id="ffmpeg-dot"></span>
+              <span class="binary-name">FFmpeg</span>
+            </div>
+            <div class="binary-badge" id="ytdlp-binary-badge" title="yt-dlp Engine (Click for Settings)">
+              <span class="dot" id="ytdlp-dot"></span>
+              <span class="binary-name">yt-dlp</span>
+            </div>
+            <button id="engine-install-fix-btn" type="button" class="binary-install-btn" style="display: none;" title="Install missing engine binaries">
+              <i data-lucide="download" style="width: 11px; height: 11px;"></i>
+              <span>Install</span>
+            </button>
+          </div>
         </div>
       </div>
 
