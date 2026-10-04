@@ -1,0 +1,50 @@
+/* Theme Classes */
+body.theme-blue {
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-glow: rgba(59, 130, 246, 0.3);
+}
+
+body.theme-red {
+  --accent: #ef4444;
+  --accent-hover: #dc2626;
+  --accent-glow: rgba(239, 68, 68, 0.3);
+}
+
+body.theme-green {
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --accent-glow: rgba(16, 185, 129, 0.3);
+}
+
+body.theme-purple {
+  --accent: #8b5cf6;
+  --accent-hover: #7c3aed;
+  --accent-glow: rgba(139, 92, 246, 0.3);
+}
+
+body.theme-gold {
+  --accent: #f59e0b;
+  --accent-hover: #d97706;
+  --accent-glow: rgba(245, 158, 11, 0.3);
+}
+
+body.theme-pink {
+  --accent: #ec4899;
+  --accent-hover: #db2777;
+  --accent-glow: rgba(236, 72, 153, 0.3);
+}
+
+body.theme-white {
+  --accent: #f8fafc;
+  --accent-hover: #cbd5e1;
+  --accent-glow: rgba(248, 250, 252, 0.3);
+  --btn-text: #0f1115;
+}
+
+body.theme-yellow {
+  --accent: #fef08a;
+  --accent-hover: #fde047;
+  --accent-glow: rgba(254, 240, 138, 0.3);
+  --btn-text: #0f1115;
+}
