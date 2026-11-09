@@ -1,5 +1,5 @@
 import { invoke, tauriDialog, listen } from './tauri.js';
-import { updateStatus, setPersonaEmotion, getAuraSpeech, logToTechyConsole } from './aura_persona.js';
+import { updateStatus, setPersonaEmotion, getAuraSpeech, logToTechyConsole, setTheme } from './aura_persona.js';
 import { initAudioVisualizer } from './visualizer.js';
 import { initPreviewPlayer } from './preview_player.js';
 
@@ -1010,6 +1010,74 @@ export function initToolsHandlers() {
       vhsBleedVal.textContent = `${val}px`;
     });
   }
+
+  const potatoOverrideToggle = document.getElementById('potato-override-toggle');
+  let previousThemeBeforePotato = localStorage.getItem('app-theme') || 'theme-blue';
+
+  potatoOverrideToggle?.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      previousThemeBeforePotato = localStorage.getItem('app-theme') || 'theme-blue';
+      setTheme('theme-red');
+      setPersonaEmotion('face_angry.png', 'Humm... mujhe mat kehna kuch kharab hua to! ⚠️🔥');
+      logToTechyConsole("Potato PC safety limit overridden! Aura mood turned aggressive RED.", "warning");
+    } else {
+      setTheme(previousThemeBeforePotato);
+      setPersonaEmotion('face_confident.png', 'Safety limit re-engaged. Back to safe operating parameters.');
+      logToTechyConsole("Potato PC limit re-engaged.", "info");
+    }
+  });
+
+  document.getElementById('run-frames-btn')?.addEventListener('click', async () => {
+    if (!window.globalInputPath || !window.globalOutputPath) {
+      alert("Please select input video and output folder first.");
+      return;
+    }
+
+    const duration = window.videoDuration || 0;
+    const isOverridden = document.getElementById('potato-override-toggle')?.checked;
+
+    if (duration > 60 && !isOverridden) {
+      setPersonaEmotion('face_shocked.png', 'Bhai kya kar rahe ho, meri jaan loge kya! Agar tumhara PC potato nahi hai to override pe tick karo! 🥔🔥');
+      logToTechyConsole("Frame extraction blocked: Video duration > 60s and Potato PC override not checked.", "warning");
+      return;
+    }
+
+    if (window.isDemoMode) {
+      updateStatus("Frames extracted to ZIP (Demo mode activated 🎭)");
+      return;
+    }
+
+    const fps = parseFloat(document.getElementById('frames-fps-select').value) || 24;
+    const format = document.getElementById('frames-format-select').value || 'png';
+
+    const inputFilename = window.globalInputPath.split(/[\/\\]/).pop();
+    const dotIndex = inputFilename.lastIndexOf('.');
+    const nameWithoutExt = dotIndex !== -1 ? inputFilename.substring(0, dotIndex) : inputFilename;
+    const outputZip = `${window.globalOutputPath}/${nameWithoutExt}_frames.zip`;
+
+    const progressContainer = document.getElementById('progress-container');
+    if (progressContainer) progressContainer.style.display = 'block';
+    setProgressMode(duration);
+    updateStatus(`Extracting frames at ${fps} FPS to ZIP...`);
+    setPersonaEmotion('face_determined.png', `Extracting frames at ${fps} FPS... Hang tight!`);
+
+    logToTechyConsole(`Extracting frames [fps=${fps}, format=${format}] -> ${outputZip}`, "command");
+
+    try {
+      await invoke('extract_frames_to_zip', {
+        inputPath: window.globalInputPath,
+        outputZipPath: outputZip,
+        fps,
+        format,
+        totalDuration: duration,
+        customFfmpegPath: localStorage.getItem('ffmpeg-custom-path') || null
+      });
+    } catch (e) {
+      console.error("Error extracting frames to zip:", e);
+      updateStatus("Frame extraction failed.");
+      logToTechyConsole(`Error in extract_frames_to_zip: ${e}`, "error");
+    }
+  });
 
   document.getElementById('run-retro-filters-btn')?.addEventListener('click', () => {
     if (!window.globalInputPath || !window.globalOutputPath) {
