@@ -643,8 +643,11 @@ listen('finished', (event) => {
     }
 
     const previewOutBtn = document.getElementById('preview-output-btn');
-    if (previewOutBtn && window.lastProcessedOutputPath) {
+    const isZip = window.lastProcessedOutputPath?.toLowerCase().endsWith('.zip');
+    if (previewOutBtn && window.lastProcessedOutputPath && !isZip && activeTab !== 'video-to-frames') {
       previewOutBtn.style.display = 'inline-flex';
+    } else if (previewOutBtn) {
+      previewOutBtn.style.display = 'none';
     }
 
     const reaction = getAuraSpeech('success_' + activeTab);

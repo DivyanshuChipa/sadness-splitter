@@ -10,6 +10,7 @@ export function setProgressMode(totalDuration = 0) {
   const progressLabel = document.getElementById('progress-label');
   if (!progressFill || !progressLabel) return;
 
+  displayedProgress = 0;
   const hasKnownDuration = Number(totalDuration) > 0;
   progressFill.classList.toggle('indeterminate', !hasKnownDuration);
   if (!hasKnownDuration) {
@@ -1055,8 +1056,14 @@ export function initToolsHandlers() {
     const nameWithoutExt = dotIndex !== -1 ? inputFilename.substring(0, dotIndex) : inputFilename;
     const outputZip = `${window.globalOutputPath}/${nameWithoutExt}_frames.zip`;
 
+    const previewOutBtn = document.getElementById('preview-output-btn');
+    if (previewOutBtn) {
+      previewOutBtn.style.display = 'none';
+    }
+
     const progressContainer = document.getElementById('progress-container');
     if (progressContainer) progressContainer.style.display = 'block';
+    displayedProgress = 0;
     setProgressMode(duration);
     updateStatus(`Extracting frames at ${fps} FPS to ZIP...`);
     setPersonaEmotion('face_determined.png', `Extracting frames at ${fps} FPS... Hang tight!`);
