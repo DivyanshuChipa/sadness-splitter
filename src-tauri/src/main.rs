@@ -16,7 +16,8 @@ use media_server::{get_media_server_port, start_media_server};
 use metrics::{get_system_metrics, start_gpu_monitor, start_system_monitor};
 use notifications::send_native_notification;
 use video::{
-    generate_thumbnail, get_video_duration, get_video_metadata, list_videos_in_folder, process_video,
+    extract_frames_to_zip, generate_thumbnail, get_video_duration, get_video_metadata,
+    list_videos_in_folder, process_video,
 };
 use ytdlp::{download_youtube, get_ytdlp_status, install_managed_ytdlp};
 
@@ -51,7 +52,8 @@ fn main() {
             get_ytdlp_status,
             install_managed_ytdlp,
             download_youtube,
-            get_video_metadata
+            get_video_metadata,
+            extract_frames_to_zip
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

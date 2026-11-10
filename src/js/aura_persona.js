@@ -39,6 +39,7 @@ export const auraDialogues = {
     "success_video-thumbnail": { face: 'face_confident.png', msg: "Dhamaka! Custom cover video container me successfully insert ho gaya! 😎🎬" },
     "success_youtube-downloader": { face: 'face_exicited.png', msg: "YouTube download complete! Ab direct preview play karo ya next tools me chain karo! 📥🚀" },
     "success_retro-filters": { face: 'face_confident.png', msg: "Balle balle! Vintage VHS tape effect successfully apply ho gaya! 📼📺" },
+    "success_video-to-frames": { face: 'face_confident.png', msg: "Mubarak ho! Saare frames ZIP me pack karke de diye! 📦✨" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "HEY! Stop poking me and focus on your work! 💢" },
@@ -116,6 +117,7 @@ export const auraDialogues = {
     "success_video-thumbnail": { face: 'face_confident.png', msg: "Success! The custom cover art has been embedded into the video container! 🎬✨" },
     "success_youtube-downloader": { face: 'face_exicited.png', msg: "YouTube download finished! You can now preview it or feed it into other tools. 📥🚀" },
     "success_retro-filters": { face: 'face_confident.png', msg: "Success! Vintage VHS tape effects and filters applied successfully! 📼📺" },
+    "success_video-to-frames": { face: 'face_confident.png', msg: "Success! All extracted frames have been bundled into a ZIP archive! 📦✨" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "HEY! Stop poking me and focus on your work! 💢" },
@@ -193,6 +195,7 @@ export const auraDialogues = {
     "success_metadata-editor": { face: 'face_smug.png', msg: "Tags and cover updated. Now everyone can see how bad your taste in music is. 🏷️🖼️" },
     "success_video-thumbnail": { face: 'face_smug.png', msg: "Thumbnail embedded. Hopefully, the video content is as interesting as the cover art. 🎬💅" },
     "success_youtube-downloader": { face: 'face_smug.png', msg: "Oh, look, we successfully downloaded a YouTube video. Let's add it to your stash of things you'll never watch. 📥💅" },
+    "success_video-to-frames": { face: 'face_smug.png', msg: "Frames extracted and zipped. Congratulations on your collection of thousands of static pictures. 📦💅" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_smug.png', msg: "Oh great, poking me again. Is this your primary job profile? 🙄" },
@@ -269,6 +272,7 @@ export const auraDialogues = {
     "success_metadata-editor": { face: 'face_smug.png', msg: "ID3 header modification complete. Art payload embedded successfully. 🏷️🖼️" },
     "success_video-thumbnail": { face: 'face_thinking.png', msg: "Image payload successfully multiplexed into output video container. Code: 0x0. 📟" },
     "success_youtube-downloader": { face: 'face_confident.png', msg: "Stream ingestion and media pull from YouTube completed. Target file cached. 📥💻" },
+    "success_video-to-frames": { face: 'face_confident.png', msg: "Video stream rasterized to sequential frame buffer and compressed into ZIP payload. 📦💾" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_anger.png', msg: "Interrupt signal detected on root node. Focus packet dropped. 💢" },
@@ -345,6 +349,7 @@ export const auraDialogues = {
     "success_metadata-editor": { face: 'face_smug.png', msg: "Metadata updated or whatever. Please don't ask me to rename another file. 🏷️🖼️" },
     "success_video-thumbnail": { face: 'face_sleepy.png', msg: "Thumbnail saved... can I close my eyes now? 🥱" },
     "success_youtube-downloader": { face: 'face_sleepy.png', msg: "Downloaded that YouTube link. Don't ask me to watch it for you, I'm taking a nap. 📥🥱" },
+    "success_video-to-frames": { face: 'face_sleepy.png', msg: "Extracted so many frames, my head hurts. Zip is ready, go open it yourself... 📦🥱" },
 
     // Mascot Poke & Metric Interactions
     interact_poke_annoyed: { face: 'face_sleepy.png', msg: "Ugh... stop poking me. I don't want to move. 🥱" },

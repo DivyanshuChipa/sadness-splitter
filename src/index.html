@@ -86,6 +86,7 @@
         <button class="nav-btn" data-target="contact"><i data-lucide="grid"></i> Contact Sheet</button>
         <button class="nav-btn" data-target="batch"><i data-lucide="package"></i> Batch Processor</button>
         <button class="nav-btn" data-target="video-thumbnail"><i data-lucide="image"></i> Video Thumbnail</button>
+        <button class="nav-btn" data-target="video-to-frames"><i data-lucide="film"></i> Video to Frames</button>
         <button class="nav-btn" data-target="retro-filters"><i data-lucide="tv" data-retro-key="retro-filters-tab-icon"></i> Retro Filters</button>
       </nav>
 
@@ -768,6 +769,49 @@
             </div>
 
             <button id="run-retro-filters-btn" class="btn action">Apply Retro Filters</button>
+          </section>
+
+          <!-- VIDEO TO FRAMES -->
+          <section id="video-to-frames" class="tool-view glass-panel" style="display: none;">
+            <div class="tool-header">
+              <h3>Video to Frames Extractor</h3>
+              <p>Extract frames at selected FPS rate and package them directly into a neat ZIP archive.</p>
+            </div>
+
+            <div class="control-group">
+              <label>Frame Rate (FPS)</label>
+              <select id="frames-fps-select">
+                <option value="1">1 FPS (1 frame per second)</option>
+                <option value="7">7 FPS</option>
+                <option value="8">8 FPS</option>
+                <option value="11">11 FPS</option>
+                <option value="12">12 FPS (Anime Style)</option>
+                <option value="24" selected>24 FPS (Cinematic standard)</option>
+                <option value="30">30 FPS</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label>Output Image Format</label>
+              <select id="frames-format-select">
+                <option value="png" selected>PNG (Lossless High Quality)</option>
+                <option value="jpg">JPG (Compact Compressed)</option>
+              </select>
+            </div>
+
+            <div class="potato-limit-notice" style="margin: 15px 0; padding: 12px; background: rgba(255, 165, 0, 0.12); border: 1px dashed var(--accent, orange); border-radius: 8px;">
+              <div style="font-size: 0.88em; line-height: 1.4; color: var(--text-main, #fff); margin-bottom: 8px;">
+                ⚠️ <strong>Safety Limit:</strong> Videos over 1 minute (60s) require Potato PC Override to protect your CPU/disk!
+              </div>
+              <div class="checkbox-group" style="margin-top: 5px;">
+                <input type="checkbox" id="potato-override-toggle">
+                <label for="potato-override-toggle" style="font-weight: 500; cursor: pointer;">
+                  🔥 Override 1-minute limit (My PC is not a potato 🥔)
+                </label>
+              </div>
+            </div>
+
+            <button id="run-frames-btn" class="btn action">Extract Frames to ZIP</button>
           </section>
 
           <!-- YOUTUBE DOWNLOADER -->
